@@ -269,11 +269,40 @@
     .results-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
     .course-card { display: flex; flex-direction: column; gap: .4rem; }
     .course-card h3 { font-size: 1.05rem; margin-bottom: .2rem; }
+    .badge-row { display: flex; gap: .4rem; align-items: center; }
     .badge-free {
       align-self: flex-start; background: #E4F7EF; color: #0E6B4F; border: 1px solid #B6E8D5;
       font-size: .75rem; font-weight: 800; letter-spacing: .05em;
       padding: .18rem .6rem; border-radius: 999px;
     }
+    .badge-ai {
+      background: #FFF3DE; color: #7A5200; border: 1px solid #F5D9A0;
+      font-size: .75rem; font-weight: 800; letter-spacing: .05em;
+      padding: .18rem .6rem; border-radius: 999px;
+    }
+
+    /* Wider-web AI search bar */
+    .ai-bar {
+      display: flex; flex-wrap: wrap; align-items: center; gap: .8rem 1.4rem;
+      background: var(--white); border: 1px dashed var(--indigo);
+      border-radius: var(--radius-sm); padding: .8rem 1rem; margin-top: .8rem;
+    }
+    .ai-switch { display: inline-flex; align-items: center; gap: .6rem; cursor: pointer; margin: 0; }
+    .ai-switch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+    .ai-slider {
+      width: 40px; height: 22px; border-radius: 999px; background: #C9CDE4;
+      position: relative; transition: background .2s ease; flex: 0 0 40px;
+    }
+    .ai-slider::after {
+      content: ""; position: absolute; top: 3px; left: 3px;
+      width: 16px; height: 16px; border-radius: 50%; background: #fff;
+      transition: transform .2s ease; box-shadow: 0 1px 3px rgba(0,0,0,.25);
+    }
+    .ai-switch input:checked + .ai-slider { background: var(--indigo); }
+    .ai-switch input:checked + .ai-slider::after { transform: translateX(18px); }
+    .ai-switch input:focus-visible + .ai-slider { outline: 3px solid var(--amber); outline-offset: 2px; }
+    .ai-label { font-weight: 700; color: var(--navy); }
+    .ai-status { margin: 0; font-size: .9rem; color: var(--muted); }
     .course-meta { font-size: .88rem; color: var(--muted); margin: 0; }
     .course-source { font-weight: 700; color: var(--indigo); font-size: .85rem; text-transform: uppercase; letter-spacing: .04em; }
     .course-link { margin-top: auto; font-weight: 700; text-decoration: none; }
@@ -590,7 +619,7 @@
     <section class="section section-alt" id="demo">
       <div class="container">
         <h2>Try a search</h2>
-        <p class="lead">Search a sample list of free courses and classes. Everything here is free to open at the original source.</p>
+        <p class="lead">Search our verified list of free courses — and, with AI switched on, the wider web too.</p>
 
         <div class="demo-controls">
           <div>
@@ -611,9 +640,23 @@
           </div>
         </div>
 
+        <!-- Wider-web AI search (visible only once an API key is added) -->
+        <div class="ai-bar" id="aiBar" hidden>
+          <label class="ai-switch" for="aiToggle">
+            <input type="checkbox" id="aiToggle" checked />
+            <span class="ai-slider" aria-hidden="true"></span>
+            <span class="ai-label">Also search the wider web with AI</span>
+          </label>
+          <p class="ai-status" id="aiStatus" role="status" aria-live="polite"></p>
+        </div>
+
         <p class="results-count" id="resultCount" role="status" aria-live="polite"></p>
         <div class="results-grid" id="results"></div>
-        <p class="muted-note" style="margin-top:1rem">Sample listings for demonstration. Details may change on the original site.</p>
+        <p class="muted-note" style="margin-top:1rem">
+          Built-in listings are samples for demonstration. Cards marked <strong>AI</strong> are suggested by
+          an AI model and shown only when their address belongs to a trusted free source — always check the
+          page opens and is free before you enrol.
+        </p>
       </div>
     </section>
 
@@ -980,8 +1023,36 @@
       // ---- Coursera (free / audit tracks) ----
       { title: "Learning How to Learn (audit free)", source: "Coursera", language: "English", level: "Beginner", topic: "General", duration: "4 weeks", link: "https://www.coursera.org/learn/learning-how-to-learn" },
       { title: "Programming for Everybody — Python (audit free)", source: "Coursera", language: "English", level: "Beginner", topic: "Programming", duration: "6 weeks", link: "https://www.coursera.org/learn/python" },
-      { title: "What is Data Science? (audit free)", source: "Coursera", language: "English", level: "Beginner", topic: "Data", duration: "4 weeks", link: "https://www.coursera.org/learn/what-is-datascience" }
+      { title: "What is Data Science? (audit free)", source: "Coursera", language: "English", level: "Beginner", topic: "Data", duration: "4 weeks", link: "https://www.coursera.org/learn/what-is-datascience" },
+      { title: "Mindshift: Learn to Learn better (audit free)", source: "Coursera", language: "English", level: "Beginner", topic: "General", duration: "4 weeks", link: "https://www.coursera.org/learn/mindshift" },
+
+      // ---- More free courses (added for wider topic coverage) ----
+      { title: "Chemistry (high school)", source: "Khan Academy", language: "English", level: "Beginner", topic: "Science", duration: "Self-paced", link: "https://www.khanacademy.org/science/chemistry" },
+      { title: "Geometry", source: "Khan Academy", language: "English", level: "Beginner", topic: "Maths", duration: "Self-paced", link: "https://www.khanacademy.org/math/geometry" },
+      { title: "Linear Algebra (18.06)", source: "MIT OpenCourseWare", language: "English", level: "Intermediate", topic: "Maths", duration: "14 weeks", link: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/" },
+      { title: "Mathematics for Computer Science (6.042J)", source: "MIT OpenCourseWare", language: "English", level: "Intermediate", topic: "Maths", duration: "13 weeks", link: "https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-fall-2010/" },
+      { title: "Back End Development and APIs", source: "freeCodeCamp", language: "English", level: "Intermediate", topic: "Programming", duration: "Self-paced", link: "https://www.freecodecamp.org/learn/back-end-development-and-apis/" },
+      { title: "Machine Learning with Python", source: "freeCodeCamp", language: "English", level: "Intermediate", topic: "Data", duration: "Self-paced", link: "https://www.freecodecamp.org/learn/machine-learning-with-python/" },
+      { title: "CS50's Web Programming with Python and JavaScript (free track)", source: "edX", language: "English", level: "Intermediate", topic: "Programming", duration: "12 weeks", link: "https://www.edx.org/course/web-programming" },
+      { title: "Data Structures and Algorithms in Python — full course", source: "YouTube (freeCodeCamp)", language: "English", level: "Intermediate", topic: "Programming", duration: "10+ hours", link: "https://www.youtube.com/watch?v=8hly31xKli0" },
+      { title: "Class 10 Maths full course — full playlist", source: "YouTube", language: "Hindi", level: "Beginner", topic: "Maths", duration: "Playlist", link: "https://www.youtube.com/results?search_query=class+10+maths+full+course+hindi" },
+      { title: "Class 12 Physics (NCERT) — full playlist", source: "YouTube", language: "Hindi", level: "Intermediate", topic: "Science", duration: "Playlist", link: "https://www.youtube.com/results?search_query=class+12+physics+ncert+full+course+hindi" },
+      { title: "Spoken English in Bengali — full playlist", source: "YouTube", language: "Bengali", level: "Beginner", topic: "Language", duration: "Playlist", link: "https://www.youtube.com/results?search_query=spoken+english+in+bengali" },
+      { title: "Yogic Fitness: An Overview", source: "SWAYAM", language: "English", level: "Beginner", topic: "General", duration: "4 weeks", link: "https://swayam.gov.in/explore" }
     ];
+
+    /* ============================================================
+       1b) AI SETTINGS — switches on the "wider web" search
+       ------------------------------------------------------------
+       Get a FREE key at https://aistudio.google.com/apikey
+       (Settings → Create API key). Restrict the key to your own
+       website domain (HTTP referrer) so nobody else can use it.
+
+       Leave the key empty to run without AI — the built-in list
+       above keeps working exactly as before.
+       ============================================================ */
+    const GEMINI_API_KEY = "";   // e.g. "AIza..."
+    const GEMINI_MODEL   = "gemini-2.5-flash";
 
     /* ============================================================
        2) NAVBAR — mobile hamburger menu
@@ -1013,7 +1084,7 @@
     });
 
     /* ============================================================
-       3) DEMO SEARCH — filters the COURSES array live
+       3) SEARCH — built-in list + optional AI search of the wider web
        ============================================================ */
     const demoQuery  = document.getElementById("demoQuery");
     const demoTopic  = document.getElementById("demoTopic");
@@ -1021,6 +1092,9 @@
     const demoLevel  = document.getElementById("demoLevel");
     const results    = document.getElementById("results");
     const resultCount= document.getElementById("resultCount");
+    const aiBar      = document.getElementById("aiBar");
+    const aiToggle   = document.getElementById("aiToggle");
+    const aiStatus   = document.getElementById("aiStatus");
 
     // Build filter dropdowns from the data (so adding a course updates them automatically)
     function fillSelect(select, values) {
@@ -1039,33 +1113,200 @@
     const esc = s => String(s).replace(/[&<>"']/g, m =>
       ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
 
-    // Render the filtered list
-    function render() {
-      const q    = demoQuery.value.trim().toLowerCase();
-      const topic= demoTopic.value;
-      const lang = demoLang.value;
-      const lvl  = demoLevel.value;
+    /* ---------- 3a. Word matching ----------------------------------
+       Every word in the search must match something, but spelling
+       variants are accepted: "math" finds "Maths", "code" finds
+       "programming", "spoken" finds "English", and so on.          */
+    const WORD_GROUPS = [
+      ["math", "maths", "mathematics", "algebra", "geometry", "calculus", "arithmetic", "statistics", "trigonometry"],
+      ["programming", "program", "coding", "code", "software", "development", "developer"],
+      ["science", "physics", "chemistry", "biology"],
+      ["english", "language", "grammar", "spoken", "communication"],
+      ["data", "analytics", "analysis", "statistics"],
+      ["artificial intelligence", "ai", "machine learning", "ml", "deep learning"],
+      ["computer", "algorithms", "algorithm"]
+    ];
+    function groupOf(token) {
+      for (const g of WORD_GROUPS) if (g.includes(token)) return g;
+      return [token];
+    }
+    function matchesQuery(course, q) {
+      if (!q) return true;
+      const hay = (course.title + " " + course.source + " " + course.topic + " " +
+                   course.language + " " + course.level + " " + course.duration).toLowerCase();
+      return q.split(/\s+/).filter(Boolean).every(token =>
+        hay.includes(token) || groupOf(token).some(v => hay.includes(v)));
+    }
 
-      const list = COURSES.filter(c =>
-        (!q    || (c.title + " " + c.source + " " + c.topic).toLowerCase().includes(q)) &&
-        (!topic|| c.topic  === topic) &&
-        (!lang || c.language === lang) &&
-        (!lvl  || c.level  === lvl)
-      );
+    /* ---------- 3b. AI search of the wider web ---------------------
+       Asks Gemini for free courses from trusted free sources, then
+       keeps only links that belong to our list of known source
+       domains — so a made-up or paid link never reaches the screen.  */
+    const TRUSTED_HOSTS = [
+      "nptel.ac.in", "swayam.gov.in", "khanacademy.org", "ocw.mit.edu", "mit.edu",
+      "freecodecamp.org", "youtube.com", "youtu.be", "edx.org", "coursera.org",
+      "alison.com", "futurelearn.com", "open.edu", "saylor.org", "gcfglobal.org"
+    ];
+    function trustedUrl(u) {
+      try {
+        const host = new URL(u).hostname.toLowerCase().replace(/^www\./, "");
+        return TRUSTED_HOSTS.some(d => host === d || host.endsWith("." + d));
+      } catch (e) { return false; }
+    }
+
+    let aiResults = [], aiLoading = false, aiToken = 0, aiTimer = null;
+
+    function buildPrompt(q) {
+      return [
+        "You help students in India find genuinely free online courses and classes.",
+        "The student searched for: \"" + q + "\".",
+        demoTopic.value ? "Category: " + demoTopic.value + "." : "",
+        demoLang.value  ? "They want lessons taught in: " + demoLang.value + "." : "",
+        demoLevel.value ? "Level: " + demoLevel.value + "." : "",
+        "Prefer these trusted free sources: NPTEL, SWAYAM, Khan Academy, MIT OpenCourseWare,",
+        "freeCodeCamp, YouTube, edX free tracks, Coursera free/audit tracks, Alison, FutureLearn, Saylor Academy.",
+        "Rules:",
+        "1. Only courses that are completely free to open. Never include paid courses, free trials or paid-only certificates.",
+        "2. Give the direct web address of the course page on the source's own website.",
+        "3. Only include web addresses you are certain exist. Never invent or guess an address. If unsure, leave it out.",
+        "4. Return between 0 and 10 results, most useful first.",
+        "5. Return JSON only, shaped like {\"results\":[{\"title\":\"...\",\"source\":\"...\",\"language\":\"...\",\"level\":\"...\",\"duration\":\"...\",\"url\":\"...\"}]}."
+      ].filter(Boolean).join("\n");
+    }
+
+    async function runAI() {
+      const q = demoQuery.value.trim();
+      aiResults = [];
+      if (!GEMINI_API_KEY || !aiToggle.checked || q.length < 2) {
+        aiLoading = false;
+        aiStatus.textContent = "";
+        render();
+        return;
+      }
+      const my = ++aiToken;
+      aiLoading = true;
+      aiStatus.textContent = "Searching trusted free sources across the internet…";
+      render();
+
+      try {
+        const res = await fetch(
+          "https://generativelanguage.googleapis.com/v1beta/models/" + GEMINI_MODEL + ":generateContent",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "x-goog-api-key": GEMINI_API_KEY },
+            body: JSON.stringify({
+              contents: [{ role: "user", parts: [{ text: buildPrompt(q) }] }],
+              generationConfig: {
+                temperature: 0.2,
+                responseMimeType: "application/json",
+                responseSchema: {
+                  type: "OBJECT",
+                  properties: {
+                    results: {
+                      type: "ARRAY",
+                      items: {
+                        type: "OBJECT",
+                        properties: {
+                          title:    { type: "STRING" },
+                          source:   { type: "STRING" },
+                          language: { type: "STRING" },
+                          level:    { type: "STRING" },
+                          duration: { type: "STRING" },
+                          url:      { type: "STRING" }
+                        },
+                        required: ["title", "url"]
+                      }
+                    }
+                  },
+                  required: ["results"]
+                }
+              }
+            })
+          }
+        );
+        if (!res.ok) throw new Error("HTTP " + res.status);
+
+        const json = await res.json();
+        const text = (json.candidates && json.candidates[0] &&
+                      json.candidates[0].content && json.candidates[0].content.parts[0].text) || "[]";
+        const parsed = JSON.parse(text);
+        if (my !== aiToken) return;                 // a newer search already started
+
+        aiResults = (parsed.results || [])
+          .filter(r => r && r.title && r.url && trustedUrl(r.url))
+          .slice(0, 10)
+          .map(r => ({
+            title: r.title,
+            source: r.source || "Wider web",
+            language: r.language || "—",
+            level: r.level || "—",
+            duration: r.duration || "—",
+            topic: r.topic || "Wider web",
+            link: r.url,
+            ai: true
+          }));
+
+        aiStatus.textContent = aiResults.length
+          ? aiResults.length + " extra free course" + (aiResults.length === 1 ? "" : "s") + " found in the wider web"
+          : "No extra free courses found for that search.";
+      } catch (err) {
+        if (my !== aiToken) return;
+        aiResults = [];
+        aiStatus.textContent = "Wider web search is unavailable right now — showing our verified list only.";
+      } finally {
+        if (my === aiToken) { aiLoading = false; render(); }
+      }
+    }
+
+    function scheduleAI() {
+      clearTimeout(aiTimer);
+      aiTimer = setTimeout(runAI, 700);   // wait until the student stops typing
+    }
+
+    /* ---------- 3c. Render the results ---------- */
+    function render() {
+      const q     = demoQuery.value.trim().toLowerCase();
+      const topic = demoTopic.value;
+      const lang  = demoLang.value;
+      const lvl   = demoLevel.value;
+
+      const local = COURSES.filter(c =>
+        matchesQuery(c, q) &&
+        (!topic || c.topic  === topic) &&
+        (!lang  || c.language === lang) &&
+        (!lvl   || c.level  === lvl));
+
+      // AI extras, with duplicates of the verified list removed
+      const seen = new Set(local.map(l => String(l.link).toLowerCase()));
+      const extra = (aiToggle.checked ? aiResults : []).filter(a => {
+        const key = String(a.link).toLowerCase();
+        const title = a.title.toLowerCase();
+        if (seen.has(key) || seen.has(title)) return false;
+        seen.add(key); seen.add(title);
+        return true;
+      });
+
+      const list = local.concat(extra);
 
       resultCount.textContent =
-        list.length + " free course" + (list.length === 1 ? "" : "s") + " found";
+        list.length + " free course" + (list.length === 1 ? "" : "s") + " found" +
+        (extra.length ? " (" + extra.length + " from the wider web)" : "");
 
       if (!list.length) {
-        results.innerHTML =
-          '<div class="card no-results"><h3>No match yet</h3>' +
-          '<p>Try a different word, or clear one of the filters. New free courses are added regularly.</p></div>';
+        results.innerHTML = aiLoading
+          ? '<div class="card no-results"><h3>Searching…</h3>' +
+            '<p>Looking for free classes across trusted free sources.</p></div>'
+          : '<div class="card no-results"><h3>No match yet</h3>' +
+            '<p>Try a different word, or clear one of the filters. Free courses are added regularly.</p></div>';
         return;
       }
 
       results.innerHTML = list.map(c => `
         <article class="card course-card">
-          <span class="badge-free">FREE</span>
+          <div class="badge-row">
+            <span class="badge-free">FREE</span>
+            ${c.ai ? '<span class="badge-ai" title="Suggested by AI from a trusted source domain">AI</span>' : ''}
+          </div>
           <span class="course-source">${esc(c.source)}</span>
           <h3>${esc(c.title)}</h3>
           <p class="course-meta">${esc(c.language)} • ${esc(c.level)} • ${esc(c.duration)}</p>
@@ -1076,9 +1317,24 @@
         </article>`).join("");
     }
 
+    // Re-run for every keystroke or filter change
     ["input", "change"].forEach(ev =>
       [demoQuery, demoTopic, demoLang, demoLevel].forEach(el =>
-        el.addEventListener(ev, render)));
+        el.addEventListener(ev, () => { render(); scheduleAI(); })));
+    aiToggle.addEventListener("change", () => {
+      if (!aiToggle.checked) {          // switch it off → clear extras at once
+        aiResults = [];
+        aiStatus.textContent = "";
+        render();
+        return;
+      }
+      render();
+      scheduleAI();
+    });
+
+    // The AI bar only appears once a key has been added (see 1b above)
+    if (GEMINI_API_KEY) aiBar.hidden = false;
+
     render();
 
     /* ============================================================
