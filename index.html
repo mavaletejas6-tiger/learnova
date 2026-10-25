@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ============ SEO ============ -->
+  <title>Learnova — Scan the web. Learn for free.</title>
+  <meta name="description" content="Learnova scans trusted free sources across the internet and brings free courses and classes together in one place. Filter by language, level and topic. Always free for learners." />
+  <meta name="theme-color" content="#1B1F4B" />
+  <link rel="canonical" href="https://your-site.netlify.app/" />
+
+  <!-- Open Graph (social sharing) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Learnova — Scan the web. Learn for free." />
+  <meta property="og:description" content="Free courses and classes from trusted sources across the internet, brought together in one place." />
+  <meta property="og:url" content="https://your-site.netlify.app/" />
+  <!-- Optional: add an og.png (1200x630) next to this file and reference it below -->
+  <!-- <meta property="og:image" content="https://your-site.netlify.app/og.png" /> -->
+  <meta name="twitter:card" content="summary" />
+
+  <!-- Favicon: inline SVG so there is no extra file to load -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%231B1F4B'/%3E%3Ccircle cx='32' cy='32' r='8' fill='none' stroke='%234F5BD5' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='17' fill='none' stroke='%231FB5A6' stroke-width='2.5' opacity='.8'/%3E%3Ccircle cx='32' cy='32' r='26' fill='none' stroke='%23F6A623' stroke-width='2' opacity='.6'/%3E%3Ccircle cx='44' cy='22' r='3.5' fill='%23F6A623'/%3E%3C/svg%3E" />
+
+  <style>
+    /* ============================================================
+       LEARNOVA — single file stylesheet
+       Sections: 1) variables 2) base 3) layout 4) components
+                 5) sections 6) responsive 7) motion preferences
+       ============================================================ */
+
+    /* ---------- 1. Design tokens ---------- */
+    :root {
+      --navy:   #1B1F4B;   /* headings, footer, dark surfaces */
+      --indigo: #4F5BD5;   /* primary actions and links */
+      --amber:  #F6A623;   /* highlights, accents */
+      --teal:   #1FB5A6;   /* success / "free" accents */
+      --bg:     #F1F2FA;   /* page background */
+      --white:  #FFFFFF;   /* cards */
+      --text:   #2A2E52;   /* body text (good contrast on light bg) */
+      --muted:  #5A5F84;   /* secondary text */
+      --line:   #E1E3F2;   /* borders */
+      --shadow: 0 6px 20px rgba(27, 31, 75, .08);
+      --shadow-lg: 0 10px 30px rgba(27, 31, 75, .12);
+      --radius: 18px;
+      --radius-sm: 12px;
+      --maxw: 1120px;
+      /* Heading = Cambria (falls back to similar serifs), Body = Calibri/Inter */
+      --font-head: "Cambria", "Georgia", "Times New Roman", serif;
+      --font-body: "Calibri", "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+    }
+
+    /* ---------- 2. Base ---------- */
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;            /* smooth scrolling */
+      -webkit-text-size-adjust: 100%;
+    }
+    body {
+      margin: 0;
+      font-family: var(--font-body);
+      font-size: 1rem;
+      line-height: 1.6;
+      color: var(--text);
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+    }
+    h1, h2, h3, h4 { font-family: var(--font-head); color: var(--navy); line-height: 1.2; margin: 0 0 .5em; }
+    h1 { font-size: clamp(2rem, 6vw, 3.2rem); }
+    h2 { font-size: clamp(1.5rem, 4vw, 2.2rem); }
+    h3 { font-size: 1.15rem; }
+    p  { margin: 0 0 1rem; }
+    a  { color: var(--indigo); }
+    img { max-width: 100%; }
+    ul { margin: 0; padding-left: 1.2rem; }
+
+    /* Sections get scroll offset so the sticky navbar never covers titles */
+    section { scroll-margin-top: 84px; }
+
+    /* Keyboard accessibility: visible focus ring everywhere */
+    a:focus-visible, button:focus-visible, input:focus-visible,
+    select:focus-visible, summary:focus-visible {
+      outline: 3px solid var(--amber);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+
+    .container { width: min(100% - 2rem, var(--maxw)); margin-inline: auto; }
+    .section   { padding: 3.5rem 0; }
+    .section-alt { background: var(--white); }
+    .lead      { font-size: 1.1rem; color: var(--muted); }
+    .center    { text-align: center; }
+    .eyebrow {
+      display: inline-block; font-weight: 700; font-size: .85rem; letter-spacing: .06em;
+      text-transform: uppercase; color: var(--indigo); margin-bottom: .4rem;
+    }
+    .muted-note { font-size: .9rem; color: var(--muted); }
+
+    /* Skip link for keyboard users */
+    .skip-link {
+      position: absolute; left: -999px; top: 0; background: var(--navy); color: #fff;
+      padding: .6rem 1rem; z-index: 100; border-radius: 0 0 8px 0;
+    }
+    .skip-link:focus { left: 0; }
+
+    /* ---------- 3. Shared components ---------- */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+      font: inherit; font-weight: 700; cursor: pointer;
+      padding: .75rem 1.4rem; border-radius: 999px; border: 0;
+      text-decoration: none; transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+    .btn-primary { background: var(--indigo); color: #fff; }
+    .btn-amber   { background: var(--amber); color: #2A1B00; }
+    .btn-light   { background: var(--white); color: var(--navy); border: 1px solid var(--line); }
+    .btn-small   { padding: .5rem 1rem; font-size: .9rem; }
+
+    .card {
+      background: var(--white); border: 1px solid var(--line);
+      border-radius: var(--radius); box-shadow: var(--shadow); padding: 1.4rem;
+    }
+
+    /* Icon in a colored circle (used across the page) */
+    .icon-circle {
+      width: 48px; height: 48px; flex: 0 0 48px; border-radius: 50%;
+      display: grid; place-items: center; font-size: 1.35rem; margin-bottom: .8rem;
+      color: #fff;
+    }
+    .ic-indigo { background: var(--indigo); }
+    .ic-amber  { background: var(--amber); color: #2A1B00; }
+    .ic-teal   { background: var(--teal); }
+    .ic-navy   { background: var(--navy); }
+
+    .grid { display: grid; gap: 1.2rem; }
+    .grid-3 { grid-template-columns: 1fr; }
+
+    /* ---------- 4. Navbar ---------- */
+    .navbar {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(241, 242, 250, .92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--line);
+    }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .7rem 0; }
+    .logo {
+      display: inline-flex; align-items: center; gap: .55rem;
+      font-family: var(--font-head); font-size: 1.35rem; font-weight: 700;
+      color: var(--navy); text-decoration: none;
+    }
+    .logo-mark {
+      width: 30px; height: 30px; border-radius: 50%; flex: 0 0 30px;
+      background: var(--navy); position: relative;
+    }
+    .logo-mark::before, .logo-mark::after {
+      content: ""; position: absolute; inset: 0; margin: auto; border-radius: 50%;
+      border: 2px solid var(--teal);
+    }
+    .logo-mark::before { width: 14px; height: 14px; }
+    .logo-mark::after  { width: 24px; height: 24px; border-color: var(--amber); opacity: .8; }
+
+    .nav-links { display: none; align-items: center; gap: 1.4rem; list-style: none; margin: 0; padding: 0; }
+    .nav-links a { color: var(--navy); text-decoration: none; font-weight: 600; }
+    .nav-links a:hover { color: var(--indigo); text-decoration: underline; }
+    .nav-cta { display: none; }
+    .hamburger {
+      background: var(--white); border: 1px solid var(--line); border-radius: 10px;
+      width: 44px; height: 44px; cursor: pointer; display: grid; place-items: center; gap: 5px;
+    }
+    .hamburger span { display: block; width: 20px; height: 2px; background: var(--navy); border-radius: 2px; transition: .2s; }
+    .hamburger[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+    .hamburger[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+    /* Mobile dropdown panel */
+    .nav-panel {
+      display: none; background: var(--white); border-top: 1px solid var(--line);
+      padding: 1rem 0 1.2rem;
+    }
+    .nav-panel.open { display: block; }
+    .nav-panel ul { list-style: none; margin: 0 0 1rem; padding: 0; }
+    .nav-panel a { display: block; padding: .7rem 0; color: var(--navy); text-decoration: none; font-weight: 600; border-bottom: 1px solid var(--line); }
+
+    /* ---------- 5. Hero + radar animation ---------- */
+    .hero { padding: 3rem 0 3.5rem; overflow: hidden; }
+    .hero-grid { display: grid; gap: 2.5rem; align-items: center; }
+    .hero p.lead { font-size: 1.15rem; }
+
+    /* Search bar block */
+    .hero-search {
+      background: var(--white); border: 1px solid var(--line); border-radius: var(--radius);
+      box-shadow: var(--shadow-lg); padding: 1rem; margin-top: 1.5rem;
+    }
+    .search-row { display: flex; gap: .6rem; }
+    .search-row input { flex: 1; }
+    .filters-row { display: grid; grid-template-columns: 1fr; gap: .6rem; margin-top: .6rem; }
+
+    input[type="text"], input[type="email"], input[type="url"], select {
+      font: inherit; width: 100%; padding: .7rem .9rem;
+      border: 1px solid var(--line); border-radius: var(--radius-sm);
+      background: #fff; color: var(--text);
+    }
+    label { font-weight: 600; font-size: .9rem; display: block; margin-bottom: .25rem; color: var(--navy); }
+
+    /* Radar: concentric rings, a rotating sweep and glowing dots (pure CSS) */
+    .radar {
+      position: relative; width: min(90vw, 380px); aspect-ratio: 1; margin-inline: auto;
+      border-radius: 50%;
+      background: radial-gradient(circle at center, #232866 0%, var(--navy) 70%);
+      box-shadow: var(--shadow-lg);
+    }
+    .radar .ring {
+      position: absolute; inset: 0; margin: auto; border-radius: 50%;
+      border: 1px solid rgba(255,255,255,.18);
+    }
+    .radar .ring-1 { width: 25%;  height: 25%; }
+    .radar .ring-2 { width: 50%;  height: 50%; }
+    .radar .ring-3 { width: 75%;  height: 75%; }
+    .radar .ring-4 { width: 96%;  height: 96%; border-color: rgba(246,166,35,.35); }
+    /* Rotating sweep beam */
+    .radar .sweep {
+      position: absolute; inset: 2%; border-radius: 50%;
+      background: conic-gradient(from 0deg, rgba(31,181,166,.45) 0deg, rgba(31,181,166,0) 60deg, rgba(31,181,166,0) 360deg);
+      animation: sweep 4s linear infinite;
+    }
+    /* Glowing dots = "sources" being detected */
+    .radar .dot {
+      position: absolute; width: 12px; height: 12px; border-radius: 50%;
+      background: var(--amber); box-shadow: 0 0 12px var(--amber);
+      animation: pulse 2.4s ease-in-out infinite;
+    }
+    .radar .dot.teal  { background: var(--teal);  box-shadow: 0 0 12px var(--teal); }
+    .radar .dot.white { background: #fff;         box-shadow: 0 0 12px #fff; }
+    .radar .d1 { top: 22%; left: 60%; animation-delay: 0s; }
+    .radar .d2 { top: 62%; left: 30%; animation-delay: .4s; }
+    .radar .d3 { top: 45%; left: 78%; animation-delay: .8s; }
+    .radar .d4 { top: 72%; left: 64%; animation-delay: 1.2s; }
+    .radar .d5 { top: 30%; left: 33%; animation-delay: 1.6s; }
+    .radar .core {
+      position: absolute; inset: 0; margin: auto; width: 14px; height: 14px;
+      border-radius: 50%; background: #fff; box-shadow: 0 0 18px #fff;
+    }
+    @keyframes sweep { to { transform: rotate(360deg); } }
+    @keyframes pulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.6); opacity: .55; } }
+    .radar-caption { text-align: center; margin-top: .8rem; font-size: .9rem; color: var(--muted); }
+
+    /* ---------- 6. Section-specific styles ---------- */
+
+    /* How it works: steps with arrows (arrows point DOWN when stacked) */
+    .steps { display: grid; gap: 1rem; align-items: stretch; }
+    .step { position: relative; text-align: center; display: flex; flex-direction: column; }
+    .step .step-num {
+      width: 54px; height: 54px; margin: 0 auto .7rem; border-radius: 50%;
+      display: grid; place-items: center; color: #fff; font-family: var(--font-head);
+      font-size: 1.3rem; font-weight: 700;
+    }
+    .step-arrow { text-align: center; color: var(--indigo); font-size: 1.6rem; line-height: 1;
+                  transform: rotate(90deg); align-self: center; }
+
+    /* Visually hidden but still read by screen readers */
+    .visually-hidden {
+      position: absolute !important; width: 1px; height: 1px; overflow: hidden;
+      clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+    }
+
+    /* Demo search results */
+    .demo-controls { display: grid; grid-template-columns: 1fr; gap: .7rem; margin: 1.2rem 0; }
+    .results-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+    .course-card { display: flex; flex-direction: column; gap: .4rem; }
+    .course-card h3 { font-size: 1.05rem; margin-bottom: .2rem; }
+    .badge-free {
+      align-self: flex-start; background: #E4F7EF; color: #0E6B4F; border: 1px solid #B6E8D5;
+      font-size: .75rem; font-weight: 800; letter-spacing: .05em;
+      padding: .18rem .6rem; border-radius: 999px;
+    }
+    .course-meta { font-size: .88rem; color: var(--muted); margin: 0; }
+    .course-source { font-weight: 700; color: var(--indigo); font-size: .85rem; text-transform: uppercase; letter-spacing: .04em; }
+    .course-link { margin-top: auto; font-weight: 700; text-decoration: none; }
+    .course-link:hover { text-decoration: underline; }
+    .results-count { font-weight: 700; color: var(--navy); margin: .4rem 0 0; }
+    .no-results { padding: 1.5rem; text-align: center; }
+
+    /* Source chips */
+    .chips { display: flex; flex-wrap: wrap; gap: .6rem; list-style: none; padding: 0; margin: 1rem 0; }
+    .chips li {
+      background: var(--white); border: 1px solid var(--line); border-radius: 999px;
+      padding: .5rem 1rem; font-weight: 600; color: var(--navy); box-shadow: var(--shadow);
+    }
+    .chips li::before { content: "• "; color: var(--teal); font-weight: 900; }
+
+    /* Comparison table */
+    .table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--line); background: var(--white); box-shadow: var(--shadow); }
+    table { border-collapse: collapse; width: 100%; min-width: 620px; }
+    th, td { padding: .9rem 1rem; text-align: left; border-bottom: 1px solid var(--line); }
+    thead th { background: var(--navy); color: #fff; font-family: var(--font-head); }
+    thead th:last-child { color: var(--amber); }
+    tbody tr:last-child td { border-bottom: 0; }
+    td.win { background: #EEF0FF; font-weight: 700; color: var(--navy); }
+    .yes { color: #0E6B4F; font-weight: 700; }
+    .no  { color: #9A3F3F; font-weight: 700; }
+    .part { color: #8A6100; font-weight: 700; }
+
+    /* Stats */
+    .stat-card { text-align: center; }
+    .stat-num { font-family: var(--font-head); font-size: 2rem; font-weight: 700; color: var(--indigo); display: block; }
+    .stat-label { color: var(--muted); font-size: .95rem; }
+
+    /* Roadmap */
+    .phase-months { display: inline-block; background: var(--amber); color: #2A1B00; font-weight: 700; font-size: .8rem; padding: .2rem .7rem; border-radius: 999px; margin-bottom: .6rem; }
+
+    /* Always-free banner */
+    .free-banner {
+      background: linear-gradient(120deg, var(--navy), #2C3376);
+      color: #fff; border-radius: var(--radius); padding: 2rem; box-shadow: var(--shadow-lg);
+    }
+    .free-banner h2 { color: #fff; }
+    .free-banner p { color: #D9DCF5; }
+    .free-banner .tick { color: var(--teal); font-weight: 700; }
+
+    /* Forms */
+    .form-card h3 { margin-bottom: .2rem; }
+    .form-group { margin-bottom: .9rem; }
+    .form-note { font-size: .85rem; color: var(--muted); }
+    .form-msg {
+      display: none; margin-top: .8rem; padding: .7rem 1rem; border-radius: var(--radius-sm);
+      background: #E4F7EF; color: #0E6B4F; border: 1px solid #B6E8D5; font-weight: 600;
+    }
+    .form-msg.show { display: block; }
+
+    /* Footer */
+    .footer { background: var(--navy); color: #C9CDEA; padding: 3rem 0 2rem; margin-top: 3rem; }
+    .footer h4 { color: #fff; font-size: 1rem; margin-bottom: .6rem; }
+    .footer a { color: #C9CDEA; text-decoration: none; display: inline-block; padding: .15rem 0; }
+    .footer a:hover { color: #fff; text-decoration: underline; }
+    .footer-grid { display: grid; gap: 2rem; }
+    .footer .logo { color: #fff; }
+    .footer-bottom { border-top: 1px solid rgba(255,255,255,.15); margin-top: 2rem; padding-top: 1.2rem; font-size: .85rem; display: flex; flex-wrap: wrap; gap: .5rem; justify-content: space-between; }
+
+    /* ---------- 7. Responsive (mobile-first: these are the larger screens) ---------- */
+    @media (min-width: 640px) {
+      .grid-3        { grid-template-columns: repeat(3, 1fr); }
+      .results-grid  { grid-template-columns: repeat(2, 1fr); }
+      .demo-controls { grid-template-columns: 2fr 1fr 1fr 1fr; }
+      .filters-row   { grid-template-columns: 1fr 1fr; }
+      .stat-grid     { grid-template-columns: repeat(2, 1fr); }
+      .form-grid     { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (min-width: 900px) {
+      /* Desktop nav */
+      .nav-links, .nav-cta { display: flex; }
+      .hamburger, .nav-panel { display: none !important; }
+      .hero-grid   { grid-template-columns: 1.15fr .85fr; }
+      /* 4 cards + 3 arrows = 7 columns, so all four steps sit on one row */
+      .steps       { grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr; }
+      .step-arrow  { transform: none; }
+      .roadmap-grid{ grid-template-columns: repeat(3, 1fr); }
+      .stat-grid   { grid-template-columns: repeat(4, 1fr); }
+      .results-grid{ grid-template-columns: repeat(3, 1fr); }
+      .footer-grid { grid-template-columns: 1.4fr 1fr 1fr; }
+    }
+
+    /* ---------- 8. Respect reduced-motion settings ---------- */
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .radar .sweep, .radar .dot { animation: none; }
+      .btn:hover { transform: none; }
+    }
+  </style>
+</head>
+
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <!-- ===================== 1. NAVBAR ===================== -->
+  <header class="navbar">
+    <div class="container nav-inner">
+      <a class="logo" href="#top" aria-label="Learnova home">
+        <span class="logo-mark" aria-hidden="true"></span> Learnova
+      </a>
+
+      <!-- Desktop links -->
+      <nav aria-label="Main menu">
+        <ul class="nav-links">
+          <li><a href="#how">How it works</a></li>
+          <li><a href="#sources">Sources</a></li>
+          <li><a href="#impact">Impact</a></li>
+          <li><a href="#roadmap">Roadmap</a></li>
+        </ul>
+      </nav>
+      <a class="btn btn-primary btn-small nav-cta" href="#demo">Search free courses</a>
+
+      <!-- Mobile hamburger -->
+      <button class="hamburger" id="navToggle" aria-expanded="false" aria-controls="navPanel" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+
+    <!-- Mobile dropdown -->
+    <div class="nav-panel" id="navPanel">
+      <div class="container">
+        <ul>
+          <li><a href="#how">How it works</a></li>
+          <li><a href="#sources">Sources</a></li>
+          <li><a href="#impact">Impact</a></li>
+          <li><a href="#roadmap">Roadmap</a></li>
+        </ul>
+        <a class="btn btn-primary" href="#demo" style="width:100%">Search free courses</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- ===================== 2. HERO ===================== -->
+    <section class="hero" id="top">
+      <div class="container hero-grid">
+        <div>
+          <span class="eyebrow">Free learning, one place</span>
+          <h1>Scan the web.<br />Learn for free.</h1>
+          <p class="lead">
+            Learnova finds free courses and classes from across the internet
+            and brings them to one place.
+          </p>
+
+          <!-- Hero search: jumps to the live demo below with your choices -->
+          <form class="hero-search" id="heroForm">
+            <div class="search-row">
+              <label for="heroQuery" class="visually-hidden">What do you want to learn?</label>
+              <input type="text" id="heroQuery" placeholder="What do you want to learn?" autocomplete="off" />
+              <button class="btn btn-amber" type="submit">Search</button>
+            </div>
+            <div class="filters-row">
+              <div>
+                <label for="heroLang">Language</label>
+                <select id="heroLang">
+                  <option value="">Any language</option>
+                  <option>English</option>
+                  <option>Hindi</option>
+                  <option>Marathi</option>
+                  <option>Tamil</option>
+                  <option>Telugu</option>
+                  <option>Bengali</option>
+                </select>
+              </div>
+              <div>
+                <label for="heroLevel">Level</label>
+                <select id="heroLevel">
+                  <option value="">Any level</option>
+                  <option>Beginner</option>
+                  <option>Intermediate</option>
+                  <option>Advanced</option>
+                </select>
+              </div>
+            </div>
+          </form>
+          <p class="muted-note" style="margin-top:.8rem">✅ Always free for learners. No sign-up needed to browse.</p>
+        </div>
+
+        <!-- Radar animation: concentric circles + glowing dots -->
+        <div>
+          <div class="radar" role="img" aria-label="Animation of a radar scanning and finding free courses from different sources">
+            <span class="ring ring-1"></span>
+            <span class="ring ring-2"></span>
+            <span class="ring ring-3"></span>
+            <span class="ring ring-4"></span>
+            <span class="sweep" aria-hidden="true"></span>
+            <span class="core" aria-hidden="true"></span>
+            <span class="dot d1" aria-hidden="true"></span>
+            <span class="dot teal d2" aria-hidden="true"></span>
+            <span class="dot white d3" aria-hidden="true"></span>
+            <span class="dot d4" aria-hidden="true"></span>
+            <span class="dot teal d5" aria-hidden="true"></span>
+          </div>
+          <p class="radar-caption">Scanning trusted free sources across the internet…</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 3. PROBLEM ===================== -->
+    <section class="section section-alt" id="problem">
+      <div class="container">
+        <h2>Free learning exists, but it is scattered.</h2>
+        <p class="lead">Students know free classes are out there. Finding them is the hard part.</p>
+
+        <div class="grid grid-3">
+          <article class="card">
+            <span class="icon-circle ic-indigo" aria-hidden="true">🗂️</span>
+            <h3>Too many places</h3>
+            <p>Free courses sit on many websites and YouTube channels. You keep opening new tabs and still miss good ones.</p>
+          </article>
+
+          <article class="card">
+            <span class="icon-circle ic-amber" aria-hidden="true">🔒</span>
+            <h3>Hidden paywalls</h3>
+            <p>Some courses look free, then ask for payment before the useful part. Wasting time and data hurts.</p>
+          </article>
+
+          <article class="card">
+            <span class="icon-circle ic-teal" aria-hidden="true">📶</span>
+            <h3>Hard to reach</h3>
+            <p>Many classes are only in English. Many need fast internet or a costly phone. That leaves out a lot of learners.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 4. HOW IT WORKS ===================== -->
+    <section class="section" id="how">
+      <div class="container">
+        <h2>How it works</h2>
+        <p class="lead">Four simple steps, from the open internet to your phone.</p>
+
+        <div class="steps">
+          <article class="step card">
+            <span class="step-num ic-navy" aria-hidden="true">1</span>
+            <h3>Scan</h3>
+            <p>We look across trusted free sources on the internet for courses and classes.</p>
+          </article>
+          <div class="step-arrow" aria-hidden="true">➜</div>
+
+          <article class="step card">
+            <span class="step-num ic-teal" aria-hidden="true">2</span>
+            <h3>Verify</h3>
+            <p>We check that a course is truly free, with no hidden paywall in the middle.</p>
+          </article>
+          <div class="step-arrow" aria-hidden="true">➜</div>
+
+          <article class="step card">
+            <span class="step-num ic-amber" aria-hidden="true">3</span>
+            <h3>Organize</h3>
+            <p>We sort everything by topic, level, language and duration, so it is easy to browse.</p>
+          </article>
+          <div class="step-arrow" aria-hidden="true">➜</div>
+
+          <article class="step card">
+            <span class="step-num ic-indigo" aria-hidden="true">4</span>
+            <h3>Deliver</h3>
+            <p>You get free courses and classes in your app, ready to open in one tap.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 5. LIVE DEMO SEARCH ===================== -->
+    <section class="section section-alt" id="demo">
+      <div class="container">
+        <h2>Try a search</h2>
+        <p class="lead">Search a sample list of free courses and classes. Everything here is free to open at the original source.</p>
+
+        <div class="demo-controls">
+          <div>
+            <label for="demoQuery">Search</label>
+            <input type="text" id="demoQuery" placeholder="e.g. python, physics, english" autocomplete="off" />
+          </div>
+          <div>
+            <label for="demoTopic">Topic</label>
+            <select id="demoTopic"><option value="">All topics</option></select>
+          </div>
+          <div>
+            <label for="demoLang">Language</label>
+            <select id="demoLang"><option value="">All languages</option></select>
+          </div>
+          <div>
+            <label for="demoLevel">Level</label>
+            <select id="demoLevel"><option value="">All levels</option></select>
+          </div>
+        </div>
+
+        <p class="results-count" id="resultCount" role="status" aria-live="polite"></p>
+        <div class="results-grid" id="results"></div>
+        <p class="muted-note" style="margin-top:1rem">Sample listings for demonstration. Details may change on the original site.</p>
+      </div>
+    </section>
+
+    <!-- ===================== 6. SOURCES ===================== -->
+    <section class="section" id="sources">
+      <div class="container">
+        <h2>Trusted free sources</h2>
+        <p class="lead">We start with sources that are already free and respected by learners.</p>
+
+        <ul class="chips">
+          <li>NPTEL</li>
+          <li>SWAYAM</li>
+          <li>Khan Academy</li>
+          <li>MIT OpenCourseWare</li>
+          <li>freeCodeCamp</li>
+          <li>YouTube</li>
+          <li>edX (free tracks)</li>
+          <li>Coursera (free tracks)</li>
+        </ul>
+
+        <p>
+          We link to the original course with credit to its creator.
+          We never copy or re-host anyone&rsquo;s content.
+        </p>
+      </div>
+    </section>
+
+    <!-- ===================== 7. WHY IT'S DIFFERENT ===================== -->
+    <section class="section section-alt" id="why">
+      <div class="container">
+        <h2>Why it is different</h2>
+        <p class="lead">A quick comparison of the three ways learners search today.</p>
+
+        <div class="table-wrap">
+          <table>
+            <caption class="visually-hidden">Comparison of manual search, paid platforms and Learnova</caption>
+            <thead>
+              <tr>
+                <th scope="col">Feature</th>
+                <th scope="col">Searching manually</th>
+                <th scope="col">Paid platforms</th>
+                <th scope="col">Learnova</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">Always free</th>
+                <td class="part">Sometimes</td>
+                <td class="no">No</td>
+                <td class="win yes">Yes</td>
+              </tr>
+              <tr>
+                <th scope="row">Many sources in one place</th>
+                <td class="no">No</td>
+                <td class="part">One platform</td>
+                <td class="win yes">Yes</td>
+              </tr>
+              <tr>
+                <th scope="row">Hidden-paywall check</th>
+                <td class="no">You do it yourself</td>
+                <td class="part">Varies</td>
+                <td class="win yes">Checked</td>
+              </tr>
+              <tr>
+                <th scope="row">Filter by language and level</th>
+                <td class="part">Hard</td>
+                <td class="part">Limited</td>
+                <td class="win yes">Built in</td>
+              </tr>
+              <tr>
+                <th scope="row">Built for low-data phones</th>
+                <td class="no">No</td>
+                <td class="no">Heavy apps</td>
+                <td class="win yes">Yes</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 8. IMPACT ===================== -->
+    <section class="section" id="impact">
+      <div class="container">
+        <h2>Our first goals</h2>
+        <p class="lead">What we want to test in the first version, with real students.</p>
+
+        <div class="grid stat-grid">
+          <article class="card stat-card">
+            <span class="stat-num">1,000</span>
+            <span class="stat-label">learners using Learnova</span>
+          </article>
+          <article class="card stat-card">
+            <span class="stat-num">200+</span>
+            <span class="stat-label">free courses and classes listed</span>
+          </article>
+          <article class="card stat-card">
+            <span class="stat-num">2–3</span>
+            <span class="stat-label">languages supported at launch</span>
+          </article>
+          <article class="card stat-card">
+            <span class="stat-num">2 min</span>
+            <span class="stat-label">to find a first free lesson</span>
+          </article>
+        </div>
+
+        <p class="muted-note" style="margin-top:1rem">These are goals to test with real students, not results.</p>
+      </div>
+    </section>
+
+    <!-- ===================== 9. ROADMAP ===================== -->
+    <section class="section section-alt" id="roadmap">
+      <div class="container">
+        <h2>Roadmap</h2>
+        <p class="lead">A simple, honest plan for the first six months.</p>
+
+        <div class="grid roadmap-grid">
+          <article class="card">
+            <span class="phase-months">Months 1–2</span>
+            <h3>Phase 1: Build</h3>
+            <ul>
+              <li>Focus on one niche subject first</li>
+              <li>Hand-pick 100–200 free courses and classes</li>
+              <li>Ship search with language and level filters</li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <span class="phase-months">Months 3–4</span>
+            <h3>Phase 2: Test</h3>
+            <ul>
+              <li>Try it with 50–100 real students</li>
+              <li>Fix whatever breaks on low-end phones</li>
+              <li>Add a second language</li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <span class="phase-months">Months 5–6</span>
+            <h3>Phase 3: Scale</h3>
+            <ul>
+              <li>Automated scanning of trusted free sources</li>
+              <li>More topics and more languages</li>
+              <li>Low-data mode and offline saved lists</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 10. ALWAYS FREE ===================== -->
+    <section class="section" id="free">
+      <div class="container">
+        <div class="free-banner">
+          <h2>Always free for learners</h2>
+          <p>
+            <span class="tick">✔ Learners never pay.</span> Not now, not later, not for filters.
+            Learnova is funded by grants, CSR support, and partnerships with colleges and NGOs.
+          </p>
+          <p style="margin-bottom:0">
+            In the future we may add optional extras like mentoring — but finding and opening
+            free courses will always stay free.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 11. JOIN / CONTACT ===================== -->
+    <section class="section section-alt" id="join">
+      <div class="container">
+        <h2>Be part of the first group</h2>
+        <p class="lead">Two simple forms. No spam, we promise.</p>
+
+        <div class="grid form-grid">
+          <!-- Email signup -->
+          <form class="card form-card" id="earlyAccessForm" novalidate>
+            <h3>Get early access</h3>
+            <p class="form-note">We will email you when Learnova is ready for students.</p>
+
+            <div class="form-group">
+              <label for="eaName">Your name</label>
+              <input type="text" id="eaName" name="name" placeholder="e.g. Priya" required />
+            </div>
+            <div class="form-group">
+              <label for="eaEmail">Email address</label>
+              <input type="email" id="eaEmail" name="email" placeholder="you@example.com" required />
+            </div>
+            <div class="form-group">
+              <label for="eaLang">Preferred language</label>
+              <select id="eaLang" name="language">
+                <option>English</option><option>Hindi</option><option>Marathi</option>
+                <option>Tamil</option><option>Telugu</option><option>Bengali</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" type="submit">Get early access</button>
+            <p class="form-msg" id="eaMsg">Thank you! We have noted your interest. ✅</p>
+          </form>
+
+          <!-- Suggest a course -->
+          <form class="card form-card" id="suggestForm" novalidate>
+            <h3>Suggest a free course</h3>
+            <p class="form-note">Found a good free class? Send it our way — we will check it and add it.</p>
+
+            <div class="form-group">
+              <label for="sgLink">Course link</label>
+              <input type="url" id="sgLink" name="link" placeholder="https://…" required />
+            </div>
+            <div class="form-group">
+              <label for="sgLang">Language</label>
+              <select id="sgLang" name="language">
+                <option>English</option><option>Hindi</option><option>Marathi</option>
+                <option>Tamil</option><option>Telugu</option><option>Bengali</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="sgTopic">Topic</label>
+              <input type="text" id="sgTopic" name="topic" placeholder="e.g. Maths, Programming, English" required />
+            </div>
+            <button class="btn btn-amber" type="submit">Send suggestion</button>
+            <p class="form-msg" id="sgMsg">Thanks for helping other learners! 🙏</p>
+          </form>
+        </div>
+
+        <p class="muted-note" style="margin-top:1rem">
+          Note: this demo page does not send data anywhere yet. To collect real signups, connect these forms
+          to a free service like Formspree, Netlify Forms or Google Forms (see comments in the code).
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================== 12. FOOTER ===================== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <a class="logo" href="#top"><span class="logo-mark" aria-hidden="true"></span> Learnova</a>
+          <p style="margin-top:.8rem">
+            Learnova scans trusted free sources across the internet and brings free
+            courses and classes together in one place. Scan the web. Learn for free.
+          </p>
+        </div>
+
+        <div>
+          <h4>Quick links</h4>
+          <ul style="list-style:none;padding:0;margin:0">
+            <li><a href="#how">How it works</a></li>
+            <li><a href="#demo">Search free courses</a></li>
+            <li><a href="#sources">Sources</a></li>
+            <li><a href="#impact">Impact</a></li>
+            <li><a href="#roadmap">Roadmap</a></li>
+            <li><a href="#join">Get early access</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4>Credit</h4>
+          <p style="font-size:.9rem">
+            All courses belong to their original creators and platforms. Learnova only
+            links to them with full credit. We never copy or re-host anyone&rsquo;s content.
+          </p>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>© <span id="year"></span> Learnova. Made for students. 🇮🇳</span>
+        <span>Scan the web. Learn for free.</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===================== JAVASCRIPT ===================== -->
+  <script>
+    /* ============================================================
+       1) COURSE LIST — edit this array to change the demo results.
+       Each item: { title, source, language, level, topic, duration, link }
+       Links go to the original creator's page.
+       ============================================================ */
+    const COURSES = [
+      // ---- NPTEL ----
+      { title: "Programming in Java", source: "NPTEL", language: "English", level: "Beginner", topic: "Programming", duration: "8 weeks", link: "https://nptel.ac.in/courses/106106146/" },
+      { title: "The Joy of Computing using Python", source: "NPTEL", language: "English", level: "Beginner", topic: "Programming", duration: "8 weeks", link: "https://nptel.ac.in/courses/106106153/" },
+      { title: "Machine Learning", source: "NPTEL", language: "English", level: "Advanced", topic: "Data", duration: "12 weeks", link: "https://nptel.ac.in/courses/106105178/" },
+      { title: "Basic Electrical Circuits", source: "NPTEL", language: "English", level: "Intermediate", topic: "Science", duration: "8 weeks", link: "https://nptel.ac.in/courses/106105184/" },
+      { title: "Engineering Mathematics", source: "NPTEL", language: "English", level: "Intermediate", topic: "Maths", duration: "12 weeks", link: "https://nptel.ac.in/courses/106106132/" },
+
+      // ---- SWAYAM ----
+      { title: "Introduction to Python Programming", source: "SWAYAM", language: "English", level: "Beginner", topic: "Programming", duration: "4 weeks", link: "https://swayam.gov.in/explore" },
+      { title: "Digital Literacy Basics", source: "SWAYAM", language: "Hindi", level: "Beginner", topic: "General", duration: "6 weeks", link: "https://swayam.gov.in/explore" },
+      { title: "Effective Communication Skills", source: "SWAYAM", language: "English", level: "Beginner", topic: "Career", duration: "4 weeks", link: "https://swayam.gov.in/explore" },
+
+      // ---- Khan Academy ----
+      { title: "Algebra basics", source: "Khan Academy", language: "English", level: "Beginner", topic: "Maths", duration: "Self-paced", link: "https://www.khanacademy.org/math/algebra" },
+      { title: "Biology (high school)", source: "Khan Academy", language: "English", level: "Beginner", topic: "Science", duration: "Self-paced", link: "https://www.khanacademy.org/science/biology" },
+      { title: "Basic Mathematics (in Hindi)", source: "Khan Academy", language: "Hindi", level: "Beginner", topic: "Maths", duration: "Self-paced", link: "https://hi.khanacademy.org/" },
+      { title: "Algebra (in Bengali)", source: "Khan Academy", language: "Bengali", level: "Beginner", topic: "Maths", duration: "Self-paced", link: "https://bn.khanacademy.org/" },
+
+      // ---- MIT OpenCourseWare ----
+      { title: "Introduction to Computer Science and Programming in Python (6.0001)", source: "MIT OpenCourseWare", language: "English", level: "Beginner", topic: "Programming", duration: "9 weeks", link: "https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/" },
+      { title: "Introduction to Algorithms (6.006)", source: "MIT OpenCourseWare", language: "English", level: "Advanced", topic: "Programming", duration: "12 weeks", link: "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/" },
+      { title: "Physics I: Classical Mechanics (8.01)", source: "MIT OpenCourseWare", language: "English", level: "Beginner", topic: "Science", duration: "13 weeks", link: "https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/" },
+      { title: "Circuits and Electronics (6.002)", source: "MIT OpenCourseWare", language: "English", level: "Intermediate", topic: "Science", duration: "12 weeks", link: "https://ocw.mit.edu/courses/6-002-circuits-and-electronics-spring-2007/" },
+
+      // ---- freeCodeCamp ----
+      { title: "Responsive Web Design Certification", source: "freeCodeCamp", language: "English", level: "Beginner", topic: "Programming", duration: "Self-paced", link: "https://www.freecodecamp.org/learn/responsive-web-design/" },
+      { title: "JavaScript Algorithms and Data Structures", source: "freeCodeCamp", language: "English", level: "Intermediate", topic: "Programming", duration: "Self-paced", link: "https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures/" },
+      { title: "Scientific Computing with Python", source: "freeCodeCamp", language: "English", level: "Beginner", topic: "Programming", duration: "Self-paced", link: "https://www.freecodecamp.org/learn/scientific-computing-with-python/" },
+      { title: "Data Analysis with Python", source: "freeCodeCamp", language: "English", level: "Intermediate", topic: "Data", duration: "Self-paced", link: "https://www.freecodecamp.org/learn/data-analysis-with-python/" },
+
+      // ---- YouTube (real channels) ----
+      { title: "CS50: Introduction to Computer Science — full course", source: "YouTube (freeCodeCamp)", language: "English", level: "Beginner", topic: "Programming", duration: "25+ hours", link: "https://www.youtube.com/watch?v=8mAITcNt710" },
+      { title: "Marathi grammar basics — full playlist", source: "YouTube", language: "Marathi", level: "Beginner", topic: "Language", duration: "Playlist", link: "https://www.youtube.com/results?search_query=marathi+vyakaran+basics" },
+      { title: "Spoken English in Telugu — full playlist", source: "YouTube", language: "Telugu", level: "Beginner", topic: "Language", duration: "Playlist", link: "https://www.youtube.com/results?search_query=spoken+english+in+telugu" },
+      { title: "Basic Maths in Tamil — full playlist", source: "YouTube", language: "Tamil", level: "Beginner", topic: "Maths", duration: "Playlist", link: "https://www.youtube.com/results?search_query=basic+maths+in+tamil" },
+      { title: "Physics class 11 (NCERT) in Hindi — full playlist", source: "YouTube", language: "Hindi", level: "Beginner", topic: "Science", duration: "Playlist", link: "https://www.youtube.com/results?search_query=physics+class+11+ncert+hindi+playlist" },
+
+      // ---- edX (free tracks) ----
+      { title: "CS50x: Introduction to Computer Science (free track)", source: "edX", language: "English", level: "Beginner", topic: "Programming", duration: "12 weeks", link: "https://www.edx.org/course/introduction-computer-science-harvardx-cs50x" },
+      { title: "English for Career Development (free track)", source: "edX", language: "English", level: "Intermediate", topic: "Career", duration: "6 weeks", link: "https://www.edx.org/course/english-for-career-development" },
+      { title: "Data Science: R Basics (free track)", source: "edX", language: "English", level: "Beginner", topic: "Data", duration: "8 weeks", link: "https://www.edx.org/course/data-science-r-basics" },
+
+      // ---- Coursera (free / audit tracks) ----
+      { title: "Learning How to Learn (audit free)", source: "Coursera", language: "English", level: "Beginner", topic: "General", duration: "4 weeks", link: "https://www.coursera.org/learn/learning-how-to-learn" },
+      { title: "Programming for Everybody — Python (audit free)", source: "Coursera", language: "English", level: "Beginner", topic: "Programming", duration: "6 weeks", link: "https://www.coursera.org/learn/python" },
+      { title: "What is Data Science? (audit free)", source: "Coursera", language: "English", level: "Beginner", topic: "Data", duration: "4 weeks", link: "https://www.coursera.org/learn/what-is-datascience" }
+    ];
+
+    /* ============================================================
+       2) NAVBAR — mobile hamburger menu
+       ============================================================ */
+    const navToggle = document.getElementById("navToggle");
+    const navPanel  = document.getElementById("navPanel");
+
+    navToggle.addEventListener("click", () => {
+      const open = navPanel.classList.toggle("open");
+      navToggle.setAttribute("aria-expanded", String(open));
+      navToggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+    });
+
+    // Close the mobile menu after tapping a link
+    navPanel.querySelectorAll("a").forEach(a =>
+      a.addEventListener("click", () => {
+        navPanel.classList.remove("open");
+        navToggle.setAttribute("aria-expanded", "false");
+      })
+    );
+
+    // Close the menu with the Escape key
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape" && navPanel.classList.contains("open")) {
+        navPanel.classList.remove("open");
+        navToggle.setAttribute("aria-expanded", "false");
+        navToggle.focus();
+      }
+    });
+
+    /* ============================================================
+       3) DEMO SEARCH — filters the COURSES array live
+       ============================================================ */
+    const demoQuery  = document.getElementById("demoQuery");
+    const demoTopic  = document.getElementById("demoTopic");
+    const demoLang   = document.getElementById("demoLang");
+    const demoLevel  = document.getElementById("demoLevel");
+    const results    = document.getElementById("results");
+    const resultCount= document.getElementById("resultCount");
+
+    // Build filter dropdowns from the data (so adding a course updates them automatically)
+    function fillSelect(select, values) {
+      values.forEach(v => {
+        const opt = document.createElement("option");
+        opt.value = v; opt.textContent = v;
+        select.appendChild(opt);
+      });
+    }
+    const uniq = key => [...new Set(COURSES.map(c => c[key]))].sort();
+    fillSelect(demoTopic, uniq("topic"));
+    fillSelect(demoLang,  uniq("language"));
+    fillSelect(demoLevel, uniq("level"));
+
+    // Escape text before putting it into HTML (safety)
+    const esc = s => String(s).replace(/[&<>"']/g, m =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
+
+    // Render the filtered list
+    function render() {
+      const q    = demoQuery.value.trim().toLowerCase();
+      const topic= demoTopic.value;
+      const lang = demoLang.value;
+      const lvl  = demoLevel.value;
+
+      const list = COURSES.filter(c =>
+        (!q    || (c.title + " " + c.source + " " + c.topic).toLowerCase().includes(q)) &&
+        (!topic|| c.topic  === topic) &&
+        (!lang || c.language === lang) &&
+        (!lvl  || c.level  === lvl)
+      );
+
+      resultCount.textContent =
+        list.length + " free course" + (list.length === 1 ? "" : "s") + " found";
+
+      if (!list.length) {
+        results.innerHTML =
+          '<div class="card no-results"><h3>No match yet</h3>' +
+          '<p>Try a different word, or clear one of the filters. New free courses are added regularly.</p></div>';
+        return;
+      }
+
+      results.innerHTML = list.map(c => `
+        <article class="card course-card">
+          <span class="badge-free">FREE</span>
+          <span class="course-source">${esc(c.source)}</span>
+          <h3>${esc(c.title)}</h3>
+          <p class="course-meta">${esc(c.language)} • ${esc(c.level)} • ${esc(c.duration)}</p>
+          <p class="course-meta">Topic: ${esc(c.topic)}</p>
+          <a class="course-link" href="${esc(c.link)}" target="_blank" rel="noopener noreferrer">
+            Open original course →
+          </a>
+        </article>`).join("");
+    }
+
+    ["input", "change"].forEach(ev =>
+      [demoQuery, demoTopic, demoLang, demoLevel].forEach(el =>
+        el.addEventListener(ev, render)));
+    render();
+
+    /* ============================================================
+       4) HERO SEARCH — passes your choices to the demo search
+       ============================================================ */
+    document.getElementById("heroForm").addEventListener("submit", e => {
+      e.preventDefault();
+      demoQuery.value = document.getElementById("heroQuery").value;
+      demoLang.value  = document.getElementById("heroLang").value;
+      demoLevel.value = document.getElementById("heroLevel").value;
+      render();
+      document.getElementById("demo").scrollIntoView({ behavior: "smooth" });
+    });
+
+    /* ============================================================
+       5) FORMS — friendly demo messages
+       ------------------------------------------------------------
+       To make these actually send data, connect them to a free
+       service, for example Formspree:
+         1. Sign up at formspree.io (free tier)
+         2. Replace the form tag with:
+            <form action="https://formspree.io/f/YOUR_ID" method="POST">
+       ============================================================ */
+    function handleDemoForm(formId, msgId) {
+      const form = document.getElementById(formId);
+      const msg  = document.getElementById(msgId);
+      form.addEventListener("submit", e => {
+        e.preventDefault();
+        if (!form.checkValidity()) { form.reportValidity(); return; }
+        msg.classList.add("show");
+        form.reset();
+        setTimeout(() => msg.classList.remove("show"), 5000);
+      });
+    }
+    handleDemoForm("earlyAccessForm", "eaMsg");
+    handleDemoForm("suggestForm", "sgMsg");
+
+    /* Footer year */
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
