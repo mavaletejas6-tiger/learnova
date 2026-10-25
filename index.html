@@ -178,6 +178,7 @@
       padding: 1rem 0 1.2rem;
     }
     .nav-panel.open { display: block; }
+    .nav-panel .auth-slot { display: flex; margin-top: .8rem; }
     .nav-panel ul { list-style: none; margin: 0 0 1rem; padding: 0; }
     .nav-panel a { display: block; padding: .7rem 0; color: var(--navy); text-decoration: none; font-weight: 600; border-bottom: 1px solid var(--line); }
 
@@ -317,6 +318,43 @@
     .free-banner p { color: #D9DCF5; }
     .free-banner .tick { color: var(--teal); font-weight: 700; }
 
+    /* Auth: navbar chips, sign-in modal, toast */
+    .nav-actions { display: flex; align-items: center; gap: .6rem; }
+    .auth-slot { display: none; align-items: center; gap: .5rem; }
+    .auth-chip {
+      display: inline-flex; align-items: center; gap: .45rem;
+      max-width: 190px; overflow: hidden;
+      background: var(--white); border: 1px solid var(--line);
+      padding: .45rem .85rem; border-radius: 999px;
+      font-size: .85rem; font-weight: 700; color: var(--navy);
+    }
+    .auth-chip .txt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .auth-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); flex: 0 0 8px; }
+
+    .modal-backdrop {
+      position: fixed; inset: 0; z-index: 80;
+      background: rgba(27, 31, 75, .55);
+      display: none; place-items: center; padding: 1rem;
+    }
+    .modal-backdrop.open { display: grid; }
+    .modal-card { position: relative; width: min(100%, 430px); max-height: 90vh; overflow-y: auto; padding: 1.8rem 1.6rem; }
+    .modal-close {
+      position: absolute; top: .6rem; right: .7rem;
+      background: none; border: 0; font-size: 1.3rem; line-height: 1;
+      color: var(--muted); cursor: pointer; padding: .3rem;
+    }
+    .modal-close:hover { color: var(--navy); }
+    .btn-row { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem; }
+
+    .toast {
+      position: fixed; left: 50%; bottom: 1.4rem; transform: translate(-50%, 20px);
+      background: var(--navy); color: #fff; font-weight: 600;
+      padding: .75rem 1.3rem; border-radius: 999px; box-shadow: var(--shadow-lg);
+      opacity: 0; pointer-events: none; transition: .25s ease; z-index: 90;
+      max-width: calc(100% - 2rem); text-align: center;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
     /* Forms */
     .form-card h3 { margin-bottom: .2rem; }
     .form-group { margin-bottom: .9rem; }
@@ -326,6 +364,7 @@
       background: #E4F7EF; color: #0E6B4F; border: 1px solid #B6E8D5; font-weight: 600;
     }
     .form-msg.show { display: block; }
+    .form-msg.error { background: #FDECEC; color: #9A3F3F; border-color: #F3C9C9; }
 
     /* Footer */
     .footer { background: var(--navy); color: #C9CDEA; padding: 3rem 0 2rem; margin-top: 3rem; }
@@ -349,6 +388,7 @@
     @media (min-width: 900px) {
       /* Desktop nav */
       .nav-links, .nav-cta { display: flex; }
+      .auth-slot { display: flex; }
       .hamburger, .nav-panel { display: none !important; }
       .hero-grid   { grid-template-columns: 1.15fr .85fr; }
       /* 4 cards + 3 arrows = 7 columns, so all four steps sit on one row */
@@ -388,7 +428,11 @@
           <li><a href="#roadmap">Roadmap</a></li>
         </ul>
       </nav>
-      <a class="btn btn-primary btn-small nav-cta" href="#demo">Search free courses</a>
+      <div class="nav-actions">
+        <a class="btn btn-primary btn-small nav-cta" href="#demo">Search free courses</a>
+        <!-- Sign-in button / signed-in chip injected here by the script -->
+        <div class="auth-slot" data-auth-slot></div>
+      </div>
 
       <!-- Mobile hamburger -->
       <button class="hamburger" id="navToggle" aria-expanded="false" aria-controls="navPanel" aria-label="Open menu">
@@ -406,6 +450,7 @@
           <li><a href="#roadmap">Roadmap</a></li>
         </ul>
         <a class="btn btn-primary" href="#demo" style="width:100%">Search free courses</a>
+        <div class="auth-slot" data-auth-slot></div>
       </div>
     </div>
   </header>
@@ -793,8 +838,9 @@
         </div>
 
         <p class="muted-note" style="margin-top:1rem">
-          Note: this demo page does not send data anywhere yet. To collect real signups, connect these forms
-          to a free service like Formspree, Netlify Forms or Google Forms (see comments in the code).
+          Sign-in and these two forms run on Supabase. Until the keys are added they work in demo mode —
+          nothing is sent anywhere. Submissions are stored with row-level security, so learners can only
+          read their own details.
         </p>
       </div>
     </section>
@@ -839,6 +885,47 @@
       </div>
     </div>
   </footer>
+
+  <!-- ============ SIGN-IN MODAL (passwordless, 6-digit email code) ============ -->
+  <div class="modal-backdrop" id="authModal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+    <div class="modal-card card">
+      <button class="modal-close" id="authClose" type="button" aria-label="Close sign in dialog">&times;</button>
+      <span class="icon-circle ic-indigo" aria-hidden="true">🔑</span>
+      <h3 id="authTitle">Sign in to Learnova</h3>
+      <p class="form-note">No password to remember. We send a 6-digit code to your email — it works on any phone.</p>
+
+      <!-- Step 1: ask for the email -->
+      <form id="otpStep1">
+        <div class="form-group">
+          <label for="authEmail">Email address</label>
+          <input type="email" id="authEmail" placeholder="you@example.com" autocomplete="email" required />
+        </div>
+        <button class="btn btn-primary" type="submit">Send my code</button>
+      </form>
+
+      <!-- Step 2: enter the code -->
+      <form id="otpStep2" hidden>
+        <p class="form-note" id="otpSentNote"></p>
+        <div class="form-group">
+          <label for="authCode">6-digit code</label>
+          <input type="text" id="authCode" inputmode="numeric" autocomplete="one-time-code"
+                 maxlength="6" placeholder="123456" required />
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" type="submit">Verify &amp; sign in</button>
+          <button class="btn btn-light btn-small" type="button" id="otpBack">Use a different email</button>
+        </div>
+      </form>
+
+      <p class="form-msg" id="authMsg" role="status" aria-live="polite"></p>
+    </div>
+  </div>
+
+  <!-- Small confirmation toast -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- Supabase JS (auth + database). Loads before the main script below. -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
   <!-- ===================== JAVASCRIPT ===================== -->
   <script>
@@ -1007,27 +1094,235 @@
     });
 
     /* ============================================================
-       5) FORMS — friendly demo messages
+       5) SUPABASE — real sign-in + database
        ------------------------------------------------------------
-       To make these actually send data, connect them to a free
-       service, for example Formspree:
-         1. Sign up at formspree.io (free tier)
-         2. Replace the form tag with:
-            <form action="https://formspree.io/f/YOUR_ID" method="POST">
+       Paste your Project URL and anon (public) key below.
+
+       Until BOTH values are filled in, the site runs in "demo mode":
+       the Sign in button stays hidden and the two forms show a
+       friendly message without sending anything anywhere.
+
+       The anon key is safe to expose in a browser — row-level
+       security in the database decides what it may do.
        ============================================================ */
-    function handleDemoForm(formId, msgId) {
-      const form = document.getElementById(formId);
-      const msg  = document.getElementById(msgId);
-      form.addEventListener("submit", e => {
-        e.preventDefault();
-        if (!form.checkValidity()) { form.reportValidity(); return; }
-        msg.classList.add("show");
-        form.reset();
-        setTimeout(() => msg.classList.remove("show"), 5000);
+    const SUPABASE_URL = "";       // e.g. "https://abcdefghij.supabase.co"
+    const SUPABASE_ANON_KEY = "";  // the "anon public" key from Settings → API
+
+    const DB_READY = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase);
+    const sb = DB_READY ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+    /* ---------- 5a. Navbar: sign-in button vs signed-in chip ---------- */
+    let currentUser = null;
+    const authSlots = document.querySelectorAll("[data-auth-slot]");
+
+    function renderAuth() {
+      authSlots.forEach(slot => {
+        if (!DB_READY) { slot.innerHTML = ""; return; }
+        slot.innerHTML = currentUser
+          ? `<span class="auth-chip" title="${esc(currentUser.email || "")}">
+               <span class="auth-dot" aria-hidden="true"></span>
+               <span class="txt">${esc(currentUser.email || "Signed in")}</span>
+             </span>
+             <button class="btn btn-light btn-small" type="button" data-signout>Sign out</button>`
+          : `<button class="btn btn-light btn-small" type="button" data-signin>Sign in</button>`;
       });
     }
-    handleDemoForm("earlyAccessForm", "eaMsg");
-    handleDemoForm("suggestForm", "sgMsg");
+
+    document.addEventListener("click", e => {
+      if (e.target.closest("[data-signin]"))  openAuthModal();
+      if (e.target.closest("[data-signout]")) signOut();
+    });
+
+    /* ---------- 5b. Small helpers ---------- */
+    const toastEl = document.getElementById("toast");
+    let toastTimer;
+    function toast(text) {
+      toastEl.textContent = text;
+      toastEl.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toastEl.classList.remove("show"), 3500);
+    }
+    function showMsg(id, text, isError) {
+      const el = document.getElementById(id);
+      el.textContent = text;
+      el.classList.add("show");
+      el.classList.toggle("error", Boolean(isError));
+    }
+    function friendlyAuthError(error) {
+      const m = String((error && error.message) || "");
+      if (/rate limit|too many|60 second/i.test(m)) return "Too many attempts. Please wait a minute and try again.";
+      if (/expired/i.test(m))  return "That code has expired. Please request a new one.";
+      if (/invalid/i.test(m))  return "That code is not correct. Please check it and try again.";
+      return "Could not sign you in right now. Please try again in a minute.";
+    }
+
+    /* ---------- 5c. Sign-in modal (email → 6-digit code → session) ---------- */
+    const authModal   = document.getElementById("authModal");
+    const authEmail   = document.getElementById("authEmail");
+    const authCode    = document.getElementById("authCode");
+    const authStep1   = document.getElementById("otpStep1");
+    const authStep2   = document.getElementById("otpStep2");
+    const otpSentNote = document.getElementById("otpSentNote");
+    let pendingWaitlist = null;   // early-access details waiting for sign-in
+    let modalReturnFocus = null;
+
+    function setAuthStep(step, email) {
+      if (email) authEmail.value = email;
+      authStep1.hidden = step !== 1;
+      authStep2.hidden = step !== 2;
+      if (step === 2) otpSentNote.textContent =
+        "We sent a 6-digit code to " + authEmail.value + ". It works for 1 hour — also check your spam folder.";
+    }
+    function openAuthModal(email = "", step = 1) {
+      if (!DB_READY) return;
+      modalReturnFocus = document.activeElement;
+      authModal.classList.add("open");
+      document.getElementById("authMsg").classList.remove("show", "error");
+      setAuthStep(step, email);
+      (step === 2 ? authCode : authEmail).focus();
+    }
+    function closeAuthModal() {
+      authModal.classList.remove("open");
+      if (modalReturnFocus && document.contains(modalReturnFocus)) modalReturnFocus.focus();
+    }
+
+    // Send the one-time code
+    async function sendCode(email) {
+      const msgId = "authMsg";
+      if (!/^\S+@\S+\.\S+$/.test(email)) return showMsg(msgId, "Please enter a valid email address.", true);
+      const { error } = await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
+      if (error) return showMsg(msgId, friendlyAuthError(error), true);
+      showMsg(msgId, "", false);
+      setAuthStep(2, email);
+      authCode.focus();
+    }
+
+    // Check the code and create the session
+    async function verifyCode() {
+      const email = authEmail.value.trim();
+      const token = authCode.value.trim();
+      if (token.length !== 6) return showMsg("authMsg", "Please enter the 6-digit code.", true);
+
+      const { data, error } = await sb.auth.verifyOtp({ email, token, type: "email" });
+      if (error) return showMsg("authMsg", friendlyAuthError(error), true);
+
+      currentUser = (data && data.session && data.session.user) || null;
+      authCode.value = "";
+      closeAuthModal();
+
+      if (pendingWaitlist) {                 // finishing an early-access signup
+        const entry = pendingWaitlist;
+        pendingWaitlist = null;
+        await saveWaitlist(entry);
+      } else {
+        toast("Signed in as " + (currentUser ? currentUser.email : ""));
+      }
+    }
+
+    async function signOut() {
+      if (sb) await sb.auth.signOut();
+      currentUser = null;
+      renderAuth();
+      toast("Signed out. See you soon!");
+    }
+
+    // Wire up the modal
+    authStep1.addEventListener("submit", e => { e.preventDefault(); sendCode(authEmail.value.trim()); });
+    authStep2.addEventListener("submit", e => { e.preventDefault(); verifyCode(); });
+    document.getElementById("authClose").addEventListener("click", closeAuthModal);
+    document.getElementById("otpBack").addEventListener("click", () => setAuthStep(1));
+    authModal.addEventListener("click", e => { if (e.target === authModal) closeAuthModal(); });
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape" && authModal.classList.contains("open")) closeAuthModal();
+    });
+
+    /* ---------- 5d. Live session state ---------- */
+    if (DB_READY) {
+      renderAuth();
+      // Restores a session saved from an earlier visit
+      sb.auth.getSession().then(({ data }) => {
+        currentUser = (data && data.session && data.session.user) || null;
+        renderAuth();
+      });
+      // Fires immediately on sign-in / sign-out, including in other tabs
+      sb.auth.onAuthStateChange((event, session) => {
+        currentUser = (session && session.user) || null;
+        renderAuth();
+        if (event === "SIGNED_IN") closeAuthModal();
+      });
+    }
+
+    /* ---------- 5e. "Get early access" → joins the waitlist ---------- */
+    async function saveWaitlist(entry) {
+      const { error } = await sb.from("waitlist").insert({
+        user_id: currentUser ? currentUser.id : null,
+        full_name: entry.full_name,
+        email: entry.email,
+        language: entry.language
+      });
+      document.getElementById("earlyAccessForm").reset();
+      if (error) {
+        if (error.code === "23505") return showMsg("eaMsg", "You are already on the list — we will email you when Learnova is ready.", false);
+        return showMsg("eaMsg", "Could not save your details right now. Please try again in a minute.", true);
+      }
+      showMsg("eaMsg", "Thank you! You are on the early access list. We will email " + entry.email + ".", false);
+      toast("You are on the list!");
+    }
+
+    document.getElementById("earlyAccessForm").addEventListener("submit", async e => {
+      e.preventDefault();
+      const form = e.currentTarget;
+      if (!form.checkValidity()) return form.reportValidity();
+
+      const entry = {
+        full_name: document.getElementById("eaName").value.trim(),
+        email:     document.getElementById("eaEmail").value.trim(),
+        language:  document.getElementById("eaLang").value
+      };
+
+      if (!DB_READY) return demoSuccess("earlyAccessForm", "eaMsg");
+
+      // Already signed in with this email → save straight away
+      if (currentUser && String(currentUser.email).toLowerCase() === entry.email.toLowerCase()) {
+        return saveWaitlist(entry);
+      }
+      // Otherwise send a code first, then save once the code is verified
+      pendingWaitlist = entry;
+      const { error } = await sb.auth.signInWithOtp({ email: entry.email, options: { shouldCreateUser: true } });
+      if (error) { pendingWaitlist = null; return showMsg("eaMsg", friendlyAuthError(error), true); }
+      showMsg("eaMsg", "We sent a 6-digit code to " + entry.email + ". Enter it in the sign-in box.", false);
+      openAuthModal(entry.email, 2);
+    });
+
+    /* ---------- 5f. "Suggest a free course" ---------- */
+    document.getElementById("suggestForm").addEventListener("submit", async e => {
+      e.preventDefault();
+      const form = e.currentTarget;
+      if (!form.checkValidity()) return form.reportValidity();
+
+      if (!DB_READY) return demoSuccess("suggestForm", "sgMsg");
+
+      const { error } = await sb.from("course_suggestions").insert({
+        user_id: currentUser ? currentUser.id : null,
+        course_link: document.getElementById("sgLink").value.trim(),
+        language: document.getElementById("sgLang").value,
+        topic: document.getElementById("sgTopic").value.trim()
+      });
+      form.reset();
+      if (error) return showMsg("sgMsg", "Could not send your suggestion right now. Please try again in a minute.", true);
+      showMsg("sgMsg", "Thanks for helping other learners! We will check this course and add it if it is free.", false);
+      toast("Suggestion sent — thank you!");
+    });
+
+    /* Fallback used until Supabase is connected: a friendly demo message.
+       The original text is captured up front so each form keeps its own wording. */
+    const demoMsgs = {};
+    ["eaMsg", "sgMsg"].forEach(id => { demoMsgs[id] = document.getElementById(id).textContent; });
+    function demoSuccess(formId, msgId) {
+      showMsg(msgId, demoMsgs[msgId], false);
+      document.getElementById(formId).reset();
+      setTimeout(() => document.getElementById(msgId).classList.remove("show"), 5000);
+    }
 
     /* Footer year */
     document.getElementById("year").textContent = new Date().getFullYear();
