@@ -6,14 +6,14 @@
 
   <!-- ============ SEO ============ -->
   <title>Learnova — Scan the web. Learn for free.</title>
-  <meta name="description" content="Learnova uses a free AI to plan live searches across YouTube, the open web, GitHub, PeerTube and more — then brings back real free courses for any subject. Filter by language and level. No stored catalogue." />
+  <meta name="description" content="Learnova uses a free AI to plan live searches across YouTube, edX, Coursera, the open web, GitHub and PeerTube — then brings back real courses for any subject. Filter by language and level. No stored catalogue." />
   <meta name="theme-color" content="#1B1F4B" />
   <link rel="canonical" href="https://mavaletejas6-tiger.github.io/learnova/" />
 
   <!-- Open Graph (social sharing) -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Learnova — Live AI search for free courses" />
-  <meta property="og:description" content="Type any subject. A free AI plans the search, then your browser fetches real free courses from YouTube, the open web and open course libraries — live." />
+  <meta property="og:description" content="Type any subject. A free AI plans the search, then your browser fetches real courses from YouTube, edX, Coursera, GitHub and the open web — live." />
   <meta property="og:url" content="https://mavaletejas6-tiger.github.io/learnova/" />
   <!-- Optional: add an og.png (1200x630) next to this file and reference it below -->
   <!-- <meta property="og:image" content="https://your-site.netlify.app/og.png" /> -->
@@ -282,6 +282,12 @@
       font-size: .75rem; font-weight: 800; letter-spacing: .05em;
       padding: .18rem .6rem; border-radius: 999px;
     }
+    /* Platform course that is usually free to audit, but may charge for certificates */
+    .badge-audit {
+      background: #EAF0FF; color: #2E3A8C; border: 1px solid #C8D4F8;
+      font-size: .75rem; font-weight: 800; letter-spacing: .05em;
+      padding: .18rem .6rem; border-radius: 999px;
+    }
     /* Neutral pill showing which list or repo the result came from */
     .badge-kind {
       background: #EEF0FF; color: #3A41A8; border: 1px solid #D2D6FA;
@@ -521,7 +527,7 @@
           <h1>Scan the web.<br />Learn for free.</h1>
           <p class="lead">
             Type any subject. A free AI plans the searches, then your browser scans
-            YouTube, the open web, GitHub, PeerTube and open course libraries — live,
+            YouTube, edX, Coursera, the open web, GitHub and PeerTube — live,
             and only for the subject you asked for.
           </p>
 
@@ -617,14 +623,14 @@
           <article class="step card">
             <span class="step-num ic-navy" aria-hidden="true">1</span>
             <h3>Scan</h3>
-            <p>A free AI turns your subject into search queries, then your browser sends them to YouTube, open course libraries and the wider web at the same time.</p>
+            <p>A free AI turns your subject into search queries, then your browser sends them to YouTube, edX, Coursera, open course libraries and the wider web at the same time.</p>
           </article>
           <div class="step-arrow" aria-hidden="true">➜</div>
 
           <article class="step card">
             <span class="step-num ic-teal" aria-hidden="true">2</span>
             <h3>Check</h3>
-            <p>We keep results from sources that only hold free material, and mark anything that arrived from the open web so you can check it first.</p>
+            <p>We keep results from sources that only hold free material, label edX and Coursera courses as free to audit, and mark anything from the open web so you can check it first.</p>
           </article>
           <div class="step-arrow" aria-hidden="true">➜</div>
 
@@ -650,7 +656,7 @@
         <h2>Live AI course scan</h2>
         <p class="lead">
           Type a subject and Learnova plans the searches with a free AI, then queries YouTube,
-          the open web, GitHub, PeerTube, Wikiversity and DEV at the same time — in your browser,
+          edX, Coursera, the open web, GitHub, PeerTube, Wikiversity and DEV at the same time — in your browser,
           right now. No stored list, no sample data.
         </p>
 
@@ -690,15 +696,18 @@
           Every card below came from a request made when you searched. A free AI model
           (<strong>LLM7</strong>, with <strong>Pollinations</strong> as backup) writes the search
           queries; your browser then fetches real results from <strong>YouTube</strong>,
+          <strong>edX</strong>, <strong>Coursera</strong>,
           <strong>DuckDuckGo&rsquo;s open web index</strong>, <strong>GitHub</strong>,
           <strong>PeerTube</strong>, <strong>Wikiversity / Wikibooks</strong> and
           <strong>DEV Community</strong>. The AI never supplies links — it only plans searches.
           Cards marked <strong>FREE</strong> come from sources that only hold free material; cards
+          marked <strong>FREE TO AUDIT</strong> come from edX or Coursera, where the lessons are
+          usually free but graded work and certificates may be paid — check the page. Cards
           marked <strong>OPEN WEB</strong> come from the wider web or academic sites, so check the
           page is free before you enrol. Language and level are read from the source when it reports
-          them — results that match your filters are listed first, and anything a source does not
-          report is left unlabelled rather than guessed. Every link opens the original
-          creator&rsquo;s page — we never copy or re-host anyone&rsquo;s content.
+          them — results whose source reports a different language or level are filtered out, and
+          anything a source does not report stays visible and unlabelled rather than guessed. Every
+          link opens the original creator&rsquo;s page — we never copy or re-host anyone&rsquo;s content.
         </p>
       </div>
     </section>
@@ -714,6 +723,8 @@
 
         <ul class="chips">
           <li>YouTube</li>
+          <li>edX</li>
+          <li>Coursera</li>
           <li>Open web (DuckDuckGo)</li>
           <li>GitHub</li>
           <li>PeerTube</li>
@@ -725,9 +736,11 @@
         <p>
           Those indexes reach platforms and creators everywhere, so a search also surfaces
           NPTEL, SWAYAM, Khan Academy, MIT OpenCourseWare, freeCodeCamp, OpenStax, university pages
-          — plus independent teachers who publish for free. A free AI plans the queries first, but
-          every card still links to the original creator with credit. We never copy or re-host
-          anyone&rsquo;s content.
+          — plus independent teachers who publish for free. edX and Coursera courses are found
+          through DuckDuckGo&rsquo;s index of their public course pages and labelled
+          <strong>FREE TO AUDIT</strong>, because their lessons are usually free while certificates
+          can be paid. A free AI plans the queries first, but every card still links to the original
+          creator with credit. We never copy or re-host anyone&rsquo;s content.
         </p>
       </div>
     </section>
@@ -827,7 +840,7 @@
             <h3>Phase 1: Build</h3>
             <ul>
               <li>Focus on one niche subject first</li>
-              <li>AI-planned live scan across YouTube, the open web and open course libraries</li>
+              <li>AI-planned live scan across YouTube, edX, Coursera, the open web and open course libraries</li>
               <li>Language and level filters that drive the scan itself</li>
             </ul>
           </article>
@@ -944,8 +957,8 @@
         <div>
           <a class="logo" href="#top"><span class="logo-mark" aria-hidden="true"></span> Learnova</a>
           <p style="margin-top:.8rem">
-            Learnova scans trusted free sources across the internet and brings free
-            courses and classes together in one place. Scan the web. Learn for free.
+            Learnova scans trusted learning sources across the internet and brings free
+            and free-to-audit courses together in one place. Scan the web. Learn for free.
           </p>
         </div>
 
@@ -1096,6 +1109,15 @@
       deutsch: "German", español: "Spanish", français: "French"
     };
 
+    /* Function words that identify a Latin-script title even when it never
+       names its language. Two hits are required so one borrowed word (or an
+       English title containing "die") does not flip the label. */
+    const LATIN_LANG_WORDS = {
+      German:  ["für","und","der","die","das","ein","eine","einen","mit","von","deutsch","grundlagen","anfänger","komplettes","nicht","auf","ist"],
+      Spanish: ["para","con","los","las","del","una","curso","desde","hasta","aprende","español","principiantes","completo"],
+      French:  ["pour","avec","les","des","une","du","dans","apprendre","français","cours","débutants","complet"]
+    };
+
     /* Common subject words written in Indian scripts, so a Hindi or Tamil
        course title still matches an English search word. */
     const TERM_HINTS = {
@@ -1129,10 +1151,8 @@
       if (beginner) return "Beginner";
       return null;
     }
-    function detectLanguage(text) {
-      const t = String(text).toLowerCase();
-      for (const w in LANG_HINTS) if (t.includes(w)) return LANG_HINTS[w];
-      /* Script detection catches titles written in the language itself. */
+    function detectScriptLanguage(text) {
+      const t = String(text);
       if (/[\u0900-\u097F]/.test(t)) return "Hindi";
       if (/[\u0980-\u09FF]/.test(t)) return "Bengali";
       if (/[\u0A00-\u0A7F]/.test(t)) return "Punjabi";
@@ -1141,6 +1161,34 @@
       if (/[\u0C00-\u0C7F]/.test(t)) return "Telugu";
       if (/[\u0C80-\u0CFF]/.test(t)) return "Kannada";
       if (/[\u0D00-\u0D7F]/.test(t)) return "Malayalam";
+      return null;
+    }
+    function detectLanguage(text) {
+      const t = String(text).toLowerCase();
+      for (const w in LANG_HINTS) if (t.includes(w)) return LANG_HINTS[w];
+      for (const lang in LATIN_LANG_WORDS) {
+        let hits = 0;
+        for (const w of LATIN_LANG_WORDS[lang]) {
+          if (new RegExp("\\b" + w + "\\b", "i").test(t) && ++hits >= 2) return lang;
+        }
+      }
+      /* Script detection catches titles written in the language itself. */
+      return detectScriptLanguage(t);
+    }
+    /* The language the learner is probably asking for, even without touching
+       the filter. A lone language word or a trailing one ("physics hindi")
+       counts; a topic word such as "french revolution" does not. */
+    function queryLanguage() {
+      if (demoLang.value) return demoLang.value;
+      const base = baseTerms();
+      const script = detectScriptLanguage(base);
+      if (script) return script;
+      const words = base.split(" ").filter(Boolean);
+      const last = words[words.length - 1];
+      if (words.length > 1 && LANG_HINTS[last]) return LANG_HINTS[last];
+      const phrase = base.match(/\b(?:in|learn|speak|speaking|through)\s+(english|hindi|marathi|tamil|telugu|bengali|urdu|kannada|malayalam|gujarati|punjabi|spanish|french|german)\b/);
+      if (phrase) return LANG_HINTS[phrase[1]];
+      if (words.length === 1 && LANG_HINTS[words[0]]) return LANG_HINTS[words[0]];
       return null;
     }
 
@@ -1577,7 +1625,62 @@
       return ok.reduce((all, r) => all.concat(r.value), []);
     }
 
-    /* 2. Open web — DuckDuckGo's no-JavaScript results, fetched through
+    /* 2. edX + Coursera — university and industry courses. Their catalogues
+          have no public browser API, so their real /learn course pages are
+          found through DuckDuckGo's live index. Both platforms usually let
+          learners audit for free, but certificates can be paid — these cards
+          say FREE TO AUDIT, never FREE. */
+    function edxCourseUrl(u) {
+      const m = u.pathname.match(/^\/learn\/([^/]+)\/([^/]+)\/?$/);
+      return m ? "https://www.edx.org/learn/" + m[1] + "/" + m[2] : "";
+    }
+    function courseraCourseUrl(u) {
+      const m = u.pathname.match(/^\/learn\/([^/]+)\/?$/);
+      return m ? "https://www.coursera.org/learn/" + m[1] : "";
+    }
+    function ddgSiteSearch(q, opts, signal) {
+      const target = "https://html.duckduckgo.com/html/?q=" + encodeURIComponent(q);
+      return fetchAny("https://r.jina.ai/" + target, signal, true)
+        .then(md => parseDDG(md, opts));
+    }
+    async function scanCourseSite(c, opts) {
+      const queries = await c.planPromise;
+      const q = "site:" + opts.site + "/learn " + (queries[0] || c.baseQuery);
+      const items = await ddgSiteSearch(q, opts, c.signal);
+      const suffix = new RegExp("\\s*[|\\-–]\\s*" + opts.label + "\\s*$", "i");
+      return items.map(item => {
+        item.title = tidy(item.title.replace(suffix, ""));
+        return item;
+      });
+    }
+    function scanEdx(c) {
+      return scanCourseSite(c, {
+        site: "edx.org",
+        host: "edx.org",
+        courseUrl: edxCourseUrl,
+        source: "edX",
+        label: "edX",
+        audit: true,
+        kind: "course",
+        meta: "edx.org",
+        metaTitle: "edX course catalogue (found through DuckDuckGo)"
+      });
+    }
+    function scanCoursera(c) {
+      return scanCourseSite(c, {
+        site: "coursera.org",
+        host: "coursera.org",
+        courseUrl: courseraCourseUrl,
+        source: "Coursera",
+        label: "Coursera",
+        audit: true,
+        kind: "course",
+        meta: "coursera.org",
+        metaTitle: "Coursera course catalogue (found through DuckDuckGo)"
+      });
+    }
+
+    /* 3. Open web — DuckDuckGo's no-JavaScript results, fetched through
           Jina Reader (which sends CORS headers). Only free-course hosts
           and academic domains are kept; paid platforms are dropped. */
     function unwrapDDG(raw) {
@@ -1606,22 +1709,34 @@
         .replace(/&nbsp;/g, " "));
     }
 
-    function parseDDG(md) {
+    function parseDDG(md, opts) {
+      opts = opts || {};
       const lines = String(md || "").split(/\r?\n/);
       const out = [], seen = new Set();
       for (let i = 0; i < lines.length; i++) {
         const m = lines[i].match(/^##\s+\[(.+?)\]\((https?:\/\/[^)\s]+)\)/);
         if (!m) continue;
         const title = stripMd(m[1]);
-        const url = unwrapDDG(m[2]);
-        if (!title || !url) continue;
+        const rawUrl = unwrapDDG(m[2]);
+        if (!title || !rawUrl) continue;
         let parsed;
-        try { parsed = new URL(url); } catch (e) { continue; }
+        try { parsed = new URL(rawUrl); } catch (e) { continue; }
+        /* Course-site searches keep only real course pages and strip tracking. */
+        if (opts.courseUrl) {
+          const clean = opts.courseUrl(parsed);
+          if (!clean) continue;
+          try { parsed = new URL(clean); } catch (e) { continue; }
+        }
+        const url = parsed.href;
         const host = parsed.hostname.toLowerCase().replace(/^www\./, "");
-        if (/(^|\.)(youtube\.com|youtu\.be|duckduckgo\.com|bing\.com)$/.test(host)) continue;
+        if (opts.host) {
+          if (host !== opts.host) continue;
+        } else {
+          if (/(^|\.)(youtube\.com|youtu\.be|duckduckgo\.com|bing\.com)$/.test(host)) continue;
+        }
         if (PIRATE_RE.test(url + " " + title)) continue;
-        const info = freeHostInfo(url);
-        if (!info) continue;
+        const info = opts.host ? null : freeHostInfo(url);
+        if (!opts.host && !info) continue;
         const key = normUrl(url);
         if (!key || seen.has(key)) continue;
         seen.add(key);
@@ -1633,22 +1748,23 @@
         out.push({
           title: title,
           url: url,
-          source: "Open web",
+          source: opts.source || "Open web",
           text: snippet.slice(0, 320),
-          free: info.free,
-          kind: "web",
-          meta: info.host,
-          metaTitle: "Website: " + info.host + " (found through DuckDuckGo)",
+          free: info ? info.free : false,
+          audit: Boolean(opts.audit),
+          kind: opts.kind || "web",
+          meta: opts.meta || (info ? info.host : host),
+          metaTitle: opts.metaTitle || ("Website: " + host + " (found through DuckDuckGo)"),
           strict: true
         });
-        if (out.length >= 24) break;
+        if (out.length >= (opts.limit || 24)) break;
       }
       return out;
     }
 
     function ddgSearch(q, signal) {
       const target = "https://html.duckduckgo.com/html/?q=" + encodeURIComponent(q);
-      return fetchAny("https://r.jina.ai/" + target, signal, true).then(parseDDG);
+      return fetchAny("https://r.jina.ai/" + target, signal, true).then(md => parseDDG(md));
     }
 
     async function scanOpenWeb(c) {
@@ -1674,10 +1790,10 @@
       return out;
     }
 
-    /* 3. GitHub — open course repos, roadmaps and full course collections */
+    /* 4. GitHub — open course repos, roadmaps and full course collections */
     function scanGitHub(c) {
       const url = "https://api.github.com/search/repositories?q=" +
-        encodeURIComponent(c.base + " course in:name,description,readme") +
+        encodeURIComponent(c.base + " course in:name,description") +
         "&sort=stars&order=desc&per_page=20";
       return fetchAny(url, c.signal).then(json => (json.items || [])
         .filter(r => !PIRATE_RE.test(r.name + " " + (r.description || "")))
@@ -1696,7 +1812,7 @@
         })));
     }
 
-    /* 4. PeerTube — a federated network of free, independent video servers */
+    /* 5. PeerTube — a federated network of free, independent video servers */
     function keepPeerTube(v) {
       if (Number(v.duration) < 1200) return false;
       return COURSEY_RE.test(v.name) ||
@@ -1727,7 +1843,7 @@
         })));
     }
 
-    /* 5. Wikiversity + Wikibooks — free course pages and free textbooks */
+    /* 6. Wikiversity + Wikibooks — free course pages and free textbooks */
     function wikiSearch(host, label, c) {
       const tokens = matchTokens();
       const url = "https://" + host + "/w/api.php?action=query&list=search&srnamespace=0&srlimit=20" +
@@ -1764,7 +1880,7 @@
       ]).then(a => a[0].concat(a[1]));
     }
 
-    /* 6. DEV Community — free written tutorials for programming topics */
+    /* 7. DEV Community — free written tutorials for programming topics */
     function scanDevTo(c) {
       const tag = c.base.split(" ")[0].toLowerCase().replace(/[^a-z0-9]/g, "");
       if (tag.length < 2 || tag.length > 20) return Promise.resolve([]);
@@ -1788,6 +1904,8 @@
     /* ---------- 3e. The scan itself ---------- */
     const SCANNERS = [
       { id: "youtube",   name: "YouTube",                   run: scanYouTube },
+      { id: "edx",       name: "edX",                       run: scanEdx },
+      { id: "coursera",  name: "Coursera",                  run: scanCoursera },
       { id: "openweb",   name: "Open web (DuckDuckGo)",     run: scanOpenWeb },
       { id: "github",    name: "GitHub",                    run: scanGitHub },
       { id: "peertube",  name: "PeerTube",                  run: scanPeerTube },
@@ -1796,12 +1914,12 @@
     ];
 
     const KIND_LABEL = {
-      video: "Video course", playlist: "Course playlist", text: "Free course page",
-      repo: "Course repo", article: "Tutorial", web: "Web page"
+      video: "Video course", playlist: "Course playlist", course: "Online course",
+      text: "Free course page", repo: "Course repo", article: "Tutorial", web: "Web page"
     };
 
     /* Indexes that accept the language hint inside the query */
-    const HINTED_SOURCES = ["youtube", "openweb", "peertube", "wikimedia"];
+    const HINTED_SOURCES = ["youtube", "edx", "coursera", "openweb", "peertube", "wikimedia"];
 
     let scanToken = 0, scanCtrl = null, scanTimer = null;
     let collected = [], sourceState = {}, scanStarted = 0, scanElapsed = 0;
@@ -1825,7 +1943,7 @@
       else ai = "Ready";
       if (busy) return ai + " · scanning " + (SCANNERS.length - busy) + " of " + SCANNERS.length + " sources…";
       if (fail === SCANNERS.length) return "No source answered — check your connection, then press Scan again.";
-      return ai + " · queried " + SCANNERS.length + " sources in " + (scanElapsed / 1000).toFixed(1) + "s" +
+      return ai + " · queried " + SCANNERS.length + " sources · finished in " + (scanElapsed / 1000).toFixed(1) + "s" +
              (fail ? " · " + fail + " unreachable" : "");
     }
     function renderSourceList() {
@@ -1867,7 +1985,7 @@
       /* Devanagari is shared by Hindi and Marathi; never hide one as the other. */
       return item.lang === "Hindi" && lang === "Marathi";
     }
-    function scoreItem(item, tokens, lang, lvl) {
+    function scoreItem(item, tokens, lang, lvl, pref) {
       const title = item.title.toLowerCase();
       const body = ((item.text || "") + " " + item.source).toLowerCase();
       let s = 0;
@@ -1884,7 +2002,10 @@
          their normal place in the list. */
       if (lang && item.lang === lang) s += 8;
       else if (lang && item.hinted) s += 5;
-      else if (!lang && item.lang === "English") s += 1.5;
+      else if (!lang && pref && item.lang === pref) s += 6;
+      else if (!lang && pref && item.lang) s -= 4;
+      else if (!lang && item.lang === "English") s += 2;
+      else if (!lang && item.lang) s -= 8;
       if (lvl && item.level === lvl) s += 5;
       if (item.views) s += Math.min(2.5, Math.log10(item.views + 10) / 2);
       if (item.stars) s += Math.min(3, Math.log10(item.stars + 10));
@@ -1892,6 +2013,7 @@
     }
     function currentList() {
       const tokens = matchTokens(), lvl = demoLevel.value, lang = demoLang.value, topic = demoTopic.value;
+      const pref = queryLanguage();
       const seen = new Set(), seenTitles = new Set(), out = [];
       for (const item of collected) {
         const key = normUrl(item.url);
@@ -1905,15 +2027,16 @@
         if (lang && !languageMatches(item, lang)) continue;
         if (topic && item.topic && item.topic !== topic) continue;
         if (!relevant(item, tokens)) continue;
-        item.score = scoreItem(item, tokens, lang, lvl);
+        item.score = scoreItem(item, tokens, lang, lvl, pref);
         out.push(item);
       }
       out.sort((a, b) => b.score - a.score);
-      /* Keep the first page varied: a single video index should not fill every slot. */
+      /* Keep the first page varied: with eight indexes, three results per
+         source guarantees every source that answered is visible. */
       const perSource = {}, primary = [], overflow = [];
       out.forEach(item => {
         const n = perSource[item.source] || 0;
-        if (n < 6) { primary.push(item); perSource[item.source] = n + 1; }
+        if (n < 3) { primary.push(item); perSource[item.source] = n + 1; }
         else overflow.push(item);
       });
       return primary.concat(overflow);
@@ -1935,13 +2058,15 @@
       if (dur) meta.push(dur);
       if (c.lang) meta.push(c.lang);
       if (c.level) meta.push(c.level);
-      const badgeTitle = c.free
-        ? "Comes from a source that only holds free material"
-        : "Found on the open web or an academic site — check it is free before you enrol";
+      const badge = c.free
+        ? { cls: "badge-free", text: "FREE", title: "Comes from a source that only holds free material" }
+        : c.audit
+          ? { cls: "badge-audit", text: "FREE TO AUDIT", title: "Usually free to audit — graded work and certificates may be paid. Check the course page." }
+          : { cls: "badge-open", text: "OPEN WEB", title: "Found on the open web or an academic site — check it is free before you enrol" };
       return `
         <article class="card course-card">
           <div class="badge-row">
-            <span class="${c.free ? "badge-free" : "badge-open"}" title="${badgeTitle}">${c.free ? "FREE" : "OPEN WEB"}</span>
+            <span class="${badge.cls}" title="${badge.title}">${badge.text}</span>
             ${c.meta ? `<span class="badge-kind" title="${esc(c.metaTitle || "Source")}">${esc(String(c.meta).split("/").pop().slice(0, 34))}</span>` : ""}
           </div>
           <span class="course-source">${esc(c.source)}</span>
@@ -1962,10 +2087,14 @@
       }
       const list = currentList();
       const freeCount = list.filter(i => i.free).length;
+      const auditCount = list.filter(i => i.audit && !i.free).length;
       resultCount.textContent = list.length
         ? (freeCount === list.length
             ? list.length + " free result" + (list.length === 1 ? "" : "s")
-            : list.length + " result" + (list.length === 1 ? "" : "s") + " · " + freeCount + " marked free")
+            : [list.length + " result" + (list.length === 1 ? "" : "s")]
+                .concat(freeCount ? [freeCount + " marked free"] : [])
+                .concat(auditCount ? [auditCount + " free to audit"] : [])
+                .join(" · "))
         : "";
       if (!list.length) {
         results.innerHTML = scanning()
