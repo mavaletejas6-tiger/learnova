@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Course details — Learnova</title>
+  <meta name="description" content="Compare a free online course: what you will learn, the typical syllabus, time commitment, certificate details, and learner reviews." />
+  <meta name="theme-color" content="#151C3B" />
+  <link rel="canonical" href="https://mavaletejas6-tiger.github.io/learnova/course.html" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Course details — Learnova" />
+  <meta property="og:description" content="A free course from Learnova's hand-checked catalogue." />
+  <meta property="og:url" content="https://mavaletejas6-tiger.github.io/learnova/course.html" />
+  <meta name="twitter:card" content="summary" />
+
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%231B1F4B'/%3E%3Ccircle cx='32' cy='32' r='8' fill='none' stroke='%234F5BD5' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='17' fill='none' stroke='%231FB5A6' stroke-width='2.5' opacity='.8'/%3E%3Ccircle cx='32' cy='32' r='26' fill='none' stroke='%23F6A623' stroke-width='2' opacity='.6'/%3E%3Ccircle cx='44' cy='22' r='3.5' fill='%23F6A623'/%3E%3C/svg%3E" />
+
+  <link rel="stylesheet" href="assets/css/site.css" />
+  <script src="assets/js/data.js" defer></script>
+  <script src="assets/js/config.js" defer></script>
+  <script src="assets/js/site.js" defer></script>
+  <script src="assets/js/course.js" defer></script>
+</head>
+
+<body data-page="browse">
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <!-- ===================== HEADER ===================== -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="index.html" aria-label="Learnova home">
+        <span class="brand-mark" aria-hidden="true"><span class="brand-dot"></span></span>
+        <span class="brand-word">learnova</span>
+      </a>
+
+      <nav class="main-nav" aria-label="Main navigation">
+        <a href="courses.html" data-nav="browse">Browse courses</a>
+        <a href="providers.html" data-nav="providers">Providers</a>
+        <a href="scan.html" data-nav="scan"><span class="live-dot" aria-hidden="true"></span>Live scan</a>
+      </nav>
+
+      <form class="header-search" data-global-search action="courses.html" role="search">
+        <div class="search-field">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+          <label class="sr-only" for="headerSearch">Search courses</label>
+          <input id="headerSearch" type="search" name="q" placeholder="Search courses, subjects, providers" autocomplete="off" />
+          <span class="search-kbd" aria-hidden="true">/</span>
+        </div>
+      </form>
+
+      <div class="header-actions">
+        <a class="btn btn-ghost btn-sm" href="my-learning.html" data-nav="learning">My learning</a>
+        <div data-auth-zone></div>
+      </div>
+
+      <button class="menu-toggle" id="menuToggle" type="button" aria-expanded="false" aria-controls="mobileMenu" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+
+    <div class="mobile-menu" id="mobileMenu">
+      <div class="container mobile-menu-inner">
+        <form class="header-search" data-global-search action="courses.html" role="search">
+          <div class="search-field">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+            <label class="sr-only" for="mobileSearch">Search courses</label>
+            <input id="mobileSearch" type="search" name="q" placeholder="Search courses, subjects, providers" autocomplete="off" />
+          </div>
+        </form>
+        <ul class="mobile-menu-links">
+          <li><a href="courses.html" data-nav="browse">Browse courses <span aria-hidden="true">→</span></a></li>
+          <li><a href="providers.html" data-nav="providers">Providers <span aria-hidden="true">→</span></a></li>
+          <li><a href="my-learning.html" data-nav="learning">My learning <span aria-hidden="true">→</span></a></li>
+          <li><a href="scan.html" data-nav="scan"><span><span class="live-dot" aria-hidden="true"></span> Live web scan</span><span aria-hidden="true">→</span></a></li>
+        </ul>
+        <div data-auth-zone></div>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="course-hero" id="courseHero">
+      <div class="container" id="courseHeroInner">
+        <div class="course-loading" role="status" aria-live="polite">
+          <span class="loading-line"></span>
+          <span class="loading-line loading-line--short"></span>
+          <p class="muted">Loading course…</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="course-body" id="courseBody">
+      <div class="container" id="courseBodyInner"></div>
+    </section>
+  </main>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a class="brand" href="index.html" aria-label="Learnova home">
+            <span class="brand-mark" aria-hidden="true"><span class="brand-dot"></span></span>
+            <span class="brand-word">learnova</span>
+          </a>
+          <p style="margin-top:.9rem">A hand-picked catalogue of free courses from the world’s best learning providers. Search, compare, save, and start learning — for free.</p>
+          <span class="footer-badge">✓ Always free for learners</span>
+        </div>
+
+        <div class="footer-col">
+          <h4>Explore</h4>
+          <ul>
+            <li><a href="courses.html">Browse courses</a></li>
+            <li><a href="providers.html">Providers</a></li>
+            <li><a href="courses.html?certificate=free">Free certificates</a></li>
+            <li><a href="courses.html?collection=india-picks">India picks</a></li>
+            <li><a href="scan.html">Live web scan</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Subjects</h4>
+          <ul>
+            <li><a href="courses.html?subject=programming">Programming</a></li>
+            <li><a href="courses.html?subject=data-science">Data Science</a></li>
+            <li><a href="courses.html?subject=mathematics">Mathematics</a></li>
+            <li><a href="courses.html?subject=languages">Languages</a></li>
+            <li><a href="courses.html?subject=career">Career &amp; Study Skills</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>About</h4>
+          <ul>
+            <li><a href="index.html#how">How it works</a></li>
+            <li><a href="my-learning.html">My learning</a></li>
+            <li><a href="index.html#newsletter">Course picks by email</a></li>
+            <li><a href="supabase/README.md">Backend setup</a></li>
+          </ul>
+          <p style="margin-top:1rem;font-size:.8rem">Course links and content belong to their original creators. Learnova only links to them, with credit.</p>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>© <span id="year"></span> Learnova. Made for learners.</span>
+        <span>Free courses, real providers, no paywalls.</span>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

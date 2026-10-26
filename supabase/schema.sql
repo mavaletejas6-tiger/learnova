@@ -28,9 +28,40 @@ create table if not exists public.course_suggestions (
   created_at  timestamptz not null default now()
 );
 
--- 3) Row-level security -------------------------------------------------
+-- 3) Saved courses + progress — one row per learner per course -----------
+create table if not exists public.saved_courses (
+  user_id    uuid not null references auth.users (id) on delete cascade,
+  course_id  text not null check (char_length(course_id) between 1 and 120),
+  status     text not null default 'saved' check (status in ('saved', 'learning', 'completed')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  primary key (user_id, course_id)
+);
+
+create index if not exists saved_courses_user_idx
+  on public.saved_courses (user_id, updated_at desc);
+
+-- 4) Learner reviews — public to read, private to write --------------------
+create table if not exists public.course_reviews (
+  id          uuid primary key default gen_random_uuid(),
+  user_id     uuid not null references auth.users (id) on delete cascade,
+  course_id   text not null check (char_length(course_id) between 1 and 120),
+  author_name text not null check (char_length(author_name) between 1 and 60),
+  rating      smallint not null check (rating between 1 and 5),
+  body        text not null check (char_length(body) between 1 and 2000),
+  created_at  timestamptz not null default now()
+);
+
+create index if not exists course_reviews_course_idx
+  on public.course_reviews (course_id, created_at desc);
+create index if not exists course_reviews_user_idx
+  on public.course_reviews (user_id, created_at desc);
+
+-- 5) Row-level security -------------------------------------------------
 alter table public.waitlist enable row level security;
 alter table public.course_suggestions enable row level security;
+alter table public.saved_courses enable row level security;
+alter table public.course_reviews enable row level security;
 
 -- Anyone may add themselves to the waitlist…
 drop policy if exists "waitlist_insert" on public.waitlist;
@@ -56,6 +87,50 @@ create policy "suggestions_select_own" on public.course_suggestions
   for select to authenticated
   using (auth.uid() = user_id);
 
--- No UPDATE or DELETE policies on purpose:
--- once submitted, rows can only be changed by you (the service role key
--- in the dashboard). The anon key in the browser cannot edit or wipe them.
+-- Saved courses: each learner can read and manage only their own rows.
+drop policy if exists "saved_courses_select_own" on public.saved_courses;
+create policy "saved_courses_select_own" on public.saved_courses
+  for select to authenticated
+  using (auth.uid() = user_id);
+
+drop policy if exists "saved_courses_insert_own" on public.saved_courses;
+create policy "saved_courses_insert_own" on public.saved_courses
+  for insert to authenticated
+  with check (auth.uid() = user_id);
+
+drop policy if exists "saved_courses_update_own" on public.saved_courses;
+create policy "saved_courses_update_own" on public.saved_courses
+  for update to authenticated
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+drop policy if exists "saved_courses_delete_own" on public.saved_courses;
+create policy "saved_courses_delete_own" on public.saved_courses
+  for delete to authenticated
+  using (auth.uid() = user_id);
+
+-- Reviews are publicly readable so every learner can see them;
+-- only a signed-in author can create, edit, or delete their own review.
+drop policy if exists "course_reviews_select_public" on public.course_reviews;
+create policy "course_reviews_select_public" on public.course_reviews
+  for select to anon, authenticated
+  using (true);
+
+drop policy if exists "course_reviews_insert_own" on public.course_reviews;
+create policy "course_reviews_insert_own" on public.course_reviews
+  for insert to authenticated
+  with check (auth.uid() = user_id);
+
+drop policy if exists "course_reviews_update_own" on public.course_reviews;
+create policy "course_reviews_update_own" on public.course_reviews
+  for update to authenticated
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+drop policy if exists "course_reviews_delete_own" on public.course_reviews;
+create policy "course_reviews_delete_own" on public.course_reviews
+  for delete to authenticated
+  using (auth.uid() = user_id);
+
+-- No UPDATE or DELETE policies on waitlist / suggestions:
+-- once submitted, those rows can only be changed in the dashboard.

@@ -4,2581 +4,414 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- ============ SEO ============ -->
-  <title>Learnova — Scan the web. Learn for free.</title>
-  <meta name="description" content="Learnova uses a free AI to plan live searches across YouTube, edX, Coursera, the open web, GitHub and PeerTube — then brings back real courses for any subject. Filter by language and level. No stored catalogue." />
-  <meta name="theme-color" content="#1B1F4B" />
+  <title>Learnova — Find free online courses from top universities</title>
+  <meta name="description" content="Discover hand-picked free online courses from Harvard, MIT, freeCodeCamp, Khan Academy, Google and more. Filter by subject, level, language, certificate and duration, save a shortlist, and start learning." />
+  <meta name="theme-color" content="#151C3B" />
   <link rel="canonical" href="https://mavaletejas6-tiger.github.io/learnova/" />
 
-  <!-- Open Graph (social sharing) -->
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="Learnova — Live AI search for free courses" />
-  <meta property="og:description" content="Type any subject. A free AI plans the search, then your browser fetches real courses from YouTube, edX, Coursera, GitHub and the open web — live." />
+  <meta property="og:title" content="Learnova — Free courses, all in one place" />
+  <meta property="og:description" content="A hand-picked catalogue of free courses from the world's best learning providers. Search, compare, save, and start for free." />
   <meta property="og:url" content="https://mavaletejas6-tiger.github.io/learnova/" />
-  <!-- Optional: add an og.png (1200x630) next to this file and reference it below -->
-  <!-- <meta property="og:image" content="https://your-site.netlify.app/og.png" /> -->
-  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:card" content="summary_large_image" />
 
-  <!-- Favicon: inline SVG so there is no extra file to load -->
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%231B1F4B'/%3E%3Ccircle cx='32' cy='32' r='8' fill='none' stroke='%234F5BD5' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='17' fill='none' stroke='%231FB5A6' stroke-width='2.5' opacity='.8'/%3E%3Ccircle cx='32' cy='32' r='26' fill='none' stroke='%23F6A623' stroke-width='2' opacity='.6'/%3E%3Ccircle cx='44' cy='22' r='3.5' fill='%23F6A623'/%3E%3C/svg%3E" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%231B1F4B'/%3E%3Ccircle cx='32' cy='32' r='8' fill='none' stroke='%234F5BD5' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='17' fill='none' stroke='%231FB5A6' stroke-width='2.5' opacity='.8'/%3E%3Ccircle cx='32' cy='32' r='26' fill='none' stroke='%23F6A623' stroke-width='2' opacity='.6'/%3E%3Ccircle cx='44' cy='22' r='3.5' fill='%23F6A623'/%3E%3C/svg%3E" />
 
-  <style>
-    /* ============================================================
-       LEARNOVA — single file stylesheet
-       Sections: 1) variables 2) base 3) layout 4) components
-                 5) sections 6) responsive 7) motion preferences
-       ============================================================ */
+  <link rel="stylesheet" href="assets/css/site.css" />
+  <script src="assets/js/data.js" defer></script>
+  <script src="assets/js/config.js" defer></script>
+  <script src="assets/js/site.js" defer></script>
+  <script src="assets/js/home.js" defer></script>
 
-    /* ---------- 1. Design tokens ---------- */
-    :root {
-      --navy:   #1B1F4B;   /* headings, footer, dark surfaces */
-      --indigo: #4F5BD5;   /* primary actions and links */
-      --amber:  #F6A623;   /* highlights, accents */
-      --teal:   #1FB5A6;   /* success / "free" accents */
-      --bg:     #F1F2FA;   /* page background */
-      --white:  #FFFFFF;   /* cards */
-      --text:   #2A2E52;   /* body text (good contrast on light bg) */
-      --muted:  #5A5F84;   /* secondary text */
-      --line:   #E1E3F2;   /* borders */
-      --shadow: 0 6px 20px rgba(27, 31, 75, .08);
-      --shadow-lg: 0 10px 30px rgba(27, 31, 75, .12);
-      --radius: 18px;
-      --radius-sm: 12px;
-      --maxw: 1120px;
-      /* Heading = Cambria (falls back to similar serifs), Body = Calibri/Inter */
-      --font-head: "Cambria", "Georgia", "Times New Roman", serif;
-      --font-body: "Calibri", "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Learnova",
+    "url": "https://mavaletejas6-tiger.github.io/learnova/",
+    "description": "A hand-picked catalogue of free online courses.",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://mavaletejas6-tiger.github.io/learnova/courses.html?q={search_term_string}",
+      "query-input": "required name=search_term_string"
     }
-
-    /* ---------- 2. Base ---------- */
-    *, *::before, *::after { box-sizing: border-box; }
-
-    html {
-      scroll-behavior: smooth;            /* smooth scrolling */
-      -webkit-text-size-adjust: 100%;
-    }
-    body {
-      margin: 0;
-      font-family: var(--font-body);
-      font-size: 1rem;
-      line-height: 1.6;
-      color: var(--text);
-      background: var(--bg);
-      -webkit-font-smoothing: antialiased;
-    }
-    h1, h2, h3, h4 { font-family: var(--font-head); color: var(--navy); line-height: 1.2; margin: 0 0 .5em; }
-    h1 { font-size: clamp(2rem, 6vw, 3.2rem); }
-    h2 { font-size: clamp(1.5rem, 4vw, 2.2rem); }
-    h3 { font-size: 1.15rem; }
-    p  { margin: 0 0 1rem; }
-    a  { color: var(--indigo); }
-    img { max-width: 100%; }
-    ul { margin: 0; padding-left: 1.2rem; }
-
-    /* Sections get scroll offset so the sticky navbar never covers titles */
-    section { scroll-margin-top: 84px; }
-
-    /* Keyboard accessibility: visible focus ring everywhere */
-    a:focus-visible, button:focus-visible, input:focus-visible,
-    select:focus-visible, summary:focus-visible {
-      outline: 3px solid var(--amber);
-      outline-offset: 2px;
-      border-radius: 4px;
-    }
-
-    .container { width: min(100% - 2rem, var(--maxw)); margin-inline: auto; }
-    .section   { padding: 3.5rem 0; }
-    .section-alt { background: var(--white); }
-    .lead      { font-size: 1.1rem; color: var(--muted); }
-    .center    { text-align: center; }
-    .eyebrow {
-      display: inline-block; font-weight: 700; font-size: .85rem; letter-spacing: .06em;
-      text-transform: uppercase; color: var(--indigo); margin-bottom: .4rem;
-    }
-    .muted-note { font-size: .9rem; color: var(--muted); }
-
-    /* Skip link for keyboard users */
-    .skip-link {
-      position: absolute; left: -999px; top: 0; background: var(--navy); color: #fff;
-      padding: .6rem 1rem; z-index: 100; border-radius: 0 0 8px 0;
-    }
-    .skip-link:focus { left: 0; }
-
-    /* ---------- 3. Shared components ---------- */
-    .btn {
-      display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
-      font: inherit; font-weight: 700; cursor: pointer;
-      padding: .75rem 1.4rem; border-radius: 999px; border: 0;
-      text-decoration: none; transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
-    }
-    .btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
-    .btn-primary { background: var(--indigo); color: #fff; }
-    .btn-amber   { background: var(--amber); color: #2A1B00; }
-    .btn-light   { background: var(--white); color: var(--navy); border: 1px solid var(--line); }
-    .btn-small   { padding: .5rem 1rem; font-size: .9rem; }
-
-    .card {
-      background: var(--white); border: 1px solid var(--line);
-      border-radius: var(--radius); box-shadow: var(--shadow); padding: 1.4rem;
-    }
-
-    /* Icon in a colored circle (used across the page) */
-    .icon-circle {
-      width: 48px; height: 48px; flex: 0 0 48px; border-radius: 50%;
-      display: grid; place-items: center; font-size: 1.35rem; margin-bottom: .8rem;
-      color: #fff;
-    }
-    .ic-indigo { background: var(--indigo); }
-    .ic-amber  { background: var(--amber); color: #2A1B00; }
-    .ic-teal   { background: var(--teal); }
-    .ic-navy   { background: var(--navy); }
-
-    .grid { display: grid; gap: 1.2rem; }
-    .grid-3 { grid-template-columns: 1fr; }
-
-    /* ---------- 4. Navbar ---------- */
-    .navbar {
-      position: sticky; top: 0; z-index: 50;
-      background: rgba(241, 242, 250, .92);
-      backdrop-filter: blur(8px);
-      border-bottom: 1px solid var(--line);
-    }
-    .nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .7rem 0; }
-    .logo {
-      display: inline-flex; align-items: center; gap: .55rem;
-      font-family: var(--font-head); font-size: 1.35rem; font-weight: 700;
-      color: var(--navy); text-decoration: none;
-    }
-    .logo-mark {
-      width: 30px; height: 30px; border-radius: 50%; flex: 0 0 30px;
-      background: var(--navy); position: relative;
-    }
-    .logo-mark::before, .logo-mark::after {
-      content: ""; position: absolute; inset: 0; margin: auto; border-radius: 50%;
-      border: 2px solid var(--teal);
-    }
-    .logo-mark::before { width: 14px; height: 14px; }
-    .logo-mark::after  { width: 24px; height: 24px; border-color: var(--amber); opacity: .8; }
-
-    .nav-links { display: none; align-items: center; gap: 1.4rem; list-style: none; margin: 0; padding: 0; }
-    .nav-links a { color: var(--navy); text-decoration: none; font-weight: 600; }
-    .nav-links a:hover { color: var(--indigo); text-decoration: underline; }
-    .nav-cta { display: none; }
-    .hamburger {
-      background: var(--white); border: 1px solid var(--line); border-radius: 10px;
-      width: 44px; height: 44px; cursor: pointer; display: grid; place-items: center; gap: 5px;
-    }
-    .hamburger span { display: block; width: 20px; height: 2px; background: var(--navy); border-radius: 2px; transition: .2s; }
-    .hamburger[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-    .hamburger[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
-    .hamburger[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-    /* Mobile dropdown panel */
-    .nav-panel {
-      display: none; background: var(--white); border-top: 1px solid var(--line);
-      padding: 1rem 0 1.2rem;
-    }
-    .nav-panel.open { display: block; }
-    .nav-panel .auth-slot { display: flex; margin-top: .8rem; }
-    .nav-panel ul { list-style: none; margin: 0 0 1rem; padding: 0; }
-    .nav-panel a { display: block; padding: .7rem 0; color: var(--navy); text-decoration: none; font-weight: 600; border-bottom: 1px solid var(--line); }
-
-    /* ---------- 5. Hero + radar animation ---------- */
-    .hero { padding: 3rem 0 3.5rem; overflow: hidden; }
-    .hero-grid { display: grid; gap: 2.5rem; align-items: center; }
-    .hero p.lead { font-size: 1.15rem; }
-
-    /* Search bar block */
-    .hero-search {
-      background: var(--white); border: 1px solid var(--line); border-radius: var(--radius);
-      box-shadow: var(--shadow-lg); padding: 1rem; margin-top: 1.5rem;
-    }
-    .search-row { display: flex; gap: .6rem; }
-    .search-row input { flex: 1; }
-    .filters-row { display: grid; grid-template-columns: 1fr; gap: .6rem; margin-top: .6rem; }
-
-    input[type="text"], input[type="email"], input[type="url"], select {
-      font: inherit; width: 100%; padding: .7rem .9rem;
-      border: 1px solid var(--line); border-radius: var(--radius-sm);
-      background: #fff; color: var(--text);
-    }
-    label { font-weight: 600; font-size: .9rem; display: block; margin-bottom: .25rem; color: var(--navy); }
-
-    /* Radar: concentric rings, a rotating sweep and glowing dots (pure CSS) */
-    .radar {
-      position: relative; width: min(90vw, 380px); aspect-ratio: 1; margin-inline: auto;
-      border-radius: 50%;
-      background: radial-gradient(circle at center, #232866 0%, var(--navy) 70%);
-      box-shadow: var(--shadow-lg);
-    }
-    .radar .ring {
-      position: absolute; inset: 0; margin: auto; border-radius: 50%;
-      border: 1px solid rgba(255,255,255,.18);
-    }
-    .radar .ring-1 { width: 25%;  height: 25%; }
-    .radar .ring-2 { width: 50%;  height: 50%; }
-    .radar .ring-3 { width: 75%;  height: 75%; }
-    .radar .ring-4 { width: 96%;  height: 96%; border-color: rgba(246,166,35,.35); }
-    /* Rotating sweep beam */
-    .radar .sweep {
-      position: absolute; inset: 2%; border-radius: 50%;
-      background: conic-gradient(from 0deg, rgba(31,181,166,.45) 0deg, rgba(31,181,166,0) 60deg, rgba(31,181,166,0) 360deg);
-      animation: sweep 4s linear infinite;
-    }
-    /* Glowing dots = "sources" being detected */
-    .radar .dot {
-      position: absolute; width: 12px; height: 12px; border-radius: 50%;
-      background: var(--amber); box-shadow: 0 0 12px var(--amber);
-      animation: pulse 2.4s ease-in-out infinite;
-    }
-    .radar .dot.teal  { background: var(--teal);  box-shadow: 0 0 12px var(--teal); }
-    .radar .dot.white { background: #fff;         box-shadow: 0 0 12px #fff; }
-    .radar .d1 { top: 22%; left: 60%; animation-delay: 0s; }
-    .radar .d2 { top: 62%; left: 30%; animation-delay: .4s; }
-    .radar .d3 { top: 45%; left: 78%; animation-delay: .8s; }
-    .radar .d4 { top: 72%; left: 64%; animation-delay: 1.2s; }
-    .radar .d5 { top: 30%; left: 33%; animation-delay: 1.6s; }
-    .radar .core {
-      position: absolute; inset: 0; margin: auto; width: 14px; height: 14px;
-      border-radius: 50%; background: #fff; box-shadow: 0 0 18px #fff;
-    }
-    @keyframes sweep { to { transform: rotate(360deg); } }
-    @keyframes pulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.6); opacity: .55; } }
-    .radar-caption { text-align: center; margin-top: .8rem; font-size: .9rem; color: var(--muted); }
-
-    /* ---------- 6. Section-specific styles ---------- */
-
-    /* How it works: steps with arrows (arrows point DOWN when stacked) */
-    .steps { display: grid; gap: 1rem; align-items: stretch; }
-    .step { position: relative; text-align: center; display: flex; flex-direction: column; }
-    .step .step-num {
-      width: 54px; height: 54px; margin: 0 auto .7rem; border-radius: 50%;
-      display: grid; place-items: center; color: #fff; font-family: var(--font-head);
-      font-size: 1.3rem; font-weight: 700;
-    }
-    .step-arrow { text-align: center; color: var(--indigo); font-size: 1.6rem; line-height: 1;
-                  transform: rotate(90deg); align-self: center; }
-
-    /* Visually hidden but still read by screen readers */
-    .visually-hidden {
-      position: absolute !important; width: 1px; height: 1px; overflow: hidden;
-      clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
-    }
-
-    /* Scan results */
-    .demo-controls { display: grid; grid-template-columns: 1fr; gap: .7rem; margin: 1.2rem 0; }
-    .results-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
-    .more-wrap { grid-column: 1 / -1; display: flex; justify-content: center; padding: .5rem 0 .2rem; }
-    .course-card { display: flex; flex-direction: column; gap: .4rem; }
-    .course-card h3 { font-size: 1.05rem; margin-bottom: .2rem; }
-    .badge-row { display: flex; gap: .4rem; align-items: center; }
-    .badge-free {
-      align-self: flex-start; background: #E4F7EF; color: #0E6B4F; border: 1px solid #B6E8D5;
-      font-size: .75rem; font-weight: 800; letter-spacing: .05em;
-      padding: .18rem .6rem; border-radius: 999px;
-    }
-    /* Badge for links found on the open web rather than a known free index */
-    .badge-open {
-      background: #FFF3DE; color: #7A5200; border: 1px solid #F5D9A0;
-      font-size: .75rem; font-weight: 800; letter-spacing: .05em;
-      padding: .18rem .6rem; border-radius: 999px;
-    }
-    /* Platform course that is usually free to audit, but may charge for certificates */
-    .badge-audit {
-      background: #EAF0FF; color: #2E3A8C; border: 1px solid #C8D4F8;
-      font-size: .75rem; font-weight: 800; letter-spacing: .05em;
-      padding: .18rem .6rem; border-radius: 999px;
-    }
-    /* Neutral pill showing which list or repo the result came from */
-    .badge-kind {
-      background: #EEF0FF; color: #3A41A8; border: 1px solid #D2D6FA;
-      font-size: .75rem; font-weight: 800; letter-spacing: .05em;
-      padding: .18rem .6rem; border-radius: 999px;
-      max-width: 14rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    }
-
-    /* ---------- Live scan: per-source status strip ---------- */
-    .scan-bar {
-      height: 6px; width: 100%; border-radius: 999px; overflow: hidden;
-      background: #E4E6F5; margin-top: 1.1rem; position: relative;
-    }
-    .scan-bar::after {
-      content: ""; position: absolute; inset: 0; width: 35%;
-      background: linear-gradient(90deg, transparent, var(--indigo), var(--teal), transparent);
-      animation: scanMove 1.1s linear infinite; opacity: 0;
-    }
-    .scan-bar[data-state="running"]::after { opacity: 1; }
-    .scan-bar[data-state="done"]::after { opacity: 0; width: 100%; background: var(--teal); animation: none; }
-    @keyframes scanMove { from { transform: translateX(-120%); } to { transform: translateX(340%); } }
-
-    .scan-head {
-      display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between;
-      gap: .6rem 1rem; margin-top: .9rem;
-    }
-    .scan-summary { font-weight: 700; color: var(--navy); margin: 0; }
-    .scan-actions { display: flex; gap: .5rem; }
-
-    .source-list {
-      display: flex; flex-wrap: wrap; gap: .5rem; list-style: none;
-      padding: 0; margin: .8rem 0 0;
-    }
-    .source-list li {
-      display: inline-flex; align-items: center; gap: .5rem;
-      background: var(--white); border: 1px solid var(--line); border-radius: 999px;
-      padding: .35rem .85rem; font-size: .82rem; font-weight: 700; color: var(--muted);
-    }
-    .source-list .dot {
-      width: 9px; height: 9px; border-radius: 50%; background: #C9CDE4; flex: 0 0 9px;
-    }
-    .source-list li[data-state="busy"] .dot { background: var(--indigo); animation: pulse 1s ease-in-out infinite; }
-    .source-list li[data-state="ok"]   .dot { background: var(--teal); }
-    .source-list li[data-state="fail"] .dot { background: #E06B6B; }
-    .source-list li[data-state="ok"]   { color: var(--navy); }
-    .source-list li[data-state="fail"] { color: #9A3F3F; border-color: #F3C9C9; }
-    .source-list .n { font-variant-numeric: tabular-nums; }
-
-    .course-meta { font-size: .88rem; color: var(--muted); margin: 0; }
-    .course-source { font-weight: 700; color: var(--indigo); font-size: .85rem; text-transform: uppercase; letter-spacing: .04em; }
-    .course-link { margin-top: auto; font-weight: 700; text-decoration: none; }
-    .course-link:hover { text-decoration: underline; }
-    .results-count { font-weight: 700; color: var(--navy); margin: .4rem 0 0; }
-    .no-results { padding: 1.5rem; text-align: center; }
-
-    /* Source chips */
-    .chips { display: flex; flex-wrap: wrap; gap: .6rem; list-style: none; padding: 0; margin: 1rem 0; }
-    .chips li {
-      background: var(--white); border: 1px solid var(--line); border-radius: 999px;
-      padding: .5rem 1rem; font-weight: 600; color: var(--navy); box-shadow: var(--shadow);
-    }
-    .chips li::before { content: "• "; color: var(--teal); font-weight: 900; }
-
-    /* Comparison table */
-    .table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--line); background: var(--white); box-shadow: var(--shadow); }
-    table { border-collapse: collapse; width: 100%; min-width: 620px; }
-    th, td { padding: .9rem 1rem; text-align: left; border-bottom: 1px solid var(--line); }
-    thead th { background: var(--navy); color: #fff; font-family: var(--font-head); }
-    thead th:last-child { color: var(--amber); }
-    tbody tr:last-child td { border-bottom: 0; }
-    td.win { background: #EEF0FF; font-weight: 700; color: var(--navy); }
-    .yes { color: #0E6B4F; font-weight: 700; }
-    .no  { color: #9A3F3F; font-weight: 700; }
-    .part { color: #8A6100; font-weight: 700; }
-
-    /* Stats */
-    .stat-card { text-align: center; }
-    .stat-num { font-family: var(--font-head); font-size: 2rem; font-weight: 700; color: var(--indigo); display: block; }
-    .stat-label { color: var(--muted); font-size: .95rem; }
-
-    /* Roadmap */
-    .phase-months { display: inline-block; background: var(--amber); color: #2A1B00; font-weight: 700; font-size: .8rem; padding: .2rem .7rem; border-radius: 999px; margin-bottom: .6rem; }
-
-    /* Always-free banner */
-    .free-banner {
-      background: linear-gradient(120deg, var(--navy), #2C3376);
-      color: #fff; border-radius: var(--radius); padding: 2rem; box-shadow: var(--shadow-lg);
-    }
-    .free-banner h2 { color: #fff; }
-    .free-banner p { color: #D9DCF5; }
-    .free-banner .tick { color: var(--teal); font-weight: 700; }
-
-    /* Auth: navbar chips, sign-in modal, toast */
-    .nav-actions { display: flex; align-items: center; gap: .6rem; }
-    .auth-slot { display: none; align-items: center; gap: .5rem; }
-    .auth-chip {
-      display: inline-flex; align-items: center; gap: .45rem;
-      max-width: 190px; overflow: hidden;
-      background: var(--white); border: 1px solid var(--line);
-      padding: .45rem .85rem; border-radius: 999px;
-      font-size: .85rem; font-weight: 700; color: var(--navy);
-    }
-    .auth-chip .txt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .auth-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); flex: 0 0 8px; }
-
-    .modal-backdrop {
-      position: fixed; inset: 0; z-index: 80;
-      background: rgba(27, 31, 75, .55);
-      display: none; place-items: center; padding: 1rem;
-    }
-    .modal-backdrop.open { display: grid; }
-    .modal-card { position: relative; width: min(100%, 430px); max-height: 90vh; overflow-y: auto; padding: 1.8rem 1.6rem; }
-    .modal-close {
-      position: absolute; top: .6rem; right: .7rem;
-      background: none; border: 0; font-size: 1.3rem; line-height: 1;
-      color: var(--muted); cursor: pointer; padding: .3rem;
-    }
-    .modal-close:hover { color: var(--navy); }
-    .btn-row { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem; }
-
-    .toast {
-      position: fixed; left: 50%; bottom: 1.4rem; transform: translate(-50%, 20px);
-      background: var(--navy); color: #fff; font-weight: 600;
-      padding: .75rem 1.3rem; border-radius: 999px; box-shadow: var(--shadow-lg);
-      opacity: 0; pointer-events: none; transition: .25s ease; z-index: 90;
-      max-width: calc(100% - 2rem); text-align: center;
-    }
-    .toast.show { opacity: 1; transform: translate(-50%, 0); }
-
-    /* Forms */
-    .form-card h3 { margin-bottom: .2rem; }
-    .form-group { margin-bottom: .9rem; }
-    .form-note { font-size: .85rem; color: var(--muted); }
-    .form-msg {
-      display: none; margin-top: .8rem; padding: .7rem 1rem; border-radius: var(--radius-sm);
-      background: #E4F7EF; color: #0E6B4F; border: 1px solid #B6E8D5; font-weight: 600;
-    }
-    .form-msg.show { display: block; }
-    .form-msg.error { background: #FDECEC; color: #9A3F3F; border-color: #F3C9C9; }
-
-    /* Footer */
-    .footer { background: var(--navy); color: #C9CDEA; padding: 3rem 0 2rem; margin-top: 3rem; }
-    .footer h4 { color: #fff; font-size: 1rem; margin-bottom: .6rem; }
-    .footer a { color: #C9CDEA; text-decoration: none; display: inline-block; padding: .15rem 0; }
-    .footer a:hover { color: #fff; text-decoration: underline; }
-    .footer-grid { display: grid; gap: 2rem; }
-    .footer .logo { color: #fff; }
-    .footer-bottom { border-top: 1px solid rgba(255,255,255,.15); margin-top: 2rem; padding-top: 1.2rem; font-size: .85rem; display: flex; flex-wrap: wrap; gap: .5rem; justify-content: space-between; }
-
-    /* ---------- 7. Responsive (mobile-first: these are the larger screens) ---------- */
-    @media (min-width: 640px) {
-      .grid-3        { grid-template-columns: repeat(3, 1fr); }
-      .results-grid  { grid-template-columns: repeat(2, 1fr); }
-      .demo-controls { grid-template-columns: 2fr 1fr 1fr 1fr; }
-      .filters-row   { grid-template-columns: 1fr 1fr; }
-      .stat-grid     { grid-template-columns: repeat(2, 1fr); }
-      .form-grid     { grid-template-columns: 1fr 1fr; }
-    }
-
-    @media (min-width: 900px) {
-      /* Desktop nav */
-      .nav-links, .nav-cta { display: flex; }
-      .auth-slot { display: flex; }
-      .hamburger, .nav-panel { display: none !important; }
-      .hero-grid   { grid-template-columns: 1.15fr .85fr; }
-      /* 4 cards + 3 arrows = 7 columns, so all four steps sit on one row */
-      .steps       { grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr; }
-      .step-arrow  { transform: none; }
-      .roadmap-grid{ grid-template-columns: repeat(3, 1fr); }
-      .stat-grid   { grid-template-columns: repeat(4, 1fr); }
-      .results-grid{ grid-template-columns: repeat(3, 1fr); }
-      .footer-grid { grid-template-columns: 1.4fr 1fr 1fr; }
-    }
-
-    /* ---------- 8. Respect reduced-motion settings ---------- */
-    @media (prefers-reduced-motion: reduce) {
-      html { scroll-behavior: auto; }
-      .radar .sweep, .radar .dot { animation: none; }
-      .scan-bar::after, .source-list li[data-state="busy"] .dot { animation: none; }
-      .btn:hover { transform: none; }
-    }
-  </style>
+  }
+  </script>
 </head>
 
-<body>
+<body data-page="home">
   <a class="skip-link" href="#main">Skip to main content</a>
 
-  <!-- ===================== 1. NAVBAR ===================== -->
-  <header class="navbar">
-    <div class="container nav-inner">
-      <a class="logo" href="#top" aria-label="Learnova home">
-        <span class="logo-mark" aria-hidden="true"></span> Learnova
+  <!-- ===================== HEADER ===================== -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="index.html" aria-label="Learnova home">
+        <span class="brand-mark" aria-hidden="true"><span class="brand-dot"></span></span>
+        <span class="brand-word">learnova</span>
       </a>
 
-      <!-- Desktop links -->
-      <nav aria-label="Main menu">
-        <ul class="nav-links">
-          <li><a href="#how">How it works</a></li>
-          <li><a href="#sources">Sources</a></li>
-          <li><a href="#impact">Impact</a></li>
-          <li><a href="#roadmap">Roadmap</a></li>
-        </ul>
+      <nav class="main-nav" aria-label="Main navigation">
+        <a href="courses.html" data-nav="browse">Browse courses</a>
+        <a href="providers.html" data-nav="providers">Providers</a>
+        <a href="scan.html" data-nav="scan"><span class="live-dot" aria-hidden="true"></span>Live scan</a>
       </nav>
-      <div class="nav-actions">
-        <a class="btn btn-primary btn-small nav-cta" href="#demo">Search free courses</a>
-        <!-- Sign-in button / signed-in chip injected here by the script -->
-        <div class="auth-slot" data-auth-slot></div>
+
+      <form class="header-search" data-global-search action="courses.html" role="search">
+        <div class="search-field">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+          <label class="sr-only" for="headerSearch">Search courses</label>
+          <input id="headerSearch" type="search" name="q" placeholder="Search courses, subjects, providers" autocomplete="off" />
+          <span class="search-kbd" aria-hidden="true">/</span>
+        </div>
+      </form>
+
+      <div class="header-actions">
+        <a class="btn btn-ghost btn-sm" href="my-learning.html" data-nav="learning">My learning</a>
+        <div data-auth-zone></div>
       </div>
 
-      <!-- Mobile hamburger -->
-      <button class="hamburger" id="navToggle" aria-expanded="false" aria-controls="navPanel" aria-label="Open menu">
+      <button class="menu-toggle" id="menuToggle" type="button" aria-expanded="false" aria-controls="mobileMenu" aria-label="Open menu">
         <span></span><span></span><span></span>
       </button>
     </div>
 
-    <!-- Mobile dropdown -->
-    <div class="nav-panel" id="navPanel">
-      <div class="container">
-        <ul>
-          <li><a href="#how">How it works</a></li>
-          <li><a href="#sources">Sources</a></li>
-          <li><a href="#impact">Impact</a></li>
-          <li><a href="#roadmap">Roadmap</a></li>
+    <div class="mobile-menu" id="mobileMenu">
+      <div class="container mobile-menu-inner">
+        <form class="header-search" data-global-search action="courses.html" role="search">
+          <div class="search-field">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+            <label class="sr-only" for="mobileSearch">Search courses</label>
+            <input id="mobileSearch" type="search" name="q" placeholder="Search courses, subjects, providers" autocomplete="off" />
+          </div>
+        </form>
+        <ul class="mobile-menu-links">
+          <li><a href="courses.html" data-nav="browse">Browse courses <span aria-hidden="true">→</span></a></li>
+          <li><a href="providers.html" data-nav="providers">Providers <span aria-hidden="true">→</span></a></li>
+          <li><a href="my-learning.html" data-nav="learning">My learning <span aria-hidden="true">→</span></a></li>
+          <li><a href="scan.html" data-nav="scan"><span><span class="live-dot" aria-hidden="true"></span> Live web scan</span><span aria-hidden="true">→</span></a></li>
         </ul>
-        <a class="btn btn-primary" href="#demo" style="width:100%">Search free courses</a>
-        <div class="auth-slot" data-auth-slot></div>
+        <div data-auth-zone></div>
       </div>
     </div>
   </header>
 
   <main id="main">
-    <!-- ===================== 2. HERO ===================== -->
-    <section class="hero" id="top">
-      <div class="container hero-grid">
-        <div>
-          <span class="eyebrow">Free learning, one place</span>
-          <h1>Scan the web.<br />Learn for free.</h1>
-          <p class="lead">
-            Type any subject. A free AI plans the searches, then your browser scans
-            YouTube, edX, Coursera, the open web, GitHub and PeerTube — live,
-            and only for the subject you asked for.
+    <!-- ===================== HERO ===================== -->
+    <section class="hero">
+      <div class="container hero-inner">
+        <div class="hero-copy">
+          <span class="eyebrow">Free courses. Real providers. One place.</span>
+          <h1>Find your next course.<br /><em>Learn without limits.</em></h1>
+          <p class="lede">
+            Hand-picked free courses from Harvard, MIT, freeCodeCamp, Khan Academy,
+            Google and more. Compare what you will learn, save a shortlist, and start —
+            without a paywall.
           </p>
 
-          <!-- Hero search: jumps to the live demo below with your choices -->
-          <form class="hero-search" id="heroForm">
-            <div class="search-row">
-              <label for="heroQuery" class="visually-hidden">What do you want to learn?</label>
-              <input type="text" id="heroQuery" placeholder="What do you want to learn?" autocomplete="off" />
-              <button class="btn btn-amber" type="submit">Search</button>
-            </div>
-            <div class="filters-row">
-              <div>
-                <label for="heroLang">Language</label>
-                <select id="heroLang">
-                  <option value="">Any language</option>
-                  <option>English</option>
-                  <option>Hindi</option>
-                  <option>Marathi</option>
-                  <option>Tamil</option>
-                  <option>Telugu</option>
-                  <option>Bengali</option>
-                </select>
-              </div>
-              <div>
-                <label for="heroLevel">Level</label>
-                <select id="heroLevel">
-                  <option value="">Any level</option>
-                  <option>Beginner</option>
-                  <option>Intermediate</option>
-                  <option>Advanced</option>
-                </select>
-              </div>
-            </div>
-          </form>
-          <p class="muted-note" style="margin-top:.8rem">✅ Always free for learners. No sign-up needed to browse.</p>
-        </div>
-
-        <!-- Radar animation: concentric circles + glowing dots -->
-        <div>
-          <div class="radar" role="img" aria-label="Animation of a radar scanning and finding free courses from different sources">
-            <span class="ring ring-1"></span>
-            <span class="ring ring-2"></span>
-            <span class="ring ring-3"></span>
-            <span class="ring ring-4"></span>
-            <span class="sweep" aria-hidden="true"></span>
-            <span class="core" aria-hidden="true"></span>
-            <span class="dot d1" aria-hidden="true"></span>
-            <span class="dot teal d2" aria-hidden="true"></span>
-            <span class="dot white d3" aria-hidden="true"></span>
-            <span class="dot d4" aria-hidden="true"></span>
-            <span class="dot teal d5" aria-hidden="true"></span>
+          <div class="hero-search-wrap">
+            <form class="hero-search" data-global-search action="courses.html" role="search">
+              <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+              <label class="sr-only" for="heroSearch">What do you want to learn?</label>
+              <input id="heroSearch" type="search" name="q" placeholder="What do you want to learn?" autocomplete="off" />
+              <button class="btn btn-primary" type="submit">Search</button>
+            </form>
           </div>
-          <p class="radar-caption">Scanning trusted free sources across the internet…</p>
+
+          <div class="hero-trends">
+            <span>Popular:</span>
+            <a class="trend-chip" href="courses.html?q=python">Python</a>
+            <a class="trend-chip" href="courses.html?q=data%20science">Data science</a>
+            <a class="trend-chip" href="courses.html?q=machine%20learning">AI &amp; ML</a>
+            <a class="trend-chip" href="courses.html?q=english">English</a>
+            <a class="trend-chip" href="courses.html?q=class%2010%20maths">Class 10 maths</a>
+            <a class="trend-chip" href="courses.html?q=excel">Excel</a>
+          </div>
+
+          <div class="hero-stats">
+            <div class="hero-stat"><strong id="statCourses">—</strong><span>free courses</span></div>
+            <div class="hero-stat"><strong id="statProviders">—</strong><span>providers</span></div>
+            <div class="hero-stat"><strong id="statSubjects">—</strong><span>subjects</span></div>
+            <div class="hero-stat"><strong id="statCertificates">—</strong><span>free certificates</span></div>
+          </div>
+        </div>
+
+        <div class="hero-art" aria-hidden="true">
+          <div class="hero-glow"></div>
+          <div class="hero-browser">
+            <div class="hero-browser-top">
+              <span class="browser-dots"><i></i><i></i><i></i></span>
+              <span class="browser-search">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+                free courses
+              </span>
+            </div>
+            <div class="hero-browser-body">
+              <div class="hero-browser-label"><span>Hand-picked for you</span><span>Updated weekly</span></div>
+              <div id="heroMiniCourses"></div>
+            </div>
+          </div>
+          <span class="float-pill float-pill--score">
+            <svg viewBox="0 0 24 24" fill="#F6A623" stroke="#F6A623" stroke-width="1.5" aria-hidden="true"><path d="m12 3 2.9 5.9 6.5.9-4.7 4.6 1.1 6.5-5.8-3-5.8 3 1.1-6.5L2.6 9.8l6.5-.9L12 3z"></path></svg>
+            <b>4.8</b> average score
+          </span>
+          <span class="float-pill float-pill--cert">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#0F9E8F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m20 6-11 11-5-5"></path></svg>
+            Free certificates
+          </span>
         </div>
       </div>
     </section>
 
-    <!-- ===================== 3. PROBLEM ===================== -->
-    <section class="section section-alt" id="problem">
-      <div class="container">
-        <h2>Free learning exists, but it is scattered.</h2>
-        <p class="lead">Students know free classes are out there. Finding them is the hard part.</p>
-
-        <div class="grid grid-3">
-          <article class="card">
-            <span class="icon-circle ic-indigo" aria-hidden="true">🗂️</span>
-            <h3>Too many places</h3>
-            <p>Free courses sit on many websites and YouTube channels. You keep opening new tabs and still miss good ones.</p>
-          </article>
-
-          <article class="card">
-            <span class="icon-circle ic-amber" aria-hidden="true">🔒</span>
-            <h3>Hidden paywalls</h3>
-            <p>Some courses look free, then ask for payment before the useful part. Wasting time and data hurts.</p>
-          </article>
-
-          <article class="card">
-            <span class="icon-circle ic-teal" aria-hidden="true">📶</span>
-            <h3>Hard to reach</h3>
-            <p>Many classes are only in English. Many need fast internet or a costly phone. That leaves out a lot of learners.</p>
-          </article>
+    <!-- ===================== PROVIDER STRIP ===================== -->
+    <div class="trust-strip">
+      <div class="container trust-inner">
+        <span class="trust-label">Courses from</span>
+        <div class="trust-logos" aria-label="Course providers">
+          <span class="trust-logo">Harvard</span>
+          <span class="trust-logo">MIT OpenCourseWare</span>
+          <span class="trust-logo">freeCodeCamp</span>
+          <span class="trust-logo">Khan Academy</span>
+          <span class="trust-logo">Coursera</span>
+          <span class="trust-logo">edX</span>
+          <span class="trust-logo">Google</span>
+          <span class="trust-logo">Yale</span>
+          <span class="trust-logo">Kaggle</span>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- ===================== 4. HOW IT WORKS ===================== -->
-    <section class="section" id="how">
+    <!-- ===================== SUBJECTS ===================== -->
+    <section class="section" id="subjects">
       <div class="container">
-        <h2>How it works</h2>
-        <p class="lead">Four simple steps, from the open internet to your phone.</p>
-
-        <div class="steps">
-          <article class="step card">
-            <span class="step-num ic-navy" aria-hidden="true">1</span>
-            <h3>Scan</h3>
-            <p>A free AI turns your subject into search queries, then your browser sends them to YouTube, edX, Coursera, open course libraries and the wider web at the same time.</p>
-          </article>
-          <div class="step-arrow" aria-hidden="true">➜</div>
-
-          <article class="step card">
-            <span class="step-num ic-teal" aria-hidden="true">2</span>
-            <h3>Check</h3>
-            <p>We keep results from sources that only hold free material, label edX and Coursera courses as free to audit, and mark anything from the open web so you can check it first.</p>
-          </article>
-          <div class="step-arrow" aria-hidden="true">➜</div>
-
-          <article class="step card">
-            <span class="step-num ic-amber" aria-hidden="true">3</span>
-            <h3>Organize</h3>
-            <p>We sort everything by topic, level and language, and drop duplicate links before they reach the screen.</p>
-          </article>
-          <div class="step-arrow" aria-hidden="true">➜</div>
-
-          <article class="step card">
-            <span class="step-num ic-indigo" aria-hidden="true">4</span>
-            <h3>Deliver</h3>
-            <p>Each result opens straight on the original creator&rsquo;s page, ready to start in one tap.</p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===================== 5. LIVE WEB SCAN ===================== -->
-    <section class="section section-alt" id="demo">
-      <div class="container">
-        <h2>Live AI course scan</h2>
-        <p class="lead">
-          Type a subject and Learnova plans the searches with a free AI, then queries YouTube,
-          edX, Coursera, the open web, GitHub, PeerTube, Wikiversity and DEV at the same time — in your browser,
-          right now. No stored list, no sample data.
-        </p>
-
-        <div class="demo-controls">
+        <div class="section-head">
           <div>
-            <label for="demoQuery">Search</label>
-            <input type="text" id="demoQuery" placeholder="e.g. python, class 10 physics hindi, spoken english" autocomplete="off" />
+            <span class="eyebrow">Browse by subject</span>
+            <h2>What do you want to learn?</h2>
+            <p>Twelve subject areas, <span id="subjectCourseCount">70</span> hand-checked courses, and no dead ends.</p>
+          </div>
+          <a class="link-arrow" href="courses.html">Browse all courses <span aria-hidden="true">→</span></a>
+        </div>
+        <div class="subject-grid" id="subjectGrid"></div>
+      </div>
+    </section>
+
+    <!-- ===================== FEATURED COURSES ===================== -->
+    <section class="section section--alt" id="featured">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">Start here</span>
+            <h2>Featured free courses</h2>
+            <p>Editor-picked courses that are genuinely free to learn — with clear time commitments and real providers.</p>
+          </div>
+          <a class="link-arrow" href="courses.html?sort=rating">See the highest rated <span aria-hidden="true">→</span></a>
+        </div>
+        <div class="course-grid course-grid--4" id="featuredGrid"></div>
+        <div class="scan-callout">
+          <div><strong>Not sure where to begin?</strong><span>Search the whole catalogue or take a 2-minute look at the live web scan.</span></div>
+          <div class="empty-actions" style="margin:0">
+            <a class="btn btn-outline btn-sm" href="courses.html">Browse everything</a>
+            <a class="btn btn-amber btn-sm" href="#live-scan">Try the live scan</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== COLLECTIONS ===================== -->
+    <section class="section" id="collections">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">Collections</span>
+            <h2>Paths that make sense</h2>
+            <p>Curated sequences of courses — start with the basics, then go deeper.</p>
+          </div>
+          <a class="link-arrow" href="courses.html">Explore all <span aria-hidden="true">→</span></a>
+        </div>
+        <div class="collection-grid" id="collectionsGrid"></div>
+      </div>
+    </section>
+
+    <!-- ===================== FREE CERTIFICATES ===================== -->
+    <section class="section section--alt" id="certificates">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">Proof of learning</span>
+            <h2>Free certificates worth sharing</h2>
+            <p>Finish a course and earn a certificate without paying. Filter the full catalogue by certificate type.</p>
+          </div>
+          <a class="link-arrow" href="courses.html?certificate=free">All free certificates <span aria-hidden="true">→</span></a>
+        </div>
+        <div class="course-grid course-grid--4" id="freeCertGrid"></div>
+      </div>
+    </section>
+
+    <!-- ===================== LIVE SCAN ===================== -->
+    <section class="section" id="live-scan">
+      <div class="container">
+        <div class="live-cta">
+          <div>
+            <span class="eyebrow">Beyond the catalogue</span>
+            <h2>Scan the live web for a subject</h2>
+            <p>
+              Can’t find it here? A free AI plans the searches, then your browser fetches
+              real courses from YouTube, edX, Coursera, GitHub, PeerTube, Wikiversity and the open web — live.
+            </p>
+            <div class="live-cta-actions">
+              <a class="btn btn-amber" href="scan.html">Open the live scan</a>
+              <a class="btn btn-outline" href="scan.html#how">How it works</a>
+            </div>
+          </div>
+          <div class="source-pills" aria-label="Sources scanned live">
+            <span class="source-pill">YouTube</span>
+            <span class="source-pill">edX</span>
+            <span class="source-pill">Coursera</span>
+            <span class="source-pill">GitHub</span>
+            <span class="source-pill">PeerTube</span>
+            <span class="source-pill">Wikiversity</span>
+            <span class="source-pill">DEV Community</span>
+            <span class="source-pill">Open web</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== HOW IT WORKS ===================== -->
+    <section class="section section--alt" id="how">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">How Learnova works</span>
+            <h2>Less searching. More learning.</h2>
+            <p>We do the discovery work, then send you straight to the original provider.</p>
+          </div>
+        </div>
+        <div class="steps-grid">
+          <article class="step-card">
+            <span class="step-num" aria-hidden="true">1</span>
+            <h3>Search or browse</h3>
+            <p>Use the filters that actually matter: subject, level, language, provider, duration, and whether the certificate is free.</p>
+          </article>
+          <article class="step-card">
+            <span class="step-num" aria-hidden="true">2</span>
+            <h3>Compare and save</h3>
+            <p>Read the overview and typical syllabus, check the time commitment, then save courses to your shortlist.</p>
+          </article>
+          <article class="step-card">
+            <span class="step-num" aria-hidden="true">3</span>
+            <h3>Learn on the provider’s site</h3>
+            <p>Every course opens on the original provider. Learnova never re-hosts content or hides the creator behind a paywall.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== PROVIDERS ===================== -->
+    <section class="section" id="providers">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">Providers</span>
+            <h2>Learn from places you trust</h2>
+            <p>Universities, nonprofits, companies, and independent teachers — all with real, free-to-start courses.</p>
+          </div>
+          <a class="link-arrow" href="providers.html">All providers <span aria-hidden="true">→</span></a>
+        </div>
+        <div class="provider-strip" id="providerStrip"></div>
+      </div>
+    </section>
+
+    <!-- ===================== INDIA PICKS ===================== -->
+    <section class="section section--alt" id="india">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">India picks</span>
+            <h2>Made for Indian learners</h2>
+            <p>Hindi-medium and India-based options, including CBSE revision and IIT-led courses.</p>
+          </div>
+          <a class="link-arrow" href="courses.html?collection=india-picks">See the collection <span aria-hidden="true">→</span></a>
+        </div>
+        <div class="course-grid" id="indiaGrid"></div>
+      </div>
+    </section>
+
+    <!-- ===================== NEWSLETTER ===================== -->
+    <section class="section" id="newsletter">
+      <div class="container">
+        <div class="newsletter">
+          <div>
+            <span class="eyebrow">Course picks by email</span>
+            <h2>One useful email. No noise.</h2>
+            <p>New free courses, free certificate deadlines, and study picks — sent occasionally.</p>
           </div>
           <div>
-            <label for="demoTopic">Topic</label>
-            <select id="demoTopic"><option value="">All topics</option></select>
-          </div>
-          <div>
-            <label for="demoLang">Language</label>
-            <select id="demoLang"><option value="">All languages</option></select>
-          </div>
-          <div>
-            <label for="demoLevel">Level</label>
-            <select id="demoLevel"><option value="">All levels</option></select>
+            <form class="newsletter-form" id="newsletterForm" novalidate>
+              <label class="sr-only" for="newsletterEmail">Email address</label>
+              <input id="newsletterEmail" type="email" placeholder="you@example.com" autocomplete="email" required />
+              <button class="btn btn-primary" type="submit">Get course picks</button>
+            </form>
+            <p class="newsletter-note">No spam. Unsubscribe whenever you like. In local mode, your email stays in this browser.</p>
+            <p class="form-msg" id="newsletterMsg" role="status" aria-live="polite"></p>
           </div>
         </div>
-
-        <!-- Live status: one chip per index being queried -->
-        <div class="scan-bar" id="scanBar" data-state="idle" aria-hidden="true"></div>
-        <div class="scan-head">
-          <p class="scan-summary" id="scanSummary" role="status" aria-live="polite">Preparing scan…</p>
-          <div class="scan-actions">
-            <button class="btn btn-light btn-small" type="button" id="rescanBtn">↻ Scan again</button>
-          </div>
-        </div>
-        <ul class="source-list" id="sourceList"></ul>
-
-        <p class="results-count" id="resultCount"></p>
-        <div class="results-grid" id="results"></div>
-
-        <p class="muted-note" style="margin-top:1rem">
-          Every card below came from a request made when you searched. A free AI model
-          (<strong>LLM7</strong>, with <strong>Pollinations</strong> as backup) writes the search
-          queries; your browser then fetches real results from <strong>YouTube</strong>,
-          <strong>edX</strong>, <strong>Coursera</strong>,
-          <strong>DuckDuckGo&rsquo;s open web index</strong>, <strong>GitHub</strong>,
-          <strong>PeerTube</strong>, <strong>Wikiversity / Wikibooks</strong> and
-          <strong>DEV Community</strong>. The AI never supplies links — it only plans searches.
-          Cards marked <strong>FREE</strong> come from sources that only hold free material; cards
-          marked <strong>FREE TO AUDIT</strong> come from edX or Coursera, where the lessons are
-          usually free but graded work and certificates may be paid — check the page. Cards
-          marked <strong>OPEN WEB</strong> come from the wider web or academic sites, so check the
-          page is free before you enrol. Language and level are read from the source when it reports
-          them — results whose source reports a different language or level are filtered out, and
-          anything a source does not report stays visible and unlabelled rather than guessed. Every
-          link opens the original creator&rsquo;s page — we never copy or re-host anyone&rsquo;s content.
-        </p>
-      </div>
-    </section>
-
-    <!-- ===================== 6. SOURCES ===================== -->
-    <section class="section" id="sources">
-      <div class="container">
-        <h2>What we actually scan</h2>
-        <p class="lead">
-          Learnova keeps no catalogue of its own. Every search runs, live and in your browser,
-          against these sources:
-        </p>
-
-        <ul class="chips">
-          <li>YouTube</li>
-          <li>edX</li>
-          <li>Coursera</li>
-          <li>Open web (DuckDuckGo)</li>
-          <li>GitHub</li>
-          <li>PeerTube</li>
-          <li>Wikiversity</li>
-          <li>Wikibooks</li>
-          <li>DEV Community</li>
-        </ul>
-
-        <p>
-          Those indexes reach platforms and creators everywhere, so a search also surfaces
-          NPTEL, SWAYAM, Khan Academy, MIT OpenCourseWare, freeCodeCamp, OpenStax, university pages
-          — plus independent teachers who publish for free. edX and Coursera courses are found
-          through DuckDuckGo&rsquo;s index of their public course pages and labelled
-          <strong>FREE TO AUDIT</strong>, because their lessons are usually free while certificates
-          can be paid. A free AI plans the queries first, but every card still links to the original
-          creator with credit. We never copy or re-host anyone&rsquo;s content.
-        </p>
-      </div>
-    </section>
-
-    <!-- ===================== 7. WHY IT'S DIFFERENT ===================== -->
-    <section class="section section-alt" id="why">
-      <div class="container">
-        <h2>Why it is different</h2>
-        <p class="lead">A quick comparison of the three ways learners search today.</p>
-
-        <div class="table-wrap">
-          <table>
-            <caption class="visually-hidden">Comparison of manual search, paid platforms and Learnova</caption>
-            <thead>
-              <tr>
-                <th scope="col">Feature</th>
-                <th scope="col">Searching manually</th>
-                <th scope="col">Paid platforms</th>
-                <th scope="col">Learnova</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <th scope="row">Always free</th>
-                <td class="part">Sometimes</td>
-                <td class="no">No</td>
-                <td class="win yes">Yes</td>
-              </tr>
-              <tr>
-                <th scope="row">Many sources in one place</th>
-                <td class="no">No</td>
-                <td class="part">One platform</td>
-                <td class="win yes">Yes</td>
-              </tr>
-              <tr>
-                <th scope="row">Hidden-paywall check</th>
-                <td class="no">You do it yourself</td>
-                <td class="part">Varies</td>
-                <td class="win yes">Checked</td>
-              </tr>
-              <tr>
-                <th scope="row">Filter by language and level</th>
-                <td class="part">Hard</td>
-                <td class="part">Limited</td>
-                <td class="win yes">Built in</td>
-              </tr>
-              <tr>
-                <th scope="row">Built for low-data phones</th>
-                <td class="no">No</td>
-                <td class="no">Heavy apps</td>
-                <td class="win yes">Yes</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===================== 8. IMPACT ===================== -->
-    <section class="section" id="impact">
-      <div class="container">
-        <h2>Our first goals</h2>
-        <p class="lead">What we want to test in the first version, with real students.</p>
-
-        <div class="grid stat-grid">
-          <article class="card stat-card">
-            <span class="stat-num">1,000</span>
-            <span class="stat-label">learners using Learnova</span>
-          </article>
-          <article class="card stat-card">
-            <span class="stat-num">200+</span>
-            <span class="stat-label">free courses and classes listed</span>
-          </article>
-          <article class="card stat-card">
-            <span class="stat-num">2–3</span>
-            <span class="stat-label">languages supported at launch</span>
-          </article>
-          <article class="card stat-card">
-            <span class="stat-num">2 min</span>
-            <span class="stat-label">to find a first free lesson</span>
-          </article>
-        </div>
-
-        <p class="muted-note" style="margin-top:1rem">These are goals to test with real students, not results.</p>
-      </div>
-    </section>
-
-    <!-- ===================== 9. ROADMAP ===================== -->
-    <section class="section section-alt" id="roadmap">
-      <div class="container">
-        <h2>Roadmap</h2>
-        <p class="lead">A simple, honest plan for the first six months.</p>
-
-        <div class="grid roadmap-grid">
-          <article class="card">
-            <span class="phase-months">Months 1–2</span>
-            <h3>Phase 1: Build</h3>
-            <ul>
-              <li>Focus on one niche subject first</li>
-              <li>AI-planned live scan across YouTube, edX, Coursera, the open web and open course libraries</li>
-              <li>Language and level filters that drive the scan itself</li>
-            </ul>
-          </article>
-
-          <article class="card">
-            <span class="phase-months">Months 3–4</span>
-            <h3>Phase 2: Test</h3>
-            <ul>
-              <li>Try it with 50–100 real students</li>
-              <li>Fix whatever breaks on low-end phones</li>
-              <li>Add a second language</li>
-            </ul>
-          </article>
-
-          <article class="card">
-            <span class="phase-months">Months 5–6</span>
-            <h3>Phase 3: Scale</h3>
-            <ul>
-              <li>Automated scanning of trusted free sources</li>
-              <li>More topics and more languages</li>
-              <li>Low-data mode and offline saved lists</li>
-            </ul>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===================== 10. ALWAYS FREE ===================== -->
-    <section class="section" id="free">
-      <div class="container">
-        <div class="free-banner">
-          <h2>Always free for learners</h2>
-          <p>
-            <span class="tick">✔ Learners never pay.</span> Not now, not later, not for filters.
-            Learnova is funded by grants, CSR support, and partnerships with colleges and NGOs.
-          </p>
-          <p style="margin-bottom:0">
-            In the future we may add optional extras like mentoring — but finding and opening
-            free courses will always stay free.
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===================== 11. JOIN / CONTACT ===================== -->
-    <section class="section section-alt" id="join">
-      <div class="container">
-        <h2>Be part of the first group</h2>
-        <p class="lead">Two simple forms. No spam, we promise.</p>
-
-        <div class="grid form-grid">
-          <!-- Email signup -->
-          <form class="card form-card" id="earlyAccessForm" novalidate>
-            <h3>Get early access</h3>
-            <p class="form-note">We will email you when Learnova is ready for students.</p>
-
-            <div class="form-group">
-              <label for="eaName">Your name</label>
-              <input type="text" id="eaName" name="name" placeholder="e.g. Priya" required />
-            </div>
-            <div class="form-group">
-              <label for="eaEmail">Email address</label>
-              <input type="email" id="eaEmail" name="email" placeholder="you@example.com" required />
-            </div>
-            <div class="form-group">
-              <label for="eaLang">Preferred language</label>
-              <select id="eaLang" name="language">
-                <option>English</option><option>Hindi</option><option>Marathi</option>
-                <option>Tamil</option><option>Telugu</option><option>Bengali</option>
-              </select>
-            </div>
-            <button class="btn btn-primary" type="submit">Get early access</button>
-            <p class="form-msg" id="eaMsg">Thank you! We have noted your interest. ✅</p>
-          </form>
-
-          <!-- Suggest a course -->
-          <form class="card form-card" id="suggestForm" novalidate>
-            <h3>Suggest a free course</h3>
-            <p class="form-note">Found a good free class? Send it our way — we will check it and add it.</p>
-
-            <div class="form-group">
-              <label for="sgLink">Course link</label>
-              <input type="url" id="sgLink" name="link" placeholder="https://…" required />
-            </div>
-            <div class="form-group">
-              <label for="sgLang">Language</label>
-              <select id="sgLang" name="language">
-                <option>English</option><option>Hindi</option><option>Marathi</option>
-                <option>Tamil</option><option>Telugu</option><option>Bengali</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="sgTopic">Topic</label>
-              <input type="text" id="sgTopic" name="topic" placeholder="e.g. Maths, Programming, English" required />
-            </div>
-            <button class="btn btn-amber" type="submit">Send suggestion</button>
-            <p class="form-msg" id="sgMsg">Thanks for helping other learners! 🙏</p>
-          </form>
-        </div>
-
-        <p class="muted-note" id="backendNote" style="margin-top:1rem">
-          Sign-in and these two forms run on Supabase. Until the project is connected they work in demo mode —
-          nothing is sent anywhere. Submissions are stored with row-level security, so learners can only
-          read their own details.
-        </p>
       </div>
     </section>
   </main>
 
-  <!-- ===================== 12. FOOTER ===================== -->
-  <footer class="footer">
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="site-footer">
     <div class="container">
       <div class="footer-grid">
-        <div>
-          <a class="logo" href="#top"><span class="logo-mark" aria-hidden="true"></span> Learnova</a>
-          <p style="margin-top:.8rem">
-            Learnova scans trusted learning sources across the internet and brings free
-            and free-to-audit courses together in one place. Scan the web. Learn for free.
-          </p>
+        <div class="footer-brand">
+          <a class="brand" href="index.html" aria-label="Learnova home">
+            <span class="brand-mark" aria-hidden="true"><span class="brand-dot"></span></span>
+            <span class="brand-word">learnova</span>
+          </a>
+          <p style="margin-top:.9rem">A hand-picked catalogue of free courses from the world’s best learning providers. Search, compare, save, and start learning — for free.</p>
+          <span class="footer-badge">✓ Always free for learners</span>
         </div>
 
-        <div>
-          <h4>Quick links</h4>
-          <ul style="list-style:none;padding:0;margin:0">
-            <li><a href="#how">How it works</a></li>
-            <li><a href="#demo">Search free courses</a></li>
-            <li><a href="#sources">Sources</a></li>
-            <li><a href="#impact">Impact</a></li>
-            <li><a href="#roadmap">Roadmap</a></li>
-            <li><a href="#join">Get early access</a></li>
+        <div class="footer-col">
+          <h4>Explore</h4>
+          <ul>
+            <li><a href="courses.html">Browse courses</a></li>
+            <li><a href="providers.html">Providers</a></li>
+            <li><a href="courses.html?certificate=free">Free certificates</a></li>
+            <li><a href="courses.html?collection=india-picks">India picks</a></li>
+            <li><a href="scan.html">Live web scan</a></li>
           </ul>
         </div>
 
-        <div>
-          <h4>Credit</h4>
-          <p style="font-size:.9rem">
-            All courses belong to their original creators and platforms. Learnova only
-            links to them with full credit. We never copy or re-host anyone&rsquo;s content.
-          </p>
+        <div class="footer-col">
+          <h4>Subjects</h4>
+          <ul>
+            <li><a href="courses.html?subject=programming">Programming</a></li>
+            <li><a href="courses.html?subject=data-science">Data Science</a></li>
+            <li><a href="courses.html?subject=mathematics">Mathematics</a></li>
+            <li><a href="courses.html?subject=languages">Languages</a></li>
+            <li><a href="courses.html?subject=career">Career &amp; Study Skills</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>About</h4>
+          <ul>
+            <li><a href="#how">How it works</a></li>
+            <li><a href="my-learning.html">My learning</a></li>
+            <li><a href="#newsletter">Course picks by email</a></li>
+            <li><a href="supabase/README.md">Backend setup</a></li>
+          </ul>
+          <p style="margin-top:1rem;font-size:.8rem">Course links and content belong to their original creators. Learnova only links to them, with credit.</p>
         </div>
       </div>
 
       <div class="footer-bottom">
-        <span>© <span id="year"></span> Learnova. Made for students. 🇮🇳</span>
-        <span>Scan the web. Learn for free.</span>
+        <span>© <span id="year"></span> Learnova. Made for learners.</span>
+        <span>Free courses, real providers, no paywalls.</span>
       </div>
     </div>
   </footer>
-
-  <!-- ============ SIGN-IN MODAL (passwordless, 6-digit email code) ============ -->
-  <div class="modal-backdrop" id="authModal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
-    <div class="modal-card card">
-      <button class="modal-close" id="authClose" type="button" aria-label="Close sign in dialog">&times;</button>
-      <span class="icon-circle ic-indigo" aria-hidden="true">🔑</span>
-      <h3 id="authTitle">Sign in to Learnova</h3>
-      <p class="form-note">No password to remember. We send a 6-digit code to your email — it works on any phone.</p>
-
-      <!-- Step 1: ask for the email -->
-      <form id="otpStep1">
-        <div class="form-group">
-          <label for="authEmail">Email address</label>
-          <input type="email" id="authEmail" placeholder="you@example.com" autocomplete="email" required />
-        </div>
-        <button class="btn btn-primary" type="submit">Send my code</button>
-      </form>
-
-      <!-- Step 2: enter the code -->
-      <form id="otpStep2" hidden>
-        <p class="form-note" id="otpSentNote"></p>
-        <div class="form-group">
-          <label for="authCode">6-digit code</label>
-          <input type="text" id="authCode" inputmode="numeric" autocomplete="one-time-code"
-                 maxlength="6" placeholder="123456" required />
-        </div>
-        <div class="btn-row">
-          <button class="btn btn-primary" type="submit">Verify &amp; sign in</button>
-          <button class="btn btn-light btn-small" type="button" id="otpBack">Use a different email</button>
-        </div>
-      </form>
-
-      <p class="form-msg" id="authMsg" role="status" aria-live="polite"></p>
-    </div>
-  </div>
-
-  <!-- Small confirmation toast -->
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
-
-  <!-- Supabase JS (auth + database). Loads before the main script below. -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-
-  <!-- ===================== JAVASCRIPT ===================== -->
-  <script>
-    /* ============================================================
-       1) LIVE SCAN SETTINGS
-       ------------------------------------------------------------
-       Learnova keeps no course list of its own. Every search fires
-       real requests, from the learner's own browser, at the open
-       indexes listed in section 3 below. Nothing here is stored,
-       faked or pre-filled.
-       ============================================================ */
-    const REQUEST_TIMEOUT = 18000;          // ms before one index counts as unreachable
-    const DEBOUNCE_MS     = 900;            // wait for typing to stop before scanning
-    const CACHE_MS        = 90000;          // reuse answers for 90s while filtering
-    const MAX_PER_SOURCE  = 30;             // so one noisy index cannot drown the rest
-    const PAGE_SIZE       = 24;             // cards shown before "show more" is pressed
-
-    /* Filter options offered to the learner (also used by the hero search) */
-    const TOPICS   = ["Programming","Data","Maths","Science","Language","Career","Design","Business","Health","Music"];
-    const LANGUAGES = ["English","Hindi","Marathi","Tamil","Telugu","Bengali","Urdu","Kannada","Malayalam","Gujarati"];
-    const LEVELS   = ["Beginner","Intermediate","Advanced"];
-
-    /* Domains whose material is free by definition — these links get the FREE badge. */
-    const FREE_HOSTS = [
-      "youtube.com", "youtu.be",
-      "khanacademy.org", "nptel.ac.in", "swayam.gov.in", "swayam2.gov.in",
-      "freecodecamp.org", "ocw.mit.edu", "cs50.harvard.edu", "pll.harvard.edu",
-      "openstax.org", "openlearn.open.ac.uk", "open.edu", "saylor.org", "gcfglobal.org",
-      "wikiversity.org", "wikibooks.org",
-      "github.com", "raw.githubusercontent.com", "dev.to",
-      "archive.org", "openlibrary.org", "gutenberg.org",
-      "w3schools.com", "developer.mozilla.org", "javascript.info", "python.org",
-      "programiz.com", "geeksforgeeks.org", "javatpoint.com", "tutorialspoint.com",
-      "learnpython.org", "theodinproject.com", "fullstackopen.com", "exercism.org",
-      "roadmap.sh", "code.org", "kaggle.com", "cognitiveclass.ai", "open.hpi.de",
-      "developers.google.com", "learn.microsoft.com",
-      "mathsisfun.com", "phet.colorado.edu", "ck12.org", "openwho.org", "who.int",
-      "musictheory.net", "justinguitar.com", "duolingo.com", "learnvern.com",
-      "magnetbrains.com", "ncert.nic.in", "cbseacademic.nic.in", "nios.ac.in",
-      "epathshala.nic.in", "diksha.gov.in", "bbc.co.uk", "britishcouncil.org"
-    ];
-
-    /* Ripped copies of paid courses that surface in public indexes — never listed. */
-    const PIRATE_RE = /(udemy|lynda|pluralsight|skillshare|torrent|desire-course|free-course-site|course-for-free|udacity[-_\s]?download|download[-_\s]?course)/i;
-
-    /* Words that say "this is a lesson" — used to keep noisy hits down. */
-    const COURSEY_RE = /\b(course|class|lesson|tutorial|learn|learning|teach|teaching|training|bootcamp|curriculum|syllabus|certification|academy|masterclass|basics?|intro(?:duction)?|beginner|roadmap|lecture|workshop|playlist|study|school)\b/i;
-
-    /* Stricter check for GitHub: a framework that mentions "machine learning"
-       is not a course, so only real curriculum/list words count. */
-    const REPO_COURSE_RE = /\b(course|curriculum|roadmap|tutorials?|bootcamp|academy|study plan|education|learning path|syllabus|guide)\b/i;
-
-    /* Search words that say nothing about the topic, so they are dropped when matching. */
-    const STOPWORDS = new Set([
-      "free","course","courses","class","classes","online","best","top","the","a","an",
-      "in","of","for","to","and","my","i","want","find","with","how","any","all"
-    ]);
-
-    /* Topic buckets: a hit is tagged with the first bucket it fits. */
-    const TOPIC_HINTS = [
-      ["Programming", ["programming","program","coding","code","software","developer","development","javascript","python","java","react","web","app","css","html","c++","golang","kotlin"]],
-      ["Data",        ["data","analytics","analysis","statistics","sql","excel","spreadsheet","machine learning","deep learning","artificial intelligence"]],
-      ["Maths",       ["math","maths","mathematics","algebra","geometry","calculus","arithmetic","trigonometry","statistics"]],
-      ["Science",     ["science","physics","chemistry","biology","astronomy","geology","engineering"]],
-      ["Language",    ["english","hindi","marathi","tamil","telugu","bengali","urdu","grammar","spoken","communication","language","writing","literature"]],
-      ["Career",      ["career","resume","interview","job","leadership","communication","productivity"]],
-      ["Business",    ["business","entrepreneur","finance","marketing","management","accounting","sales","economics","commerce","startup"]],
-      ["Design",      ["design","figma","photoshop","illustration","ui","ux","drawing","animation"]],
-      ["Health",      ["health","yoga","fitness","nutrition","medicine","medical","nursing","psychology"]],
-      ["Music",       ["music","guitar","piano","singing","flute","drums","harmonium"]]
-    ];
-
-    /* Languages we can recognise inside a title. */
-    const LANG_HINTS = {
-      english: "English", hindi: "Hindi", marathi: "Marathi", tamil: "Tamil", telugu: "Telugu",
-      bengali: "Bengali", urdu: "Urdu", kannada: "Kannada", malayalam: "Malayalam",
-      gujarati: "Gujarati", punjabi: "Punjabi", spanish: "Spanish", french: "French", german: "German",
-      deutsch: "German", español: "Spanish", français: "French"
-    };
-
-    /* Function words that identify a Latin-script title even when it never
-       names its language. Two hits are required so one borrowed word (or an
-       English title containing "die") does not flip the label. */
-    const LATIN_LANG_WORDS = {
-      German:  ["für","und","der","die","das","ein","eine","einen","mit","von","deutsch","grundlagen","anfänger","komplettes","nicht","auf","ist"],
-      Spanish: ["para","con","los","las","del","una","curso","desde","hasta","aprende","español","principiantes","completo"],
-      French:  ["pour","avec","les","des","une","du","dans","apprendre","français","cours","débutants","complet"]
-    };
-
-    /* Common subject words written in Indian scripts, so a Hindi or Tamil
-       course title still matches an English search word. */
-    const TERM_HINTS = {
-      physics: ["भौतिक", "भौतिकी", "இயற்பியல்", "భౌతిక", "ಭೌತಶಾಸ್ತ್ರ"],
-      chemistry: ["रसायन", "இரசாயன", "రసాయన", "ರಸಾಯನ"],
-      biology: ["जीव", "जीवविज्ञान", "உயிரியல்", "జీవశాస్త్రం", "ಜೀವಶಾಸ್ತ್ರ"],
-      science: ["विज्ञान", "அறிவியல்", "విజ్ఞాన", "ವಿಜ್ಞಾನ"],
-      maths: ["गणित", "கணிதம்", "గణిత", "ಗಣಿತ"],
-      mathematics: ["गणित", "கணிதம்", "గణిత", "ಗಣಿತ"],
-      english: ["अंग्रेजी", "ஆங்கிலம்", "ఆంగ్లం", "ಇಂಗ್ಲಿಷ್"],
-      hindi: ["हिंदी", "हिन्दी"],
-      computer: ["कंप्यूटर", "கணினி", "కంప్యూటర్", "ಕಂಪ್ಯೂಟರ್"],
-      history: ["इतिहास", "வரலாறு", "చరిత్ర", "ಇತಿಹಾಸ"],
-      geography: ["भूगोल", "புவியியல்", "భూగోళ", "ಭೂಗೋಳ"],
-      economics: ["अर्थशास्त्र", "பொருளாதாரம்", "ఆర్థిక", "ಅರ್ಥಶಾಸ್ತ್ರ"]
-    };
-
-    function detectTopic(text) {
-      const t = " " + String(text).toLowerCase() + " ";
-      for (const [topic, words] of TOPIC_HINTS)
-        if (words.some(w => t.includes(w))) return topic;
-      return null;
-    }
-    function detectLevel(text) {
-      const t = String(text).toLowerCase();
-      const beginner = /\b(beginner|beginners|intro(?:duction)?|101|basic|basics|foundation|foundations|starter|from scratch|getting started|zero to)\b/.test(t);
-      const advanced = /\b(advanced|expert|master(?:class|ing)?|deep dive|graduate|professional)\b/.test(t);
-      if (beginner && advanced) return "Intermediate";
-      if (advanced) return "Advanced";
-      if (/\b(intermediate|upskill|beyond the basics)\b/.test(t)) return "Intermediate";
-      if (beginner) return "Beginner";
-      return null;
-    }
-    function detectScriptLanguage(text) {
-      const t = String(text);
-      if (/[\u0900-\u097F]/.test(t)) return "Hindi";
-      if (/[\u0980-\u09FF]/.test(t)) return "Bengali";
-      if (/[\u0A00-\u0A7F]/.test(t)) return "Punjabi";
-      if (/[\u0A80-\u0AFF]/.test(t)) return "Gujarati";
-      if (/[\u0B80-\u0BFF]/.test(t)) return "Tamil";
-      if (/[\u0C00-\u0C7F]/.test(t)) return "Telugu";
-      if (/[\u0C80-\u0CFF]/.test(t)) return "Kannada";
-      if (/[\u0D00-\u0D7F]/.test(t)) return "Malayalam";
-      return null;
-    }
-    function detectLanguage(text) {
-      const t = String(text).toLowerCase();
-      for (const w in LANG_HINTS) if (t.includes(w)) return LANG_HINTS[w];
-      for (const lang in LATIN_LANG_WORDS) {
-        let hits = 0;
-        for (const w of LATIN_LANG_WORDS[lang]) {
-          if (new RegExp("\\b" + w + "\\b", "i").test(t) && ++hits >= 2) return lang;
-        }
-      }
-      /* Script detection catches titles written in the language itself. */
-      return detectScriptLanguage(t);
-    }
-    /* The language the learner is probably asking for, even without touching
-       the filter. A lone language word or a trailing one ("physics hindi")
-       counts; a topic word such as "french revolution" does not. */
-    function queryLanguage() {
-      if (demoLang.value) return demoLang.value;
-      const base = baseTerms();
-      const script = detectScriptLanguage(base);
-      if (script) return script;
-      const words = base.split(" ").filter(Boolean);
-      const last = words[words.length - 1];
-      if (words.length > 1 && LANG_HINTS[last]) return LANG_HINTS[last];
-      const phrase = base.match(/\b(?:in|learn|speak|speaking|through)\s+(english|hindi|marathi|tamil|telugu|bengali|urdu|kannada|malayalam|gujarati|punjabi|spanish|french|german)\b/);
-      if (phrase) return LANG_HINTS[phrase[1]];
-      if (words.length === 1 && LANG_HINTS[words[0]]) return LANG_HINTS[words[0]];
-      return null;
-    }
-
-    /* Small text helpers shared by every index */
-    function tidy(s) {
-      return String(s == null ? "" : s)
-        .replace(/\s+/g, " ")
-        .replace(/^[\s\-–—:•|]+/, "")
-        .replace(/[\s\-–—:•|]+$/, "")
-        .trim().slice(0, 170);
-    }
-    function stripTags(html) {
-      return tidy(String(html == null ? "" : html)
-        .replace(/<[^>]*>/g, " ")
-        .replace(/&quot;/g, '"').replace(/&#39;|&rsquo;/g, "'")
-        .replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
-        .replace(/&nbsp;/g, " "));
-    }
-    function normUrl(u) {
-      try { return new URL(u).href.split("#")[0].replace(/\/+$/, "").toLowerCase(); }
-      catch (e) { return ""; }
-    }
-    function isAcademicHost(host) {
-      return /(^|\.)(edu|gov)(\.[a-z]{2})?$/.test(host) ||
-             /\.(ac|edu|gov)\.[a-z]{2}$/.test(host) ||
-             /\.nic\.in$/.test(host);
-    }
-    function freeHostInfo(u) {
-      try {
-        const host = new URL(u).hostname.toLowerCase().replace(/^www\./, "");
-        if (FREE_HOSTS.some(d => host === d || host.endsWith("." + d))) return { free: true, host: host };
-        if (isAcademicHost(host)) return { free: false, host: host };
-        return null;
-      } catch (e) { return null; }
-    }
-    function isFreeHost(u) {
-      const info = freeHostInfo(u);
-      return Boolean(info && info.free);
-    }
-
-    /* ============================================================
-       2) NAVBAR — mobile hamburger menu
-       ============================================================ */
-    const navToggle = document.getElementById("navToggle");
-    const navPanel  = document.getElementById("navPanel");
-
-    navToggle.addEventListener("click", () => {
-      const open = navPanel.classList.toggle("open");
-      navToggle.setAttribute("aria-expanded", String(open));
-      navToggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
-    });
-
-    // Close the mobile menu after tapping a link
-    navPanel.querySelectorAll("a").forEach(a =>
-      a.addEventListener("click", () => {
-        navPanel.classList.remove("open");
-        navToggle.setAttribute("aria-expanded", "false");
-      })
-    );
-
-    // Close the menu with the Escape key
-    document.addEventListener("keydown", e => {
-      if (e.key === "Escape" && navPanel.classList.contains("open")) {
-        navPanel.classList.remove("open");
-        navToggle.setAttribute("aria-expanded", "false");
-        navToggle.focus();
-      }
-    });
-
-    /* ============================================================
-       3) LIVE AI SCAN — a free AI plans the searches, then the
-       learner's browser queries real indexes in parallel.
-       ------------------------------------------------------------
-       Nothing is pre-loaded. If every index is blocked or offline,
-       the page says so instead of falling back to a sample list.
-       ============================================================ */
-    const demoQuery   = document.getElementById("demoQuery");
-    const demoTopic   = document.getElementById("demoTopic");
-    const demoLang    = document.getElementById("demoLang");
-    const demoLevel   = document.getElementById("demoLevel");
-    const results     = document.getElementById("results");
-    const resultCount = document.getElementById("resultCount");
-    const scanBar     = document.getElementById("scanBar");
-    const scanSummary = document.getElementById("scanSummary");
-    const sourceList  = document.getElementById("sourceList");
-    const rescanBtn   = document.getElementById("rescanBtn");
-
-    /* Escape text before putting it into HTML (safety) */
-    const esc = s => String(s).replace(/[&<>"']/g, m =>
-      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
-
-    /* Fixed filter options (defined in section 1) */
-    function fillSelect(select, values) {
-      values.forEach(v => {
-        const opt = document.createElement("option");
-        opt.value = v; opt.textContent = v;
-        select.appendChild(opt);
-      });
-    }
-    fillSelect(demoTopic, TOPICS);
-    fillSelect(demoLang, LANGUAGES);
-    fillSelect(demoLevel, LEVELS);
-
-    /* ---------- 3a. What we ask the indexes for ---------- */
-    function baseTerms() {
-      const cleaned = demoQuery.value.trim().toLowerCase()
-        .replace(/[^\p{L}\p{N}+#.\s-]/gu, " ")
-        .replace(/\s+/g, " ").trim();
-      if (cleaned) return cleaned;
-      if (demoTopic.value) return demoTopic.value.toLowerCase();
-      return "";
-    }
-    /* Words that carry the topic ("free course" says nothing, so it is dropped here) */
-    function matchTokens() {
-      return baseTerms().split(" ").filter(w => w && !STOPWORDS.has(w));
-    }
-    /* Quote each word so a Solr / Wikimedia parser never treats it as an operator */
-    function quotedWords(terms) {
-      return terms.split(" ").filter(Boolean)
-        .map(w => '"' + w.replace(/"/g, "") + '"').join(" ");
-    }
-    function langHint() {
-      const l = demoLang.value;
-      if (!l || baseTerms().includes(l.toLowerCase())) return "";
-      return " in " + l;
-    }
-    function levelHint() {
-      const l = demoLevel.value;
-      if (l === "Beginner") return " for beginners";
-      if (l === "Advanced") return " advanced";
-      return "";
-    }
-
-    /* ---------- 3b. One fetch helper, with its own timeout ---------- */
-    function fetchWithTimeout(url, opts, signal, asText, timeoutMs) {
-      const ctrl = new AbortController();
-      let timedOut = false;
-      const timer = setTimeout(() => { timedOut = true; ctrl.abort(); }, timeoutMs || REQUEST_TIMEOUT);
-      const onAbort = () => ctrl.abort();
-      const stopListening = () => {
-        clearTimeout(timer);
-        if (signal) signal.removeEventListener("abort", onAbort);
-      };
-      if (signal) {
-        if (signal.aborted) {
-          clearTimeout(timer);
-          const err = new Error("scan cancelled");
-          err.name = "AbortError";
-          return Promise.reject(err);
-        }
-        signal.addEventListener("abort", onAbort);
-      }
-      return fetch(url, Object.assign({}, opts, {
-          signal: ctrl.signal,
-          referrerPolicy: "no-referrer"
-        }))
-        .then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return asText ? r.text() : r.json(); })
-        .then(v => { stopListening(); return v; },
-              e => {
-                stopListening();
-                if (timedOut) {
-                  const err = new Error("request timed out");
-                  err.name = "TimeoutError";
-                  throw err;
-                }
-                throw e;
-              });
-    }
-    function fetchAny(url, signal, asText) {
-      return fetchWithTimeout(url, {}, signal, asText, REQUEST_TIMEOUT);
-    }
-    function postJSON(url, payload, signal, timeoutMs) {
-      return fetchWithTimeout(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      }, signal, false, timeoutMs);
-    }
-
-    /* ---------- 3c. The free AI planner ----------
-       The model only writes search queries. It never supplies links:
-       every card still comes from a real index fetched below. */
-    const AI_TIMEOUT = 7000;
-    const POLLINATIONS_TIMEOUT = 15000;
-    const AI_CACHE_MS = 15 * 60 * 1000;
-    const aiCache = new Map();
-
-    function extractQueries(text) {
-      const raw = String(text || "").replace(/```(?:json)?/gi, "").trim();
-      const start = raw.indexOf("[");
-      const end = raw.lastIndexOf("]");
-      if (start === -1 || end <= start) return [];
-      let parsed;
-      try { parsed = JSON.parse(raw.slice(start, end + 1)); } catch (e) { return []; }
-      if (!Array.isArray(parsed)) return [];
-      const out = [];
-      parsed.forEach(q => {
-        if (typeof q !== "string") return;
-        const clean = tidy(q).replace(/^["'`]+|["'`]+$/g, "").replace(/\s+/g, " ");
-        if (clean.length < 3 || clean.length > 120) return;
-        if (/https?:\/\//i.test(clean) || /\bsite:/i.test(clean)) return;
-        out.push(clean);
-      });
-      return out.slice(0, 4);
-    }
-
-    async function askLLM7(prompt, signal) {
-      const body = {
-        model: "minimax-m2.7",
-        messages: [
-          { role: "system", content: "You plan search queries for a free-course finder. Reply with ONLY a JSON array of short query strings." },
-          { role: "user", content: prompt }
-        ],
-        temperature: 0.35,
-        max_tokens: 260
-      };
-      const json = await postJSON("https://api.llm7.io/v1/chat/completions", body, signal, AI_TIMEOUT);
-      const content = json && json.choices && json.choices[0] &&
-        json.choices[0].message && json.choices[0].message.content;
-      return extractQueries(content);
-    }
-
-    async function askPollinations(prompt, signal) {
-      const body = {
-        model: "openai-fast",
-        messages: [
-          { role: "system", content: "Reply with ONLY a JSON array of short search query strings." },
-          { role: "user", content: prompt }
-        ],
-        temperature: 0.35
-      };
-      const json = await postJSON("https://text.pollinations.ai/openai", body, signal, POLLINATIONS_TIMEOUT);
-      const content = json && json.choices && json.choices[0] &&
-        json.choices[0].message && json.choices[0].message.content;
-      return extractQueries(content);
-    }
-
-    function queryKey(q) {
-      return String(q).toLowerCase().replace(/[^\p{L}\p{N}+#]+/gu, " ").trim();
-    }
-    function queryWords(q) {
-      return new Set(queryKey(q).split(" ").filter(w => w && !STOPWORDS.has(w)));
-    }
-    function similarQuery(a, b) {
-      const A = queryWords(a), B = queryWords(b);
-      if (!A.size || !B.size) return queryKey(a) === queryKey(b);
-      let same = 0;
-      A.forEach(w => { if (B.has(w)) same++; });
-      return same / Math.min(A.size, B.size) >= 0.85;
-    }
-    function mergeQueries(list, max) {
-      const out = [];
-      list.forEach(q => {
-        const clean = tidy(q).replace(/^["'`]+|["'`]+$/g, "").replace(/\s+/g, " ");
-        if (clean.length < 3) return;
-        if (out.some(old => similarQuery(old, clean))) return;
-        out.push(clean);
-      });
-      return out.slice(0, max);
-    }
-
-    async function planSearches(ctx) {
-      const prompt = [
-        "Subject: " + ctx.base,
-        "Language: " + (ctx.lang || "any"),
-        "Level: " + (ctx.level || "any"),
-        "Write up to 3 short web-search queries that will find free full courses, video playlists or open courseware for this subject.",
-        "Each query must aim at a full course, video playlist or open courseware — not notes, PDFs, exam papers or books.",
-        "Include the language and level words when they are given. Keep each query under 90 characters.",
-        "Do not return links, site: operators, quotes or explanations.",
-        'Reply with ONLY a JSON array of strings, for example ["python full course hindi", "python beginners playlist"].'
-      ].join("\n");
-
-      let ai = [];
-      try {
-        ai = await askLLM7(prompt, ctx.signal);
-      } catch (e) {
-        if (e && e.name === "AbortError") throw e;
-      }
-      if (!ai.length) {
-        try {
-          ai = await askPollinations(prompt, ctx.signal);
-        } catch (e) {
-          if (e && e.name === "AbortError") throw e;
-        }
-      }
-
-      const ordered = ai.length
-        ? [ai[0], ctx.baseQuery].concat(ai.slice(1))
-        : [ctx.baseQuery];
-      const queries = mergeQueries(ordered, 4);
-      return { queries: queries.length ? queries : [ctx.baseQuery], aiCount: ai.length, usedAI: ai.length > 0 };
-    }
-
-    function getCachedPlan(key) {
-      const hit = aiCache.get(key);
-      if (!hit) return null;
-      const ttl = hit.plan.usedAI ? AI_CACHE_MS : 60000;
-      if (performance.now() - hit.at > ttl) {
-        aiCache.delete(key);
-        return null;
-      }
-      return hit.plan;
-    }
-    function savePlan(key, plan) {
-      aiCache.set(key, { at: performance.now(), plan: plan });
-      if (aiCache.size > 40) {
-        const oldest = aiCache.keys().next().value;
-        if (oldest !== key) aiCache.delete(oldest);
-      }
-    }
-
-    /* ---------- 3d. The indexes ---------- */
-
-    /* 1. YouTube — the largest free video-course library. Piped is the
-          primary open API; Invidious is the fallback if Piped is down. */
-    const PIPED_HOST = "https://pipedapi.ducks.party";
-    const INVIDIOUS_HOSTS = ["https://yt.chocolatemoo53.com", "https://inv.nadeko.net"];
-
-    function keepYouTube(item) {
-      if (item.kind === "playlist") return item.videoCount >= 2;
-      return COURSEY_RE.test(item.title) || item.seconds >= 1200;
-    }
-
-    function pipedVideo(v) {
-      if (!v || v.type !== "stream" || !v.url || !v.title) return null;
-      return {
-        title: tidy(v.title),
-        url: "https://www.youtube.com" + v.url,
-        source: "YouTube",
-        text: String(v.shortDescription || "").slice(0, 320),
-        free: true,
-        kind: "video",
-        seconds: Number(v.duration) || 0,
-        views: Number(v.views) || 0,
-        meta: v.uploaderName || "YouTube",
-        metaTitle: "YouTube channel",
-        strict: true
-      };
-    }
-    function pipedPlaylist(p) {
-      if (!p || p.type !== "playlist") return null;
-      const id = String(p.url || "").match(/[?&]list=([^&]+)/);
-      const name = p.name || p.title;
-      if (!id || !name) return null;
-      return {
-        title: tidy(name),
-        url: "https://www.youtube.com/playlist?list=" + id[1],
-        source: "YouTube",
-        text: "",
-        free: true,
-        kind: "playlist",
-        videoCount: Number(p.videos) || 0,
-        meta: p.uploaderName || "YouTube",
-        metaTitle: "YouTube channel",
-        strict: true
-      };
-    }
-
-    function pipedSearch(q, signal) {
-      const url = PIPED_HOST + "/search?q=" + encodeURIComponent(q) + "&filter=all";
-      return fetchAny(url, signal).then(json => (json.items || [])
-        .map(v => pipedVideo(v) || pipedPlaylist(v))
-        .filter(i => i && keepYouTube(i)));
-    }
-
-    function invidiousVideo(v) {
-      if (!v || v.type !== "video" || !v.videoId || !v.title) return null;
-      return {
-        title: tidy(v.title),
-        url: "https://www.youtube.com/watch?v=" + v.videoId,
-        source: "YouTube",
-        text: String(v.description || "").slice(0, 320),
-        free: true,
-        kind: "video",
-        seconds: Number(v.lengthSeconds) || 0,
-        views: Number(v.viewCount) || 0,
-        meta: v.author || "YouTube",
-        metaTitle: "YouTube channel",
-        strict: true
-      };
-    }
-    function invidiousPlaylist(p) {
-      if (!p || p.type !== "playlist" || !p.playlistId || !p.title) return null;
-      return {
-        title: tidy(p.title),
-        url: "https://www.youtube.com/playlist?list=" + p.playlistId,
-        source: "YouTube",
-        text: "",
-        free: true,
-        kind: "playlist",
-        videoCount: Number(p.videoCount) || 0,
-        meta: p.author || "YouTube",
-        metaTitle: "YouTube channel",
-        strict: true
-      };
-    }
-
-    async function invidiousSearch(q, signal) {
-      let lastErr = null;
-      for (const host of INVIDIOUS_HOSTS) {
-        try {
-          const [videos, playlists] = await Promise.all([
-            fetchAny(host + "/api/v1/search?q=" + encodeURIComponent(q) + "&type=video", signal),
-            fetchAny(host + "/api/v1/search?q=" + encodeURIComponent(q) + "&type=playlist", signal)
-          ]);
-          return videos.map(invidiousVideo)
-            .concat(playlists.map(invidiousPlaylist))
-            .filter(i => i && keepYouTube(i));
-        } catch (e) {
-          if (e && e.name === "AbortError") throw e;
-          lastErr = e;
-        }
-      }
-      throw lastErr || new Error("YouTube unreachable");
-    }
-
-    async function youtubeQuery(q, signal) {
-      try {
-        return await pipedSearch(q, signal);
-      } catch (e) {
-        if (e && e.name === "AbortError") throw e;
-        return invidiousSearch(q, signal);
-      }
-    }
-
-    async function scanYouTube(c) {
-      const queries = await c.planPromise;
-      const chosen = queries.slice(0, 2);
-      if (!chosen.length) throw new Error("No YouTube query");
-      const settled = await Promise.allSettled(chosen.map(q => youtubeQuery(q, c.signal)));
-      const ok = settled.filter(r => r.status === "fulfilled");
-      if (!ok.length) throw settled[0].reason;
-      return ok.reduce((all, r) => all.concat(r.value), []);
-    }
-
-    /* 2. edX + Coursera — university and industry courses. Their catalogues
-          have no public browser API, so their real /learn course pages are
-          found through DuckDuckGo's live index. Both platforms usually let
-          learners audit for free, but certificates can be paid — these cards
-          say FREE TO AUDIT, never FREE. */
-    function edxCourseUrl(u) {
-      const m = u.pathname.match(/^\/learn\/([^/]+)\/([^/]+)\/?$/);
-      return m ? "https://www.edx.org/learn/" + m[1] + "/" + m[2] : "";
-    }
-    function courseraCourseUrl(u) {
-      const m = u.pathname.match(/^\/learn\/([^/]+)\/?$/);
-      return m ? "https://www.coursera.org/learn/" + m[1] : "";
-    }
-    function ddgSiteSearch(q, opts, signal) {
-      const target = "https://html.duckduckgo.com/html/?q=" + encodeURIComponent(q);
-      return fetchAny("https://r.jina.ai/" + target, signal, true)
-        .then(md => parseDDG(md, opts));
-    }
-    async function scanCourseSite(c, opts) {
-      const queries = await c.planPromise;
-      const q = "site:" + opts.site + "/learn " + (queries[0] || c.baseQuery);
-      const items = await ddgSiteSearch(q, opts, c.signal);
-      const suffix = new RegExp("\\s*[|\\-–]\\s*" + opts.label + "\\s*$", "i");
-      return items.map(item => {
-        item.title = tidy(item.title.replace(suffix, ""));
-        return item;
-      });
-    }
-    function scanEdx(c) {
-      return scanCourseSite(c, {
-        site: "edx.org",
-        host: "edx.org",
-        courseUrl: edxCourseUrl,
-        source: "edX",
-        label: "edX",
-        audit: true,
-        kind: "course",
-        meta: "edx.org",
-        metaTitle: "edX course catalogue (found through DuckDuckGo)"
-      });
-    }
-    function scanCoursera(c) {
-      return scanCourseSite(c, {
-        site: "coursera.org",
-        host: "coursera.org",
-        courseUrl: courseraCourseUrl,
-        source: "Coursera",
-        label: "Coursera",
-        audit: true,
-        kind: "course",
-        meta: "coursera.org",
-        metaTitle: "Coursera course catalogue (found through DuckDuckGo)"
-      });
-    }
-
-    /* 3. Open web — DuckDuckGo's no-JavaScript results, fetched through
-          Jina Reader (which sends CORS headers). Only free-course hosts
-          and academic domains are kept; paid platforms are dropped. */
-    function unwrapDDG(raw) {
-      try {
-        const u = new URL(String(raw).replace(/&amp;/g, "&"));
-        const host = u.hostname.toLowerCase();
-        if (host === "duckduckgo.com" || host.endsWith(".duckduckgo.com")) {
-          if (u.pathname === "/l/" || u.pathname === "/l") {
-            const target = u.searchParams.get("uddg");
-            return target || "";
-          }
-          return "";
-        }
-        return u.href;
-      } catch (e) { return ""; }
-    }
-
-    function stripMd(s) {
-      return tidy(String(s == null ? "" : s)
-        .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
-        .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
-        .replace(/[*_`~#>]/g, " ")
-        .replace(/\\([\[\]()])/g, "$1")
-        .replace(/&quot;/g, '"').replace(/&#39;|&rsquo;/g, "'")
-        .replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
-        .replace(/&nbsp;/g, " "));
-    }
-
-    function parseDDG(md, opts) {
-      opts = opts || {};
-      const lines = String(md || "").split(/\r?\n/);
-      const out = [], seen = new Set();
-      for (let i = 0; i < lines.length; i++) {
-        const m = lines[i].match(/^##\s+\[(.+?)\]\((https?:\/\/[^)\s]+)\)/);
-        if (!m) continue;
-        const title = stripMd(m[1]);
-        const rawUrl = unwrapDDG(m[2]);
-        if (!title || !rawUrl) continue;
-        let parsed;
-        try { parsed = new URL(rawUrl); } catch (e) { continue; }
-        /* Course-site searches keep only real course pages and strip tracking. */
-        if (opts.courseUrl) {
-          const clean = opts.courseUrl(parsed);
-          if (!clean) continue;
-          try { parsed = new URL(clean); } catch (e) { continue; }
-        }
-        const url = parsed.href;
-        const host = parsed.hostname.toLowerCase().replace(/^www\./, "");
-        if (opts.host) {
-          if (host !== opts.host) continue;
-        } else {
-          if (/(^|\.)(youtube\.com|youtu\.be|duckduckgo\.com|bing\.com)$/.test(host)) continue;
-        }
-        if (PIRATE_RE.test(url + " " + title)) continue;
-        const info = opts.host ? null : freeHostInfo(url);
-        if (!opts.host && !info) continue;
-        const key = normUrl(url);
-        if (!key || seen.has(key)) continue;
-        seen.add(key);
-        let snippet = "";
-        for (let j = i + 1; j < lines.length && !/^##\s+\[/.test(lines[j]); j++) {
-          const text = stripMd(lines[j]);
-          if (text.length > snippet.length && !/^Image \d+/.test(text)) snippet = text;
-        }
-        out.push({
-          title: title,
-          url: url,
-          source: opts.source || "Open web",
-          text: snippet.slice(0, 320),
-          free: info ? info.free : false,
-          audit: Boolean(opts.audit),
-          kind: opts.kind || "web",
-          meta: opts.meta || (info ? info.host : host),
-          metaTitle: opts.metaTitle || ("Website: " + host + " (found through DuckDuckGo)"),
-          strict: true
-        });
-        if (out.length >= (opts.limit || 24)) break;
-      }
-      return out;
-    }
-
-    function ddgSearch(q, signal) {
-      const target = "https://html.duckduckgo.com/html/?q=" + encodeURIComponent(q);
-      return fetchAny("https://r.jina.ai/" + target, signal, true).then(md => parseDDG(md));
-    }
-
-    async function scanOpenWeb(c) {
-      const queries = await c.planPromise;
-      const chosen = [];
-      queries.slice(0, 2).forEach(q => {
-        const clean = tidy(q);
-        const full = /\b(free|course|courses|tutorial|lesson|lecture|class)\b/i.test(clean)
-          ? clean : clean + " free course";
-        if (!chosen.some(old => old.toLowerCase() === full.toLowerCase())) chosen.push(full);
-      });
-      if (!chosen.length) throw new Error("No web query");
-      const settled = await Promise.allSettled(chosen.map(q => ddgSearch(q, c.signal)));
-      const ok = settled.filter(r => r.status === "fulfilled");
-      if (!ok.length) throw settled[0].reason;
-      const seen = new Set(), out = [];
-      ok.forEach(r => r.value.forEach(item => {
-        const key = normUrl(item.url);
-        if (!key || seen.has(key)) return;
-        seen.add(key);
-        out.push(item);
-      }));
-      return out;
-    }
-
-    /* 4. GitHub — open course repos, roadmaps and full course collections */
-    function scanGitHub(c) {
-      const url = "https://api.github.com/search/repositories?q=" +
-        encodeURIComponent(c.base + " course in:name,description") +
-        "&sort=stars&order=desc&per_page=20";
-      return fetchAny(url, c.signal).then(json => (json.items || [])
-        .filter(r => !PIRATE_RE.test(r.name + " " + (r.description || "")))
-        .filter(r => REPO_COURSE_RE.test(r.name + " " + (r.description || "") + " " + (r.topics || []).join(" ")))
-        .map(r => ({
-          title: tidy(r.name.replace(/[-_]+/g, " ")),
-          url: r.html_url,
-          source: "GitHub",
-          text: String(r.description || "") + " " + (r.topics || []).join(" "),
-          free: true,
-          kind: "repo",
-          stars: r.stargazers_count || 0,
-          meta: r.full_name,
-          metaTitle: "GitHub repository",
-          strict: true
-        })));
-    }
-
-    /* 5. PeerTube — a federated network of free, independent video servers */
-    function keepPeerTube(v) {
-      if (Number(v.duration) < 1200) return false;
-      return COURSEY_RE.test(v.name) ||
-        /\b(full|complete|from scratch|lecture|series|beginner|masterclass)\b/i.test(v.name);
-    }
-    function scanPeerTube(c) {
-      const term = (c.base + c.hint).trim();
-      const url = "https://sepiasearch.org/api/v1/search/videos?search=" +
-        encodeURIComponent(term) + "&count=25&nsfw=false";
-      return fetchAny(url, c.signal).then(json => (json.data || [])
-        .filter(v => v.name && v.account && v.uuid && !PIRATE_RE.test(v.name))
-        .filter(keepPeerTube)
-        .map(v => ({
-          title: tidy(v.name),
-          url: "https://" + v.account.host + "/w/" + v.uuid,
-          source: "PeerTube",
-          text: String(v.description || "").slice(0, 320),
-          free: true,
-          kind: "video",
-          seconds: Number(v.duration) || 0,
-          views: Number(v.views) || 0,
-          lang: (v.language && v.language.label && v.language.label !== "Unknown")
-            ? v.language.label.charAt(0).toUpperCase() + v.language.label.slice(1).toLowerCase()
-            : null,
-          meta: v.account.host,
-          metaTitle: "PeerTube server",
-          strict: true
-        })));
-    }
-
-    /* 6. Wikiversity + Wikibooks — free course pages and free textbooks */
-    function wikiSearch(host, label, c) {
-      const tokens = matchTokens();
-      const url = "https://" + host + "/w/api.php?action=query&list=search&srnamespace=0&srlimit=20" +
-        "&srsearch=" + encodeURIComponent(quotedWords(c.base) + c.hint) + "&format=json&origin=*";
-      return fetchAny(url, c.signal).then(json => {
-        const hits = (json.query && json.query.search) || [];
-        return hits
-          .filter(h => !/print version/i.test(h.title || ""))
-          /* A page that only mentions the subject in its body is usually a
-             tangent. Keep Wikimedia pages whose title names the subject. */
-          .filter(h => {
-            if (!tokens.length) return true;
-            const title = String(h.title || "").toLowerCase();
-            return tokens.some(t => title.includes(t) ||
-              (TERM_HINTS[t] || []).some(x => title.includes(x)));
-          })
-          .map(h => ({
-            title: tidy(h.title),
-            url: "https://" + host + "/wiki/" + encodeURIComponent(h.title.replace(/ /g, "_")),
-            source: label,
-            text: stripTags(h.snippet || ""),
-            free: true,
-            kind: "text",
-            meta: "Wikiversity" === label ? "wikiversity.org" : "wikibooks.org",
-            metaTitle: "Wikimedia project",
-            strict: true
-          }));
-      });
-    }
-    function scanWikimedia(c) {
-      return Promise.all([
-        wikiSearch("en.wikiversity.org", "Wikiversity", c),
-        wikiSearch("en.wikibooks.org", "Wikibooks", c)
-      ]).then(a => a[0].concat(a[1]));
-    }
-
-    /* 7. DEV Community — free written tutorials for programming topics */
-    function scanDevTo(c) {
-      const tag = c.base.split(" ")[0].toLowerCase().replace(/[^a-z0-9]/g, "");
-      if (tag.length < 2 || tag.length > 20) return Promise.resolve([]);
-      const url = "https://dev.to/api/articles?tag=" + encodeURIComponent(tag) + "&per_page=20";
-      return fetchAny(url, c.signal).then(json => (json || [])
-        .filter(a => a.title && a.url)
-        .map(a => ({
-          title: tidy(a.title),
-          url: a.url,
-          source: "DEV Community",
-          text: String(a.description || "").slice(0, 320),
-          free: true,
-          kind: "article",
-          minutes: Number(a.reading_time_minutes) || 0,
-          meta: "dev.to",
-          metaTitle: "DEV Community",
-          strict: true
-        })));
-    }
-
-    /* ---------- 3e. The scan itself ---------- */
-    const SCANNERS = [
-      { id: "youtube",   name: "YouTube",                   run: scanYouTube },
-      { id: "edx",       name: "edX",                       run: scanEdx },
-      { id: "coursera",  name: "Coursera",                  run: scanCoursera },
-      { id: "openweb",   name: "Open web (DuckDuckGo)",     run: scanOpenWeb },
-      { id: "github",    name: "GitHub",                    run: scanGitHub },
-      { id: "peertube",  name: "PeerTube",                  run: scanPeerTube },
-      { id: "wikimedia", name: "Wikiversity + Wikibooks",   run: scanWikimedia },
-      { id: "devto",     name: "DEV Community",             run: scanDevTo }
-    ];
-
-    const KIND_LABEL = {
-      video: "Video course", playlist: "Course playlist", course: "Online course",
-      text: "Free course page", repo: "Course repo", article: "Tutorial", web: "Web page"
-    };
-
-    /* Indexes that accept the language hint inside the query */
-    const HINTED_SOURCES = ["youtube", "edx", "coursera", "openweb", "peertube", "wikimedia"];
-
-    let scanToken = 0, scanCtrl = null, scanTimer = null;
-    let collected = [], sourceState = {}, scanStarted = 0, scanElapsed = 0;
-    let visibleLimit = PAGE_SIZE;
-    let aiState = { state: "idle", count: 0, cached: false };
-    const cache = new Map();
-
-    function scanning() {
-      return aiState.state === "busy" ||
-        SCANNERS.some(s => (sourceState[s.id] || {}).state === "busy");
-    }
-    function summaryText() {
-      if (!scanStarted) return "Ready. Type any subject to start a live scan.";
-      const states = SCANNERS.map(s => (sourceState[s.id] || {}).state);
-      const busy = states.filter(x => x === "busy").length;
-      const fail = states.filter(x => x === "fail").length;
-      let ai;
-      if (aiState.state === "busy") ai = "AI is planning searches";
-      else if (aiState.state === "ok") ai = "AI planned " + aiState.count + " search" + (aiState.count === 1 ? "" : "es") + (aiState.cached ? " (cached)" : "");
-      else if (aiState.state === "fail") ai = "AI planner unavailable — searched your words directly";
-      else ai = "Ready";
-      if (busy) return ai + " · scanning " + (SCANNERS.length - busy) + " of " + SCANNERS.length + " sources…";
-      if (fail === SCANNERS.length) return "No source answered — check your connection, then press Scan again.";
-      return ai + " · queried " + SCANNERS.length + " sources · finished in " + (scanElapsed / 1000).toFixed(1) + "s" +
-             (fail ? " · " + fail + " unreachable" : "");
-    }
-    function renderSourceList() {
-      sourceList.innerHTML = SCANNERS.map(s => {
-        const st = sourceState[s.id] || { state: "idle" };
-        const label = st.state === "ok"   ? st.count + (st.count === 1 ? " result" : " results")
-                    : st.state === "busy" ? "scanning…"
-                    : st.state === "fail" ? "unreachable"
-                    : "waiting";
-        return '<li data-state="' + st.state + '" title="' + esc(s.name) + '">' +
-               '<span class="dot"></span>' + esc(s.name) + ' <b class="n">' + label + "</b></li>";
-      }).join("");
-      scanSummary.textContent = summaryText();
-    }
-
-    /* ---------- 3f. Ranking and painting what came back ---------- */
-    function decorate(item) {
-      if (!item.level) item.level = detectLevel(item.title) || detectLevel(item.text || "");
-      /* Read language from the title only: descriptions often mention a
-         different language and would hide valid results. */
-      if (!item.lang)  item.lang  = detectLanguage(item.title);
-      if (!item.topic) item.topic = detectTopic(item.title + " " + (item.text || ""));
-      if (item.free === null || item.free === undefined) item.free = isFreeHost(item.url);
-      return item;
-    }
-    function relevant(item, tokens) {
-      if (!tokens.length) return true;
-      const title = item.title.toLowerCase();
-      const hay = (item.title + " " + (item.text || "") + " " + item.source).toLowerCase();
-      const found = tokens.filter(t => {
-        if (hay.includes(t)) return true;
-        const alt = TERM_HINTS[t];
-        return Boolean(alt && alt.some(x => hay.includes(x)));
-      });
-      if (!item.strict) return found.length >= 1;
-      if (found.length >= Math.min(2, tokens.length)) return true;
-      /* Longer searches often mix a subject with a class, level or language
-         ("class 10 physics hindi medium"). One token in the title is still a
-         strong match, so use it rather than emptying the whole page. */
-      return found.some(t => title.includes(t) ||
-        (TERM_HINTS[t] || []).some(x => title.includes(x)));
-    }
-    function languageMatches(item, lang) {
-      if (!item.lang) return true;
-      if (item.lang === lang) return true;
-      /* Devanagari is shared by Hindi and Marathi; never hide one as the other. */
-      return item.lang === "Hindi" && lang === "Marathi";
-    }
-    /* Topic buckets overlap (marketing is business and career content), so a
-       selected topic matches either the detected bucket or its own hint words. */
-    function topicMatches(item, topic) {
-      if (!topic || !item.topic) return true;
-      if (item.topic === topic) return true;
-      const bucket = TOPIC_HINTS.find(pair => pair[0] === topic);
-      if (!bucket) return false;
-      const hay = (item.title + " " + (item.text || "")).toLowerCase();
-      return bucket[1].some(w => hay.includes(w));
-    }
-    function scoreItem(item, tokens, lang, lvl, pref) {
-      const title = item.title.toLowerCase();
-      const body = ((item.text || "") + " " + item.source).toLowerCase();
-      let s = 0;
-      for (const t of tokens) {
-        if (title.includes(t)) s += 4;
-        else if (body.includes(t)) s += 1.5;
-      }
-      if (COURSEY_RE.test(item.title)) s += 2;
-      if (item.free) s += 1;
-      if (item.kind === "playlist") s += 4;
-      if (item.kind === "video" && item.seconds >= 1800) s += 2;
-      /* The learner asked for a language or a level — put the matching ones on top.
-         Nothing is hidden this way: sources that do not report language/level keep
-         their normal place in the list. */
-      if (lang && item.lang === lang) s += 8;
-      else if (lang && item.hinted) s += 5;
-      else if (!lang && pref && item.lang === pref) s += 6;
-      else if (!lang && pref && item.lang) s -= 4;
-      else if (!lang && item.lang === "English") s += 2;
-      else if (!lang && item.lang) s -= 8;
-      if (lvl && item.level === lvl) s += 5;
-      if (item.views) s += Math.min(2.5, Math.log10(item.views + 10) / 2);
-      if (item.stars) s += Math.min(3, Math.log10(item.stars + 10));
-      return s;
-    }
-    function currentList() {
-      const tokens = matchTokens(), lvl = demoLevel.value, lang = demoLang.value, topic = demoTopic.value;
-      const pref = queryLanguage();
-      const seen = new Set(), seenTitles = new Set(), out = [];
-      for (const item of collected) {
-        const key = normUrl(item.url);
-        if (!key || seen.has(key)) continue;
-        seen.add(key);
-        const titleKey = (item.title + "|" + (item.meta || "") + "|" + item.source)
-          .toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();
-        if (titleKey && seenTitles.has(titleKey)) continue;
-        seenTitles.add(titleKey);
-        if (lvl && item.level && item.level !== lvl) continue;
-        if (lang && !languageMatches(item, lang)) continue;
-        if (topic && !topicMatches(item, topic)) continue;
-        if (!relevant(item, tokens)) continue;
-        item.score = scoreItem(item, tokens, lang, lvl, pref);
-        out.push(item);
-      }
-      out.sort((a, b) => b.score - a.score);
-      /* Keep the first page varied: with eight indexes, three results per
-         source guarantees every source that answered is visible. */
-      const perSource = {}, primary = [], overflow = [];
-      out.forEach(item => {
-        const n = perSource[item.source] || 0;
-        if (n < 3) { primary.push(item); perSource[item.source] = n + 1; }
-        else overflow.push(item);
-      });
-      return primary.concat(overflow);
-    }
-    function durationLabel(c) {
-      if (c.videoCount) return c.videoCount + (c.videoCount === 1 ? " video" : " videos");
-      if (c.minutes) return Math.round(c.minutes) + " min read";
-      if (c.seconds) {
-        const m = Math.round(c.seconds / 60);
-        return m >= 60 ? Math.floor(m / 60) + "h " + (m % 60) + "m" : m + " min";
-      }
-      if (c.views) return (c.views >= 1000 ? (c.views / 1000).toFixed(1) + "k" : c.views) + " views";
-      if (c.stars) return (c.stars >= 1000 ? (c.stars / 1000).toFixed(1) + "k" : c.stars) + " stars";
-      return "";
-    }
-    function cardHTML(c) {
-      const meta = [KIND_LABEL[c.kind] || "Web page"];
-      const dur = durationLabel(c);
-      if (dur) meta.push(dur);
-      if (c.lang) meta.push(c.lang);
-      if (c.level) meta.push(c.level);
-      const badge = c.free
-        ? { cls: "badge-free", text: "FREE", title: "Comes from a source that only holds free material" }
-        : c.audit
-          ? { cls: "badge-audit", text: "FREE TO AUDIT", title: "Usually free to audit — graded work and certificates may be paid. Check the course page." }
-          : { cls: "badge-open", text: "OPEN WEB", title: "Found on the open web or an academic site — check it is free before you enrol" };
-      return `
-        <article class="card course-card">
-          <div class="badge-row">
-            <span class="${badge.cls}" title="${badge.title}">${badge.text}</span>
-            ${c.meta ? `<span class="badge-kind" title="${esc(c.metaTitle || "Source")}">${esc(String(c.meta).split("/").pop().slice(0, 34))}</span>` : ""}
-          </div>
-          <span class="course-source">${esc(c.source)}</span>
-          <h3>${esc(c.title)}</h3>
-          <p class="course-meta">${esc(meta.join(" • "))}</p>
-          <a class="course-link" href="${esc(c.url)}" target="_blank" rel="noopener noreferrer">
-            Open original page →
-          </a>
-        </article>`;
-    }
-    function renderResults() {
-      if (!scanStarted) {
-        resultCount.textContent = "";
-        results.innerHTML = '<div class="card no-results"><h3>Type a subject to start</h3>' +
-          '<p>Nothing is pre-loaded. Try <strong>python</strong>, <strong>class 10 physics in Hindi</strong> ' +
-          'or <strong>spoken English</strong> — a free AI plans the searches, then your browser fetches the courses live.</p></div>';
-        return;
-      }
-      const list = currentList();
-      const freeCount = list.filter(i => i.free).length;
-      const auditCount = list.filter(i => i.audit && !i.free).length;
-      resultCount.textContent = list.length
-        ? (freeCount === list.length
-            ? list.length + " free result" + (list.length === 1 ? "" : "s")
-            : [list.length + " result" + (list.length === 1 ? "" : "s")]
-                .concat(freeCount ? [freeCount + " marked free"] : [])
-                .concat(auditCount ? [auditCount + " free to audit"] : [])
-                .join(" · "))
-        : "";
-      if (!list.length) {
-        const filtersOn = demoLang.value || demoLevel.value || demoTopic.value;
-        results.innerHTML = scanning()
-          ? '<div class="card no-results"><h3>Scanning the live web…</h3>' +
-            '<p>AI is planning the searches and the indexes are answering. Results appear as each one arrives.</p></div>'
-          : '<div class="card no-results"><h3>Nothing matched that</h3>' +
-            '<p>' + (filtersOn
-              ? 'The sources answered, but none of their results fit the filters you chose.'
-              : 'This is a real empty result: the live indexes found no matching course for those words.') +
-            ' Try fewer words, a different spelling' +
-            (filtersOn ? ', or clear the filters.' : '.') + '</p>' +
-            (filtersOn
-              ? '<button class="btn btn-light btn-small" type="button" id="clearFiltersBtn">Clear filters and rescan</button>'
-              : '') +
-            '</div>';
-        return;
-      }
-      const shown = list.slice(0, visibleLimit);
-      const left  = list.length - shown.length;
-      results.innerHTML = shown.map(cardHTML).join("") +
-        (left > 0
-          ? '<div class="more-wrap"><button class="btn btn-light" type="button" id="moreBtn">' +
-            "Show " + Math.min(PAGE_SIZE, left) + " more of " + list.length + " results</button></div>"
-          : "");
-    }
-
-    function resetIdle(message) {
-      scanToken++;
-      if (scanCtrl) { scanCtrl.abort(); scanCtrl = null; }
-      clearTimeout(scanTimer);
-      collected = [];
-      sourceState = {};
-      aiState = { state: "idle", count: 0, cached: false };
-      scanStarted = 0;
-      scanElapsed = 0;
-      visibleLimit = PAGE_SIZE;
-      scanBar.dataset.state = "idle";
-      renderSourceList();
-      scanSummary.textContent = message || "Ready. Type any subject to start a live scan.";
-      renderResults();
-    }
-
-    /* ---------- 3g. Running the scan ---------- */
-    function runScan(force) {
-      const base = baseTerms();
-      if (!base || base.length < 2 || !matchTokens().length) {
-        resetIdle("Add a subject — for example python, class 10 physics or spoken English — to start a live scan.");
-        return;
-      }
-      const my = ++scanToken;
-      if (scanCtrl) scanCtrl.abort();
-      scanCtrl = new AbortController();
-
-      const ctx = {
-        base: base,
-        hint: langHint(),
-        lang: demoLang.value,
-        level: demoLevel.value,
-        baseQuery: (base + langHint() + levelHint()).trim(),
-        signal: scanCtrl.signal,
-        queries: [],
-        planPromise: null
-      };
-
-      scanStarted = performance.now();
-      scanElapsed = 0;
-      collected = [];
-      visibleLimit = PAGE_SIZE;
-      sourceState = {};
-      SCANNERS.forEach(s => { sourceState[s.id] = { state: "busy" }; });
-      scanBar.dataset.state = "running";
-
-      const planKey = [ctx.base, ctx.hint, ctx.level, ctx.lang].join("|");
-      const cachedPlan = getCachedPlan(planKey);
-      if (cachedPlan) {
-        ctx.queries = cachedPlan.queries;
-        aiState = { state: cachedPlan.usedAI ? "ok" : "fail", count: cachedPlan.aiCount, cached: true };
-        ctx.planPromise = Promise.resolve(ctx.queries);
-      } else {
-        aiState = { state: "busy", count: 0, cached: false };
-        ctx.queries = [ctx.baseQuery];
-        ctx.planPromise = planSearches(ctx)
-          .then(plan => {
-            savePlan(planKey, plan);
-            if (my !== scanToken) return plan.queries;
-            ctx.queries = plan.queries;
-            aiState = { state: plan.usedAI ? "ok" : "fail", count: plan.aiCount, cached: false };
-            return plan.queries;
-          })
-          .catch(err => {
-            if (my !== scanToken || (err && err.name === "AbortError")) return ctx.queries;
-            aiState = { state: "fail", count: 0, cached: false };
-            return ctx.queries;
-          });
-      }
-      renderSourceList();
-      renderResults();
-
-      const key = [ctx.base, ctx.hint, ctx.level, demoTopic.value].join("|");
-      let entry = force ? null : cache.get(key);
-      if (!entry || performance.now() - entry.at > CACHE_MS) {
-        entry = { at: performance.now(), bySource: {} };
-        cache.set(key, entry);
-        if (cache.size > 30) {
-          const oldest = cache.keys().next().value;
-          if (oldest !== key) cache.delete(oldest);
-        }
-      } else {
-        entry.at = performance.now();
-      }
-
-      let pending = SCANNERS.length + 1;
-      function land() {
-        if (my !== scanToken) return;
-        renderSourceList();
-        renderResults();
-        if (--pending === 0) {
-          if (aiState.state === "busy") aiState = { state: "fail", count: 0, cached: false };
-          scanElapsed = performance.now() - scanStarted;
-          scanBar.dataset.state = "done";
-          renderSourceList();
-        }
-      }
-
-      ctx.planPromise.then(land, land);
-
-      SCANNERS.forEach(s => {
-        const cached = entry.bySource[s.id];
-        if (cached) {
-          collected.push.apply(collected, cached);
-          sourceState[s.id] = { state: "ok", count: cached.length };
-          land();
-          return;
-        }
-        Promise.resolve()
-          .then(() => s.run(ctx))
-          .then(items => {
-            if (my !== scanToken) return;
-            const hinted = Boolean(ctx.hint || ctx.lang) && HINTED_SOURCES.indexOf(s.id) !== -1;
-            const list = (items || [])
-              .filter(i => i && i.title && i.url)
-              .slice(0, MAX_PER_SOURCE)
-              .map(decorate);
-            if (hinted) list.forEach(i => { i.hinted = true; });
-            entry.bySource[s.id] = list;
-            collected.push.apply(collected, list);
-            sourceState[s.id] = { state: "ok", count: list.length };
-            land();
-          })
-          .catch(err => {
-            if (my !== scanToken || (err && err.name === "AbortError")) return;
-            sourceState[s.id] = { state: "fail" };
-            land();
-          });
-      });
-    }
-
-    function scheduleScan(delay) {
-      clearTimeout(scanTimer);
-      scanTimer = setTimeout(() => runScan(false), delay === undefined ? DEBOUNCE_MS : delay);
-    }
-
-    /* ---------- 3h. Wiring ---------- */
-    demoQuery.addEventListener("input", () => {
-      if (!baseTerms() || !matchTokens().length) {
-        resetIdle();
-        return;
-      }
-      /* Drop the previous subject's cards while the new scan waits. */
-      if (scanStarted) resetIdle();
-      else renderResults();
-      scheduleScan();
-    });
-    demoQuery.addEventListener("keydown", e => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        clearTimeout(scanTimer);
-        runScan(true);
-      }
-    });
-    demoTopic.addEventListener("change", () => {
-      if (demoQuery.value.trim()) renderResults();
-      else scheduleScan(60);
-    });
-    demoLang.addEventListener("change", () => {
-      if (demoQuery.value.trim()) scheduleScan(60);
-    });
-    demoLevel.addEventListener("change", () => {
-      if (demoQuery.value.trim()) scheduleScan(60);
-    });
-    rescanBtn.addEventListener("click", () => runScan(true));
-    /* Show more of the results without re-querying anything */
-    results.addEventListener("click", e => {
-      if (e.target.closest("#moreBtn")) { visibleLimit += PAGE_SIZE; renderResults(); }
-      if (e.target.closest("#clearFiltersBtn")) {
-        demoLang.value = "";
-        demoLevel.value = "";
-        demoTopic.value = "";
-        runScan(true);
-      }
-    });
-
-    /* Start in a real idle state — no sample courses are fetched or shown. */
-    resetIdle();
-    /* ============================================================
-       4) HERO SEARCH — sends your choices straight into a live scan
-       ============================================================ */
-    document.getElementById("heroForm").addEventListener("submit", e => {
-      e.preventDefault();
-      const q = document.getElementById("heroQuery").value.trim();
-      if (!q) {
-        document.getElementById("heroQuery").focus();
-        return;
-      }
-      clearTimeout(scanTimer);
-      demoQuery.value = q;
-      demoLang.value  = document.getElementById("heroLang").value;
-      demoLevel.value = document.getElementById("heroLevel").value;
-      demoTopic.value = "";
-      runScan(true);
-      document.getElementById("demo").scrollIntoView({ behavior: "smooth" });
-    });
-
-    /* ============================================================
-       5) SUPABASE — real sign-in + database
-       ------------------------------------------------------------
-       Paste your Project URL and anon (public) key below.
-       Full setup steps: supabase/README.md
-
-       Until BOTH values are filled in, the site runs in "demo mode":
-       the Sign in button stays hidden and the two forms show a
-       friendly message without sending anything anywhere.
-
-       The anon key is safe to expose in a browser — row-level
-       security in the database decides what it may do.
-       ============================================================ */
-    const SUPABASE_URL = "";       // e.g. "https://abcdefghij.supabase.co"
-    const SUPABASE_ANON_KEY = "";  // the "anon public" key from Settings → API
-
-    const DB_READY = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase);
-    const sb = DB_READY ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
-
-    /* Tell visitors whether the backend is actually live. */
-    const backendNote = document.getElementById("backendNote");
-    if (backendNote) {
-      backendNote.textContent = DB_READY
-        ? "Sign-in and both forms are connected to Supabase. Submissions are stored with row-level security, so learners can only read their own details."
-        : "Backend not connected yet — the site is in demo mode and nothing is sent anywhere. Add the Supabase Project URL and anon public key in index.html to switch it on. Setup steps are in supabase/README.md.";
-    }
-
-    /* ---------- 5a. Navbar: sign-in button vs signed-in chip ---------- */
-    let currentUser = null;
-    const authSlots = document.querySelectorAll("[data-auth-slot]");
-
-    function renderAuth() {
-      authSlots.forEach(slot => {
-        if (!DB_READY) { slot.innerHTML = ""; return; }
-        slot.innerHTML = currentUser
-          ? `<span class="auth-chip" title="${esc(currentUser.email || "")}">
-               <span class="auth-dot" aria-hidden="true"></span>
-               <span class="txt">${esc(currentUser.email || "Signed in")}</span>
-             </span>
-             <button class="btn btn-light btn-small" type="button" data-signout>Sign out</button>`
-          : `<button class="btn btn-light btn-small" type="button" data-signin>Sign in</button>`;
-      });
-    }
-
-    document.addEventListener("click", e => {
-      if (e.target.closest("[data-signin]"))  openAuthModal();
-      if (e.target.closest("[data-signout]")) signOut();
-    });
-
-    /* ---------- 5b. Small helpers ---------- */
-    const toastEl = document.getElementById("toast");
-    let toastTimer;
-    function toast(text) {
-      toastEl.textContent = text;
-      toastEl.classList.add("show");
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => toastEl.classList.remove("show"), 3500);
-    }
-    function showMsg(id, text, isError) {
-      const el = document.getElementById(id);
-      el.textContent = text;
-      el.classList.add("show");
-      el.classList.toggle("error", Boolean(isError));
-    }
-    function friendlyAuthError(error) {
-      const m = String((error && error.message) || "");
-      if (/rate limit|too many|60 second/i.test(m)) return "Too many attempts. Please wait a minute and try again.";
-      if (/expired/i.test(m))  return "That code has expired. Please request a new one.";
-      if (/invalid/i.test(m))  return "That code is not correct. Please check it and try again.";
-      return "Could not sign you in right now. Please try again in a minute.";
-    }
-
-    /* ---------- 5c. Sign-in modal (email → 6-digit code → session) ---------- */
-    const authModal   = document.getElementById("authModal");
-    const authEmail   = document.getElementById("authEmail");
-    const authCode    = document.getElementById("authCode");
-    const authStep1   = document.getElementById("otpStep1");
-    const authStep2   = document.getElementById("otpStep2");
-    const otpSentNote = document.getElementById("otpSentNote");
-    let pendingWaitlist = null;   // early-access details waiting for sign-in
-    let modalReturnFocus = null;
-
-    function setAuthStep(step, email) {
-      if (email) authEmail.value = email;
-      authStep1.hidden = step !== 1;
-      authStep2.hidden = step !== 2;
-      if (step === 2) otpSentNote.textContent =
-        "We sent a 6-digit code to " + authEmail.value + ". It works for 1 hour — also check your spam folder.";
-    }
-    function openAuthModal(email = "", step = 1) {
-      if (!DB_READY) return;
-      modalReturnFocus = document.activeElement;
-      authModal.classList.add("open");
-      document.getElementById("authMsg").classList.remove("show", "error");
-      setAuthStep(step, email);
-      (step === 2 ? authCode : authEmail).focus();
-    }
-    function closeAuthModal() {
-      authModal.classList.remove("open");
-      if (modalReturnFocus && document.contains(modalReturnFocus)) modalReturnFocus.focus();
-    }
-
-    // Send the one-time code
-    async function sendCode(email) {
-      const msgId = "authMsg";
-      if (!/^\S+@\S+\.\S+$/.test(email)) return showMsg(msgId, "Please enter a valid email address.", true);
-      const { error } = await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
-      if (error) return showMsg(msgId, friendlyAuthError(error), true);
-      showMsg(msgId, "", false);
-      setAuthStep(2, email);
-      authCode.focus();
-    }
-
-    // Check the code and create the session
-    async function verifyCode() {
-      const email = authEmail.value.trim();
-      const token = authCode.value.trim();
-      if (token.length !== 6) return showMsg("authMsg", "Please enter the 6-digit code.", true);
-
-      const { data, error } = await sb.auth.verifyOtp({ email, token, type: "email" });
-      if (error) return showMsg("authMsg", friendlyAuthError(error), true);
-
-      currentUser = (data && data.session && data.session.user) || null;
-      authCode.value = "";
-      closeAuthModal();
-
-      if (pendingWaitlist) {                 // finishing an early-access signup
-        const entry = pendingWaitlist;
-        pendingWaitlist = null;
-        await saveWaitlist(entry);
-      } else {
-        toast("Signed in as " + (currentUser ? currentUser.email : ""));
-      }
-    }
-
-    async function signOut() {
-      if (sb) await sb.auth.signOut();
-      currentUser = null;
-      renderAuth();
-      toast("Signed out. See you soon!");
-    }
-
-    // Wire up the modal
-    authStep1.addEventListener("submit", e => { e.preventDefault(); sendCode(authEmail.value.trim()); });
-    authStep2.addEventListener("submit", e => { e.preventDefault(); verifyCode(); });
-    document.getElementById("authClose").addEventListener("click", closeAuthModal);
-    document.getElementById("otpBack").addEventListener("click", () => setAuthStep(1));
-    authModal.addEventListener("click", e => { if (e.target === authModal) closeAuthModal(); });
-    document.addEventListener("keydown", e => {
-      if (e.key === "Escape" && authModal.classList.contains("open")) closeAuthModal();
-    });
-
-    /* ---------- 5d. Live session state ---------- */
-    if (DB_READY) {
-      renderAuth();
-      // Restores a session saved from an earlier visit
-      sb.auth.getSession().then(({ data }) => {
-        currentUser = (data && data.session && data.session.user) || null;
-        renderAuth();
-      });
-      // Fires immediately on sign-in / sign-out, including in other tabs
-      sb.auth.onAuthStateChange((event, session) => {
-        currentUser = (session && session.user) || null;
-        renderAuth();
-        if (event === "SIGNED_IN") closeAuthModal();
-      });
-    }
-
-    /* ---------- 5e. "Get early access" → joins the waitlist ---------- */
-    async function saveWaitlist(entry) {
-      const { error } = await sb.from("waitlist").insert({
-        user_id: currentUser ? currentUser.id : null,
-        full_name: entry.full_name,
-        email: entry.email,
-        language: entry.language
-      });
-      document.getElementById("earlyAccessForm").reset();
-      if (error) {
-        if (error.code === "23505") return showMsg("eaMsg", "You are already on the list — we will email you when Learnova is ready.", false);
-        return showMsg("eaMsg", "Could not save your details right now. Please try again in a minute.", true);
-      }
-      showMsg("eaMsg", "Thank you! You are on the early access list. We will email " + entry.email + ".", false);
-      toast("You are on the list!");
-    }
-
-    document.getElementById("earlyAccessForm").addEventListener("submit", async e => {
-      e.preventDefault();
-      const form = e.currentTarget;
-      if (!form.checkValidity()) return form.reportValidity();
-
-      const entry = {
-        full_name: document.getElementById("eaName").value.trim(),
-        email:     document.getElementById("eaEmail").value.trim(),
-        language:  document.getElementById("eaLang").value
-      };
-
-      if (!DB_READY) return demoSuccess("earlyAccessForm", "eaMsg");
-
-      // Already signed in with this email → save straight away
-      if (currentUser && String(currentUser.email).toLowerCase() === entry.email.toLowerCase()) {
-        return saveWaitlist(entry);
-      }
-      // Otherwise send a code first, then save once the code is verified
-      pendingWaitlist = entry;
-      const { error } = await sb.auth.signInWithOtp({ email: entry.email, options: { shouldCreateUser: true } });
-      if (error) { pendingWaitlist = null; return showMsg("eaMsg", friendlyAuthError(error), true); }
-      showMsg("eaMsg", "We sent a 6-digit code to " + entry.email + ". Enter it in the sign-in box.", false);
-      openAuthModal(entry.email, 2);
-    });
-
-    /* ---------- 5f. "Suggest a free course" ---------- */
-    document.getElementById("suggestForm").addEventListener("submit", async e => {
-      e.preventDefault();
-      const form = e.currentTarget;
-      if (!form.checkValidity()) return form.reportValidity();
-
-      if (!DB_READY) return demoSuccess("suggestForm", "sgMsg");
-
-      const { error } = await sb.from("course_suggestions").insert({
-        user_id: currentUser ? currentUser.id : null,
-        course_link: document.getElementById("sgLink").value.trim(),
-        language: document.getElementById("sgLang").value,
-        topic: document.getElementById("sgTopic").value.trim()
-      });
-      form.reset();
-      if (error) return showMsg("sgMsg", "Could not send your suggestion right now. Please try again in a minute.", true);
-      showMsg("sgMsg", "Thanks for helping other learners! We will check this course and add it if it is free.", false);
-      toast("Suggestion sent — thank you!");
-    });
-
-    /* Fallback used until Supabase is connected: a friendly demo message.
-       The original text is captured up front so each form keeps its own wording. */
-    const demoMsgs = {};
-    ["eaMsg", "sgMsg"].forEach(id => { demoMsgs[id] = document.getElementById(id).textContent; });
-    function demoSuccess(formId, msgId) {
-      showMsg(msgId, demoMsgs[msgId], false);
-      document.getElementById(formId).reset();
-      setTimeout(() => document.getElementById(msgId).classList.remove("show"), 5000);
-    }
-
-    /* Footer year */
-    document.getElementById("year").textContent = new Date().getFullYear();
-  </script>
 </body>
 </html>
