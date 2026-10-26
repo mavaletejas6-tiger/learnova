@@ -941,8 +941,8 @@
           </form>
         </div>
 
-        <p class="muted-note" style="margin-top:1rem">
-          Sign-in and these two forms run on Supabase. Until the keys are added they work in demo mode —
+        <p class="muted-note" id="backendNote" style="margin-top:1rem">
+          Sign-in and these two forms run on Supabase. Until the project is connected they work in demo mode —
           nothing is sent anywhere. Submissions are stored with row-level security, so learners can only
           read their own details.
         </p>
@@ -2341,6 +2341,7 @@
        5) SUPABASE — real sign-in + database
        ------------------------------------------------------------
        Paste your Project URL and anon (public) key below.
+       Full setup steps: supabase/README.md
 
        Until BOTH values are filled in, the site runs in "demo mode":
        the Sign in button stays hidden and the two forms show a
@@ -2354,6 +2355,14 @@
 
     const DB_READY = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase);
     const sb = DB_READY ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+    /* Tell visitors whether the backend is actually live. */
+    const backendNote = document.getElementById("backendNote");
+    if (backendNote) {
+      backendNote.textContent = DB_READY
+        ? "Sign-in and both forms are connected to Supabase. Submissions are stored with row-level security, so learners can only read their own details."
+        : "Backend not connected yet — the site is in demo mode and nothing is sent anywhere. Add the Supabase Project URL and anon public key in index.html to switch it on. Setup steps are in supabase/README.md.";
+    }
 
     /* ---------- 5a. Navbar: sign-in button vs signed-in chip ---------- */
     let currentUser = null;
