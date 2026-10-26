@@ -1048,7 +1048,7 @@
     const PAGE_SIZE       = 24;             // cards shown before "show more" is pressed
 
     /* Filter options offered to the learner (also used by the hero search) */
-    const TOPICS   = ["Programming","Data","Maths","Science","Language","Career","Design","Business","Health","Music","General"];
+    const TOPICS   = ["Programming","Data","Maths","Science","Language","Career","Design","Business","Health","Music"];
     const LANGUAGES = ["English","Hindi","Marathi","Tamil","Telugu","Bengali","Urdu","Kannada","Malayalam","Gujarati"];
     const LEVELS   = ["Beginner","Intermediate","Advanced"];
 
@@ -1095,7 +1095,8 @@
       ["Maths",       ["math","maths","mathematics","algebra","geometry","calculus","arithmetic","trigonometry","statistics"]],
       ["Science",     ["science","physics","chemistry","biology","astronomy","geology","engineering"]],
       ["Language",    ["english","hindi","marathi","tamil","telugu","bengali","urdu","grammar","spoken","communication","language","writing","literature"]],
-      ["Career",      ["career","resume","interview","job","business","entrepreneur","finance","marketing","management"]],
+      ["Career",      ["career","resume","interview","job","leadership","communication","productivity"]],
+      ["Business",    ["business","entrepreneur","finance","marketing","management","accounting","sales","economics","commerce","startup"]],
       ["Design",      ["design","figma","photoshop","illustration","ui","ux","drawing","animation"]],
       ["Health",      ["health","yoga","fitness","nutrition","medicine","medical","nursing","psychology"]],
       ["Music",       ["music","guitar","piano","singing","flute","drums","harmonium"]]
@@ -1971,19 +1972,36 @@
     }
     function relevant(item, tokens) {
       if (!tokens.length) return true;
+      const title = item.title.toLowerCase();
       const hay = (item.title + " " + (item.text || "") + " " + item.source).toLowerCase();
       const found = tokens.filter(t => {
         if (hay.includes(t)) return true;
         const alt = TERM_HINTS[t];
         return Boolean(alt && alt.some(x => hay.includes(x)));
-      }).length;
-      return found >= (item.strict ? Math.min(2, tokens.length) : 1);
+      });
+      if (!item.strict) return found.length >= 1;
+      if (found.length >= Math.min(2, tokens.length)) return true;
+      /* Longer searches often mix a subject with a class, level or language
+         ("class 10 physics hindi medium"). One token in the title is still a
+         strong match, so use it rather than emptying the whole page. */
+      return found.some(t => title.includes(t) ||
+        (TERM_HINTS[t] || []).some(x => title.includes(x)));
     }
     function languageMatches(item, lang) {
       if (!item.lang) return true;
       if (item.lang === lang) return true;
       /* Devanagari is shared by Hindi and Marathi; never hide one as the other. */
       return item.lang === "Hindi" && lang === "Marathi";
+    }
+    /* Topic buckets overlap (marketing is business and career content), so a
+       selected topic matches either the detected bucket or its own hint words. */
+    function topicMatches(item, topic) {
+      if (!topic || !item.topic) return true;
+      if (item.topic === topic) return true;
+      const bucket = TOPIC_HINTS.find(pair => pair[0] === topic);
+      if (!bucket) return false;
+      const hay = (item.title + " " + (item.text || "")).toLowerCase();
+      return bucket[1].some(w => hay.includes(w));
     }
     function scoreItem(item, tokens, lang, lvl, pref) {
       const title = item.title.toLowerCase();
@@ -2025,7 +2043,7 @@
         seenTitles.add(titleKey);
         if (lvl && item.level && item.level !== lvl) continue;
         if (lang && !languageMatches(item, lang)) continue;
-        if (topic && item.topic && item.topic !== topic) continue;
+        if (topic && !topicMatches(item, topic)) continue;
         if (!relevant(item, tokens)) continue;
         item.score = scoreItem(item, tokens, lang, lvl, pref);
         out.push(item);
@@ -2097,12 +2115,20 @@
                 .join(" · "))
         : "";
       if (!list.length) {
+        const filtersOn = demoLang.value || demoLevel.value || demoTopic.value;
         results.innerHTML = scanning()
           ? '<div class="card no-results"><h3>Scanning the live web…</h3>' +
             '<p>AI is planning the searches and the indexes are answering. Results appear as each one arrives.</p></div>'
           : '<div class="card no-results"><h3>Nothing matched that</h3>' +
-            '<p>This is a real empty result: the live indexes found no free course for those words. ' +
-            'Try fewer words, a different spelling, or clear a filter.</p></div>';
+            '<p>' + (filtersOn
+              ? 'The sources answered, but none of their results fit the filters you chose.'
+              : 'This is a real empty result: the live indexes found no matching course for those words.') +
+            ' Try fewer words, a different spelling' +
+            (filtersOn ? ', or clear the filters.' : '.') + '</p>' +
+            (filtersOn
+              ? '<button class="btn btn-light btn-small" type="button" id="clearFiltersBtn">Clear filters and rescan</button>'
+              : '') +
+            '</div>';
         return;
       }
       const shown = list.slice(0, visibleLimit);
@@ -2282,6 +2308,12 @@
     /* Show more of the results without re-querying anything */
     results.addEventListener("click", e => {
       if (e.target.closest("#moreBtn")) { visibleLimit += PAGE_SIZE; renderResults(); }
+      if (e.target.closest("#clearFiltersBtn")) {
+        demoLang.value = "";
+        demoLevel.value = "";
+        demoTopic.value = "";
+        runScan(true);
+      }
     });
 
     /* Start in a real idle state — no sample courses are fetched or shown. */
