@@ -1028,7 +1028,7 @@
        indexes listed in section 3 below. Nothing here is stored,
        faked or pre-filled.
        ============================================================ */
-    const REQUEST_TIMEOUT = 15000;          // ms before one index counts as unreachable
+    const REQUEST_TIMEOUT = 18000;          // ms before one index counts as unreachable
     const DEBOUNCE_MS     = 900;            // wait for typing to stop before scanning
     const CACHE_MS        = 90000;          // reuse answers for 90s while filtering
     const MAX_PER_SOURCE  = 30;             // so one noisy index cannot drown the rest
@@ -1121,9 +1121,12 @@
     }
     function detectLevel(text) {
       const t = String(text).toLowerCase();
-      if (/\b(advanced|expert|master(?:class|ing)?|deep dive|graduate|professional)\b/.test(t)) return "Advanced";
+      const beginner = /\b(beginner|beginners|intro(?:duction)?|101|basic|basics|foundation|foundations|starter|from scratch|getting started|zero to)\b/.test(t);
+      const advanced = /\b(advanced|expert|master(?:class|ing)?|deep dive|graduate|professional)\b/.test(t);
+      if (beginner && advanced) return "Intermediate";
+      if (advanced) return "Advanced";
       if (/\b(intermediate|upskill|beyond the basics)\b/.test(t)) return "Intermediate";
-      if (/\b(beginner|beginners|intro(?:duction)?|101|basic|basics|foundation|foundations|starter|from scratch|getting started|zero to)\b/.test(t)) return "Beginner";
+      if (beginner) return "Beginner";
       return null;
     }
     function detectLanguage(text) {
@@ -1726,12 +1729,21 @@
 
     /* 5. Wikiversity + Wikibooks — free course pages and free textbooks */
     function wikiSearch(host, label, c) {
+      const tokens = matchTokens();
       const url = "https://" + host + "/w/api.php?action=query&list=search&srnamespace=0&srlimit=20" +
         "&srsearch=" + encodeURIComponent(quotedWords(c.base) + c.hint) + "&format=json&origin=*";
       return fetchAny(url, c.signal).then(json => {
         const hits = (json.query && json.query.search) || [];
         return hits
           .filter(h => !/print version/i.test(h.title || ""))
+          /* A page that only mentions the subject in its body is usually a
+             tangent. Keep Wikimedia pages whose title names the subject. */
+          .filter(h => {
+            if (!tokens.length) return true;
+            const title = String(h.title || "").toLowerCase();
+            return tokens.some(t => title.includes(t) ||
+              (TERM_HINTS[t] || []).some(x => title.includes(x)));
+          })
           .map(h => ({
             title: tidy(h.title),
             url: "https://" + host + "/wiki/" + encodeURIComponent(h.title.replace(/ /g, "_")),
@@ -1813,7 +1825,7 @@
       else ai = "Ready";
       if (busy) return ai + " · scanning " + (SCANNERS.length - busy) + " of " + SCANNERS.length + " sources…";
       if (fail === SCANNERS.length) return "No source answered — check your connection, then press Scan again.";
-      return ai + " · scanned " + SCANNERS.length + " sources in " + (scanElapsed / 1000).toFixed(1) + "s" +
+      return ai + " · queried " + SCANNERS.length + " sources in " + (scanElapsed / 1000).toFixed(1) + "s" +
              (fail ? " · " + fail + " unreachable" : "");
     }
     function renderSourceList() {
@@ -1831,7 +1843,7 @@
 
     /* ---------- 3f. Ranking and painting what came back ---------- */
     function decorate(item) {
-      if (!item.level) item.level = detectLevel(item.title + " " + (item.text || ""));
+      if (!item.level) item.level = detectLevel(item.title) || detectLevel(item.text || "");
       /* Read language from the title only: descriptions often mention a
          different language and would hide valid results. */
       if (!item.lang)  item.lang  = detectLanguage(item.title);
@@ -1950,10 +1962,10 @@
       }
       const list = currentList();
       const freeCount = list.filter(i => i.free).length;
-      const liveSources = new Set(list.map(i => i.source)).size;
       resultCount.textContent = list.length
-        ? list.length + " result" + (list.length === 1 ? "" : "s") + " · " +
-          freeCount + " marked free · " + liveSources + " live source" + (liveSources === 1 ? "" : "s")
+        ? (freeCount === list.length
+            ? list.length + " free result" + (list.length === 1 ? "" : "s")
+            : list.length + " result" + (list.length === 1 ? "" : "s") + " · " + freeCount + " marked free")
         : "";
       if (!list.length) {
         results.innerHTML = scanning()
