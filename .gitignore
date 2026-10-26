@@ -1,0 +1,27 @@
+# Local API / search probe dumps (not part of the site)
+*-body.json
+*-headers.txt
+*-models.json
+*-all.json
+*-all2.json
+*-pl.json
+af*.json
+ai*.json
+airforce-*.json
+github-test.json
+hc.json
+instances.json
+inv*.json
+piped.json
+poll.json
+jina-*.txt
+allorigins.html
+bing.html
+brave*.html
+codetabs.html
+ddg.html
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+*.log
