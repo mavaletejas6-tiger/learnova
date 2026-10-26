@@ -1,0 +1,750 @@
+/* ============================================================
+   LEARNOVA — live course search (browse page only)
+   ------------------------------------------------------------
+   Fetches real results from open, CORS-friendly indexes in the
+   learner's browser. Nothing is pre-loaded or invented. When an
+   index is unreachable it is marked unavailable and the rest keep
+   going. Results always link to the original creator.
+   ============================================================ */
+(function () {
+  "use strict";
+
+  document.addEventListener("DOMContentLoaded", init);
+
+  const PAGE_SIZE = 6;
+  const REQUEST_TIMEOUT = 11000;
+
+  const STOPWORDS = new Set([
+    "free", "course", "courses", "class", "classes", "online", "best", "top",
+    "the", "a", "an", "in", "of", "for", "to", "and", "my", "i", "want", "find",
+    "with", "how", "any", "all", "learn", "learning", "study", "full", "tutorial",
+    "tutorials", "video", "videos", "beginner", "beginners", "advanced"
+  ]);
+
+  const COURSEY_RE = /\b(course|courses|class|classes|lesson|lessons|tutorial|tutorials|learn|learning|teach|teaching|training|bootcamp|curriculum|syllabus|certification|academy|masterclass|basics?|intro(?:duction)?|beginner|beginners|roadmap|lecture|lectures|workshop|playlist|study|school|guide)\b/i;
+  const REPO_COURSE_RE = /\b(course|curriculum|roadmap|tutorials?|bootcamp|academy|study plan|education|learning path|syllabus|guide)\b/i;
+  const PIRATE_RE = /(udemy|lynda|pluralsight|skillshare|torrent|desire-course|free-course-site|course-for-free|udacity[-_\s]?download|download[-_\s]?course)/i;
+
+  const SOURCE_DEFS = [
+    { id: "youtube", name: "YouTube", run: searchYouTube },
+    { id: "github", name: "GitHub", run: searchGitHub },
+    { id: "peertube", name: "PeerTube", run: searchPeerTube },
+    { id: "wikimedia", name: "Wikiversity", run: searchWiki },
+    { id: "devto", name: "DEV", run: searchDevTo }
+  ];
+
+  let els = null;
+  let activeCtrl = null;
+  let searchSeq = 0;
+  let busy = false;
+  let searched = false;
+  let currentQuery = "";
+  let sourceState = {};
+  let resultsBySource = {};
+  let orderedResults = [];
+  let shown = PAGE_SIZE;
+  let startedAt = 0;
+  let liveDirty = false;
+  let browseSyncTimer = null;
+
+  /* ---------- text + URL helpers ---------- */
+  function esc(value) {
+    return String(value == null ? "" : value).replace(/[&<>"']/g, m =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
+  }
+  function cleanQuery(value) {
+    return String(value == null ? "" : value)
+      .replace(/\s+/g, " ").trim().slice(0, 120);
+  }
+  function tidy(value, max) {
+    return String(value == null ? "" : value)
+      .replace(/\s+/g, " ").trim().slice(0, max || 220);
+  }
+  function stripTags(value) {
+    return tidy(String(value == null ? "" : value)
+      .replace(/<[^>]*>/g, " ")
+      .replace(/&quot;/g, '"').replace(/&#39;|&rsquo;/g, "'")
+      .replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
+      .replace(/&nbsp;/g, " "), 260);
+  }
+  function normalize(value) {
+    return String(value == null ? "" : value)
+      .toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^\p{L}\p{N}+#.\s-]/gu, " ")
+      .replace(/\s+/g, " ").trim();
+  }
+  function tokensFor(value) {
+    const all = normalize(value).split(" ").filter(Boolean);
+    const useful = all.filter(t => !STOPWORDS.has(t));
+    return useful.length ? useful : all;
+  }
+  function safeUrl(value) {
+    try {
+      const url = new URL(value);
+      return /^https?:$/.test(url.protocol) ? url.href : "";
+    } catch (e) { return ""; }
+  }
+  function normUrl(value) {
+    try {
+      const url = new URL(value);
+      url.hash = "";
+      return url.href.replace(/\/+$/, "");
+    } catch (e) { return ""; }
+  }
+  function relevant(item, tokens) {
+    if (!tokens.length) return true;
+    const hay = normalize([item.title, item.text, item.meta].filter(Boolean).join(" "));
+    return tokens.some(token => hay.includes(token));
+  }
+  function dedupe(items) {
+    const seen = new Set();
+    const seenTitles = new Set();
+    return (items || []).filter(item => {
+      if (!item || !item.title || !item.url) return false;
+      const key = normUrl(item.url);
+      const titleKey = normalize(item.title + " " + (item.meta || ""));
+      if (!key || seen.has(key) || (titleKey && seenTitles.has(titleKey))) return false;
+      seen.add(key);
+      if (titleKey) seenTitles.add(titleKey);
+      return true;
+    });
+  }
+
+  /* ---------- network ---------- */
+  function fetchJSON(url, signal, options) {
+    const opts = options || {};
+    const ctrl = new AbortController();
+    let timedOut = false;
+    const timer = setTimeout(() => {
+      timedOut = true;
+      ctrl.abort();
+    }, opts.timeout || REQUEST_TIMEOUT);
+    const onAbort = () => ctrl.abort();
+
+    if (signal) {
+      if (signal.aborted) {
+        clearTimeout(timer);
+        const err = new Error("cancelled");
+        err.name = "AbortError";
+        return Promise.reject(err);
+      }
+      signal.addEventListener("abort", onAbort, { once: true });
+    }
+
+    const headers = Object.assign({ Accept: "application/json" }, opts.headers || {});
+
+    return fetch(url, {
+      signal: ctrl.signal,
+      headers: headers,
+      referrerPolicy: "no-referrer"
+    })
+      .then(response => {
+        if (!response.ok) {
+          const err = new Error("HTTP " + response.status);
+          err.status = response.status;
+          throw err;
+        }
+        return response.json();
+      })
+      .catch(err => {
+        if (timedOut) {
+          const timeout = new Error("request timed out");
+          timeout.name = "TimeoutError";
+          throw timeout;
+        }
+        if (signal && signal.aborted) {
+          const aborted = new Error("cancelled");
+          aborted.name = "AbortError";
+          throw aborted;
+        }
+        throw err;
+      })
+      .finally(() => {
+        clearTimeout(timer);
+        if (signal) signal.removeEventListener("abort", onAbort);
+      });
+  }
+
+  /* ---------- YouTube ---------- */
+  const PIPED_HOST = "https://pipedapi.ducks.party";
+  const INVIDIOUS_HOSTS = ["https://yt.chocolatemoo53.com", "https://inv.nadeko.net"];
+
+  function pipedItem(item, tokens) {
+    if (!item) return null;
+    if (item.type === "stream") {
+      const title = tidy(item.title, 180);
+      const url = safeUrl("https://www.youtube.com" + (item.url || ""));
+      const seconds = Number(item.duration) || 0;
+      if (!title || !url) return null;
+      if (seconds < 1200 && !COURSEY_RE.test(title)) return null;
+      const result = {
+        sourceId: "youtube", source: "YouTube", title: title, url: url,
+        text: tidy(item.shortDescription, 220), meta: tidy(item.uploaderName || "YouTube", 80),
+        kind: seconds >= 2400 ? "Video course" : "Video lecture",
+        seconds: seconds, views: Number(item.views) || 0
+      };
+      return relevant(result, tokens) ? result : null;
+    }
+    if (item.type === "playlist") {
+      const match = String(item.url || "").match(/[?&]list=([^&]+)/);
+      const title = tidy(item.name || item.title, 180);
+      const count = Number(item.videos) || 0;
+      if (!match || !title || count < 2) return null;
+      const result = {
+        sourceId: "youtube", source: "YouTube", title: title,
+        url: "https://www.youtube.com/playlist?list=" + encodeURIComponent(match[1]),
+        text: "", meta: tidy(item.uploaderName || "YouTube", 80),
+        kind: "Course playlist", videoCount: count
+      };
+      return relevant(result, tokens) ? result : null;
+    }
+    return null;
+  }
+
+  function invidiousVideo(video, tokens) {
+    if (!video || !video.videoId || !video.title) return null;
+    const title = tidy(video.title, 180);
+    const seconds = Number(video.lengthSeconds) || 0;
+    if (seconds < 1200 && !COURSEY_RE.test(title)) return null;
+    const result = {
+      sourceId: "youtube", source: "YouTube", title: title,
+      url: "https://www.youtube.com/watch?v=" + encodeURIComponent(video.videoId),
+      text: tidy(video.description, 220), meta: tidy(video.author || "YouTube", 80),
+      kind: seconds >= 2400 ? "Video course" : "Video lecture",
+      seconds: seconds, views: Number(video.viewCount) || 0
+    };
+    return relevant(result, tokens) ? result : null;
+  }
+
+  function invidiousPlaylist(playlist, tokens) {
+    if (!playlist || !playlist.playlistId || !playlist.title) return null;
+    const result = {
+      sourceId: "youtube", source: "YouTube", title: tidy(playlist.title, 180),
+      url: "https://www.youtube.com/playlist?list=" + encodeURIComponent(playlist.playlistId),
+      text: "", meta: tidy(playlist.author || "YouTube", 80),
+      kind: "Course playlist", videoCount: Number(playlist.videoCount) || 0
+    };
+    return relevant(result, tokens) ? result : null;
+  }
+
+  async function invidiousSearch(query, signal, tokens) {
+    let lastError = null;
+    for (const host of INVIDIOUS_HOSTS) {
+      try {
+        const [videos, playlists] = await Promise.all([
+          fetchJSON(host + "/api/v1/search?q=" + encodeURIComponent(query) + "&type=video", signal),
+          fetchJSON(host + "/api/v1/search?q=" + encodeURIComponent(query) + "&type=playlist", signal)
+        ]);
+        const items = (Array.isArray(videos) ? videos : []).map(v => invidiousVideo(v, tokens))
+          .concat((Array.isArray(playlists) ? playlists : []).map(p => invidiousPlaylist(p, tokens)));
+        const clean = dedupe(items);
+        if (clean.length) return clean;
+      } catch (err) {
+        if (err && err.name === "AbortError") throw err;
+        lastError = err;
+      }
+    }
+    if (lastError) throw lastError;
+    return [];
+  }
+
+  async function searchYouTube(query, signal) {
+    const search = /\b(course|playlist|tutorial)\b/i.test(query) ? query : query + " full course";
+    const tokens = tokensFor(query);
+    let items = [];
+    let pipedAnswered = false;
+    try {
+      const json = await fetchJSON(PIPED_HOST + "/search?q=" + encodeURIComponent(search) + "&filter=all", signal);
+      pipedAnswered = true;
+      items = dedupe((json.items || []).map(item => pipedItem(item, tokens)));
+    } catch (err) {
+      if (err && err.name === "AbortError") throw err;
+    }
+    if (!items.length) {
+      try {
+        items = await invidiousSearch(search, signal, tokens);
+      } catch (err) {
+        if (err && err.name === "AbortError") throw err;
+        if (!pipedAnswered) throw err;
+      }
+    }
+    return items.slice(0, 10);
+  }
+
+  /* ---------- GitHub ---------- */
+  async function searchGitHub(query, signal) {
+    const tokens = tokensFor(query);
+    const search = query + " course in:name,description";
+    const url = "https://api.github.com/search/repositories?q=" +
+      encodeURIComponent(search) + "&sort=stars&order=desc&per_page=12";
+    const json = await fetchJSON(url, signal, {
+      headers: { Accept: "application/vnd.github+json" }
+    });
+    const items = (json.items || []).map(repo => {
+      const title = tidy(String(repo.name || "").replace(/[-_]+/g, " "), 140);
+      const description = tidy(repo.description || "", 220);
+      const topics = (repo.topics || []).join(" ");
+      const hay = [repo.name, repo.description, topics].filter(Boolean).join(" ");
+      if (!title || PIRATE_RE.test(hay) || !REPO_COURSE_RE.test(hay)) return null;
+      if (!tokens.some(token => normalize(title).includes(token))) return null;
+      const result = {
+        sourceId: "github", source: "GitHub", title: title,
+        url: safeUrl(repo.html_url),
+        text: [description, topics].filter(Boolean).join(" · "),
+        meta: tidy(repo.full_name || "github.com", 90),
+        kind: "Course repository", stars: Number(repo.stargazers_count) || 0
+      };
+      if (!result.url) return null;
+      return relevant(result, tokens) ? result : null;
+    });
+    return dedupe(items).slice(0, 8);
+  }
+
+  /* ---------- PeerTube ---------- */
+  async function searchPeerTube(query, signal) {
+    const tokens = tokensFor(query);
+    const search = /\bcourse\b/i.test(query) ? query : query + " course";
+    const url = "https://sepiasearch.org/api/v1/search/videos?search=" +
+      encodeURIComponent(search) + "&count=20&nsfw=false";
+    const json = await fetchJSON(url, signal);
+    const items = (json.data || []).map(video => {
+      if (!video || !video.name || !video.account || !video.uuid) return null;
+      const title = tidy(video.name, 180);
+      const seconds = Number(video.duration) || 0;
+      if (seconds < 600 || (!COURSEY_RE.test(title) && seconds < 1800)) return null;
+      if (PIRATE_RE.test(title)) return null;
+      const host = tidy(video.account.host, 90);
+      const titleKey = normalize(title);
+      if (!tokens.some(token => titleKey.includes(token)) && !COURSEY_RE.test(title)) return null;
+      const result = {
+        sourceId: "peertube", source: "PeerTube", title: title,
+        url: safeUrl("https://" + host + "/w/" + video.uuid),
+        text: tidy(video.description, 220), meta: host,
+        kind: "Video course", seconds: seconds, views: Number(video.views) || 0
+      };
+      if (!result.url) return null;
+      return relevant(result, tokens) ? result : null;
+    });
+    return dedupe(items).slice(0, 6);
+  }
+
+  /* ---------- Wikiversity ---------- */
+  async function searchWiki(query, signal) {
+    const tokens = tokensFor(query);
+    const terms = (tokens.length ? tokens : normalize(query).split(" ").filter(Boolean))
+      .map(word => '"' + word.replace(/"/g, "") + '"').join(" ");
+    if (!terms) return [];
+    const url = "https://en.wikiversity.org/w/api.php?action=query&list=search&srnamespace=0&srlimit=12" +
+      "&srsearch=" + encodeURIComponent(terms) + "&format=json&origin=*";
+    const json = await fetchJSON(url, signal);
+    const items = (((json.query || {}).search) || []).map(hit => {
+      if (!hit || !hit.title || /print version/i.test(hit.title)) return null;
+      const title = tidy(hit.title, 180);
+      const titleKey = normalize(title);
+      if (tokens.length && !tokens.some(token =>
+        titleKey.includes(token) || (token === "maths" && titleKey.includes("math")))) return null;
+      return {
+        sourceId: "wikimedia", source: "Wikiversity", title: title,
+        url: safeUrl("https://en.wikiversity.org/wiki/" + encodeURIComponent(String(hit.title).replace(/ /g, "_"))),
+        text: stripTags(hit.snippet), meta: "wikiversity.org",
+        kind: "Open learning page"
+      };
+    });
+    return dedupe(items).slice(0, 6);
+  }
+
+  /* ---------- DEV Community ---------- */
+  async function searchDevTo(query, signal) {
+    const tokens = tokensFor(query);
+    const tag = tokens.find(token => /^[a-z][a-z0-9]{1,19}$/.test(token));
+    if (!tag) return [];
+    let json = [];
+    try {
+      json = await fetchJSON("https://dev.to/api/articles?tag=" + encodeURIComponent(tag) + "&per_page=10", signal);
+    } catch (err) {
+      if (err && (err.name === "AbortError" || err.status === 404)) {
+        if (err.name === "AbortError") throw err;
+        return [];
+      }
+      throw err;
+    }
+    const items = (Array.isArray(json) ? json : []).map(article => {
+      if (!article || !article.title || !article.url) return null;
+      const hay = [article.title, article.description].filter(Boolean).join(" ");
+      if (PIRATE_RE.test(hay) || !COURSEY_RE.test(hay)) return null;
+      const result = {
+        sourceId: "devto", source: "DEV Community", title: tidy(article.title, 180),
+        url: safeUrl(article.url), text: tidy(article.description, 220),
+        meta: "dev.to", kind: "Tutorial", minutes: Number(article.reading_time_minutes) || 0
+      };
+      if (!result.url) return null;
+      return relevant(result, tokens) ? result : null;
+    });
+    return dedupe(items).slice(0, 5);
+  }
+
+  /* ---------- rendering ---------- */
+  function durationText(item) {
+    if (item.videoCount) return item.videoCount + (item.videoCount === 1 ? " video" : " videos");
+    if (item.minutes) return Math.round(item.minutes) + " min read";
+    if (item.seconds) {
+      const minutes = Math.round(item.seconds / 60);
+      if (minutes >= 60) {
+        const hours = Math.floor(minutes / 60);
+        const rest = minutes % 60;
+        return hours + "h" + (rest ? " " + rest + "m" : "");
+      }
+      return minutes + " min";
+    }
+    return "";
+  }
+  function countText(value) {
+    const n = Number(value) || 0;
+    if (n >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, "") + "M";
+    if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, "") + "k";
+    return n ? String(n) : "";
+  }
+
+  function cardHTML(item) {
+    const meta = [];
+    if (item.meta) meta.push(item.meta);
+    const duration = durationText(item);
+    if (duration) meta.push(duration);
+    if (item.views) meta.push(countText(item.views) + " views");
+    if (item.stars) meta.push(countText(item.stars) + " stars");
+    const label = item.title + " — " + item.source + " " + item.kind + " (opens in a new tab)";
+    return '<a class="live-card" href="' + esc(item.url) + '" target="_blank" rel="noopener noreferrer"' +
+      ' data-source="' + esc(item.sourceId) + '" aria-label="' + esc(label) + '">' +
+        '<div class="live-card-top">' +
+          '<span class="live-source-tag" data-source="' + esc(item.sourceId) + '">' + esc(item.source) + "</span>" +
+          '<span class="live-kind">' + esc(item.kind) + "</span>" +
+        "</div>" +
+        "<h3>" + esc(item.title) + "</h3>" +
+        (item.text ? "<p>" + esc(item.text) + "</p>" : "<p></p>") +
+        '<div class="live-card-meta">' + meta.map(value => "<span>" + esc(value) + "</span>").join("") + "</div>" +
+        '<span class="live-card-cta">Open original <span aria-hidden="true">↗</span></span>' +
+      "</a>";
+  }
+
+  function renderSources() {
+    if (!els) return;
+    els.sources.innerHTML = SOURCE_DEFS.map(def => {
+      const state = sourceState[def.id] || { state: "idle" };
+      const text = state.state === "busy" ? "checking"
+        : state.state === "ok" ? String(state.count)
+        : state.state === "fail" ? "unavailable"
+        : "waiting";
+      const title = def.name + ": " + (state.state === "ok"
+        ? state.count + (state.count === 1 ? " result" : " results")
+        : text);
+      return '<li class="live-source is-' + esc(state.state) + '" title="' + esc(title) + '">' +
+        '<span class="dot" aria-hidden="true"></span>' + esc(def.name) +
+        " <b>" + esc(text) + "</b></li>";
+    }).join("");
+    els.sources.hidden = false;
+  }
+
+  function renderCards() {
+    const cards = orderedResults.slice(0, shown);
+    els.grid.innerHTML = cards.map(cardHTML).join("");
+    els.grid.hidden = cards.length === 0;
+    const remaining = Math.max(0, orderedResults.length - shown);
+    els.more.hidden = remaining === 0 || busy;
+    els.moreBtn.textContent = "Show " + Math.min(PAGE_SIZE, remaining) +
+      " more live " + (Math.min(PAGE_SIZE, remaining) === 1 ? "result" : "results");
+  }
+
+  function updateProgress() {
+    if (!busy) return;
+    const total = Object.keys(resultsBySource).reduce((sum, id) => sum + resultsBySource[id].length, 0);
+    const remaining = SOURCE_DEFS.filter(def => (sourceState[def.id] || {}).state === "busy").length;
+    if (total) {
+      els.status.innerHTML = "Found <strong>" + total + "</strong> live " +
+        (total === 1 ? "result" : "results") + " so far — still checking " +
+        remaining + " " + (remaining === 1 ? "source" : "sources") + "…";
+    } else {
+      els.status.innerHTML = "Searching <strong>" + SOURCE_DEFS.length + " live sources</strong> for <strong>" +
+        esc(currentQuery) + "</strong>…";
+    }
+  }
+
+  function setEmpty(title, text) {
+    els.emptyTitle.textContent = title;
+    els.emptyText.textContent = text;
+    els.empty.hidden = false;
+    els.grid.hidden = true;
+  }
+
+  function finishSearch() {
+    busy = false;
+    searched = true;
+    els.btn.disabled = false;
+    els.btn.removeAttribute("aria-busy");
+    els.btn.textContent = "Search live web";
+    els.loading.hidden = true;
+
+    orderedResults = collectOrdered();
+    const total = orderedResults.length;
+    const answered = SOURCE_DEFS.filter(def => (sourceState[def.id] || {}).state === "ok").length;
+    const failed = SOURCE_DEFS.filter(def => (sourceState[def.id] || {}).state === "fail").length;
+    const elapsed = ((performance.now() - startedAt) / 1000).toFixed(1);
+
+    if (total) {
+      els.status.innerHTML = "Found <strong>" + total + "</strong> live " +
+        (total === 1 ? "result" : "results") + " for <strong>" + esc(currentQuery) + "</strong> · " +
+        answered + " of " + SOURCE_DEFS.length + " sources answered" +
+        (failed ? " · " + failed + " unavailable" : "") + " · " + elapsed + "s.";
+      els.empty.hidden = true;
+      renderCards();
+    } else {
+      const allFailed = failed === SOURCE_DEFS.length;
+      els.status.innerHTML = allFailed
+        ? "No live source answered. Check your connection and try again."
+        : "No live results for <strong>" + esc(currentQuery) + "</strong> in the sources that answered.";
+      setEmpty(
+        allFailed ? "Live search is unavailable right now" : "No live matches for “" + currentQuery + "”",
+        allFailed
+          ? "The open indexes did not respond. Try again in a moment, or use the full live scan for a wider search."
+          : "The sources answered, but nothing relevant came back. Try a shorter topic, or open the full live scan for more sources."
+      );
+    }
+    els.scanLink.href = "scan.html" + (currentQuery ? "?q=" + encodeURIComponent(currentQuery) : "");
+  }
+
+  function collectOrdered() {
+    const buckets = SOURCE_DEFS.map(def => resultsBySource[def.id] || []);
+    const out = [];
+    const seen = new Set();
+    for (let index = 0; ; index++) {
+      let added = false;
+      for (const bucket of buckets) {
+        const item = bucket[index];
+        if (!item) continue;
+        added = true;
+        const key = normUrl(item.url);
+        if (!key || seen.has(key)) continue;
+        seen.add(key);
+        out.push(item);
+      }
+      if (!added) break;
+    }
+    return out;
+  }
+
+  function resetResults() {
+    if (activeCtrl) activeCtrl.abort();
+    activeCtrl = null;
+    searchSeq++;
+    busy = false;
+    searched = false;
+    currentQuery = "";
+    sourceState = {};
+    resultsBySource = {};
+    orderedResults = [];
+    shown = PAGE_SIZE;
+    els.btn.disabled = false;
+    els.btn.removeAttribute("aria-busy");
+    els.btn.textContent = "Search live web";
+    els.grid.innerHTML = "";
+    els.grid.hidden = true;
+    els.loading.hidden = true;
+    els.empty.hidden = true;
+    els.more.hidden = true;
+    els.sources.innerHTML = "";
+    els.sources.hidden = true;
+  }
+
+  function setReady(query) {
+    resetResults();
+    const clean = cleanQuery(query);
+    els.status.innerHTML = clean
+      ? "Ready to search the live indexes for <strong>" + esc(clean) + "</strong>."
+      : "Type a topic, or choose a suggestion above.";
+    updateLinks(clean);
+  }
+
+  function updateLinks(query) {
+    const clean = cleanQuery(query);
+    const searchFor = clean || "free courses";
+    els.edxLink.href = "https://www.edx.org/search?q=" + encodeURIComponent(searchFor);
+    els.courseraLink.href = "https://www.coursera.org/search?query=" + encodeURIComponent(searchFor);
+    els.scanLink.href = "scan.html" + (clean ? "?q=" + encodeURIComponent(clean) : "");
+    els.fullScanLink.href = els.scanLink.href;
+  }
+
+  function runSearch(rawQuery) {
+    const query = cleanQuery(rawQuery);
+    if (!query) {
+      setReady("");
+      els.input.focus();
+      return;
+    }
+    if (busy && query === currentQuery) return;
+
+    if (activeCtrl) activeCtrl.abort();
+    activeCtrl = new AbortController();
+    const signal = activeCtrl.signal;
+    const seq = ++searchSeq;
+
+    liveDirty = true;
+    busy = true;
+    searched = true;
+    currentQuery = query;
+    startedAt = performance.now();
+    shown = PAGE_SIZE;
+    sourceState = {};
+    resultsBySource = {};
+    orderedResults = [];
+    SOURCE_DEFS.forEach(def => { sourceState[def.id] = { state: "busy", count: 0 }; });
+
+    els.input.value = query;
+    els.btn.disabled = true;
+    els.btn.setAttribute("aria-busy", "true");
+    els.btn.textContent = "Searching…";
+    els.status.innerHTML = "Searching <strong>" + SOURCE_DEFS.length + " live sources</strong> for <strong>" +
+      esc(query) + "</strong>…";
+    els.grid.innerHTML = "";
+    els.grid.hidden = true;
+    els.empty.hidden = true;
+    els.more.hidden = true;
+    els.loading.hidden = false;
+    els.sources.hidden = false;
+    updateLinks(query);
+    renderSources();
+
+    const tasks = SOURCE_DEFS.map(def => {
+      return def.run(query, signal)
+        .then(items => {
+          if (seq !== searchSeq) return;
+          sourceState[def.id] = { state: "ok", count: (items || []).length };
+          resultsBySource[def.id] = dedupe(items || []);
+          renderSources();
+          updateProgress();
+        })
+        .catch(err => {
+          if (seq !== searchSeq) return;
+          if (err && err.name === "AbortError") return;
+          sourceState[def.id] = { state: "fail", count: 0 };
+          resultsBySource[def.id] = [];
+          renderSources();
+          updateProgress();
+        });
+    });
+
+    Promise.allSettled(tasks).then(() => {
+      if (seq !== searchSeq) return;
+      finishSearch();
+    });
+  }
+
+  /* ---------- initial query + events ---------- */
+  function initialQuery() {
+    const params = new URLSearchParams(location.search);
+    const q = cleanQuery(params.get("q") || "");
+    if (q) return q;
+    const subjects = [];
+    params.getAll("subject").forEach(value => {
+      String(value).split(",").forEach(part => {
+        if (part.trim()) subjects.push(part.trim());
+      });
+    });
+    if (subjects.length === 1 && window.LN_DATA) {
+      const subject = (window.LN_DATA.subjects || []).find(item => item.id === subjects[0]);
+      if (subject) return subject.name;
+    }
+    return "";
+  }
+
+  function init() {
+    const section = document.getElementById("liveCourses");
+    if (!section) return;
+
+    els = {
+      section: section,
+      form: document.getElementById("liveSearchForm"),
+      input: document.getElementById("liveSearchInput"),
+      btn: document.getElementById("liveSearchBtn"),
+      quick: document.getElementById("liveQuick"),
+      status: document.getElementById("liveStatus"),
+      sources: document.getElementById("liveSources"),
+      loading: document.getElementById("liveLoading"),
+      grid: document.getElementById("liveGrid"),
+      empty: document.getElementById("liveEmpty"),
+      emptyTitle: document.getElementById("liveEmptyTitle"),
+      emptyText: document.getElementById("liveEmptyText"),
+      retry: document.getElementById("liveRetryBtn"),
+      scanLink: document.getElementById("liveScanLink"),
+      more: document.getElementById("liveMoreWrap"),
+      moreBtn: document.getElementById("liveMoreBtn"),
+      edxLink: document.getElementById("liveEdxLink"),
+      courseraLink: document.getElementById("liveCourseraLink"),
+      fullScanLink: document.getElementById("liveFullScanLink")
+    };
+
+    const initial = initialQuery();
+    if (initial) els.input.value = initial;
+    setReady(initial);
+
+    els.form.addEventListener("submit", event => {
+      event.preventDefault();
+      runSearch(els.input.value);
+    });
+
+    els.input.addEventListener("input", () => {
+      const value = cleanQuery(els.input.value);
+      liveDirty = Boolean(value);
+      if (!value) {
+        setReady("");
+        return;
+      }
+      if (!busy && searched && value !== currentQuery) {
+        els.status.innerHTML = "Press <strong>Search live web</strong> to look for <strong>" +
+          esc(value) + "</strong>.";
+      } else if (!searched) {
+        els.status.innerHTML = "Ready to search the live indexes for <strong>" + esc(value) + "</strong>.";
+      }
+      updateLinks(value);
+    });
+
+    els.quick.addEventListener("click", event => {
+      const button = event.target.closest("[data-live-query]");
+      if (!button) return;
+      runSearch(button.getAttribute("data-live-query"));
+    });
+
+    els.moreBtn.addEventListener("click", () => {
+      const firstNew = shown;
+      shown += PAGE_SIZE;
+      renderCards();
+      const cards = els.grid.querySelectorAll(".live-card");
+      if (cards[firstNew]) {
+        try { cards[firstNew].focus({ preventScroll: true }); }
+        catch (e) { cards[firstNew].focus(); }
+      }
+    });
+
+    els.retry.addEventListener("click", () => {
+      runSearch(currentQuery || els.input.value);
+    });
+
+    const browseSearch = document.getElementById("browseSearch");
+    if (browseSearch) {
+      browseSearch.addEventListener("input", () => {
+        if (liveDirty || busy) return;
+        clearTimeout(browseSyncTimer);
+        browseSyncTimer = setTimeout(() => {
+          if (liveDirty || busy) return;
+          const value = cleanQuery(browseSearch.value);
+          if (value === cleanQuery(els.input.value)) return;
+          els.input.value = value;
+          setReady(value);
+        }, 350);
+      });
+    }
+
+    window.addEventListener("beforeunload", () => {
+      if (activeCtrl) activeCtrl.abort();
+    });
+  }
+})();

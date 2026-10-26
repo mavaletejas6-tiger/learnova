@@ -11,6 +11,9 @@ the catalogue.
 - **70 courses from 30 providers**, across 12 subjects and 6 curated collections.
 - **Catalogue browsing** with keyword search, subject, provider, level, language, price,
   certificate, duration, sorting, grid/list layout, and load-more paging.
+- **Live course search on the browse page** that queries YouTube, GitHub, PeerTube,
+  Wikiversity, and DEV Community directly from the browser, with per-source status and
+  direct links to the original creator. No API keys are required.
 - **Course pages** with an overview, typical syllabus, practical details, related courses,
   an honest editorial score, and separate learner reviews.
 - **Provider directory** with search, type filters, and course counts.
@@ -28,7 +31,7 @@ Every course links to its original provider. Learnova never re-hosts course cont
 | File | Purpose |
 | --- | --- |
 | `index.html` | Homepage: search, subjects, featured courses, collections, providers |
-| `courses.html` | Full catalogue with filters, sorting, and search |
+| `courses.html` | Full catalogue with filters, sorting, search, and live course search |
 | `course.html?id=...` | Course details, syllabus, reviews, save/progress actions |
 | `providers.html` | Provider directory |
 | `my-learning.html` | Saved, in-progress, completed, and review history |
@@ -44,6 +47,7 @@ assets/
   js/site.js         shared state, search, cards, auth, reviews, Supabase runtime
   js/home.js         homepage rendering
   js/browse.js       catalogue filters and search
+  js/live-courses.js live web search embedded in the browse page
   js/course.js       course detail page
   js/providers.js    provider directory
   js/my-learning.js  learner workspace
@@ -65,8 +69,8 @@ python -m http.server 8000
 Then open `http://localhost:8000/`.
 
 Do not open the HTML files directly with `file://`; browser security rules can block module
-loading and clipboard features. A local server is also required for the live scan’s cross-origin
-requests.
+loading and clipboard features. A local server is also required for the live scan and the
+browse page’s live course search, which make cross-origin requests from the browser.
 
 ## Backend (optional)
 
