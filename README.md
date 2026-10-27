@@ -11,9 +11,10 @@ the catalogue.
 - **70 courses from 30 providers**, across 12 subjects and 6 curated collections.
 - **Catalogue browsing** with keyword search, subject, provider, level, language, price,
   certificate, duration, sorting, grid/list layout, and load-more paging.
-- **Live course search at the top of the browse page** that queries YouTube, GitHub, PeerTube,
-  Wikiversity, and DEV Community directly from the browser, with per-source status and
-  direct links to the original creator. No API keys are required.
+- **Live course search at the top of the browse page** that queries YouTube, the open web
+  (via DuckDuckGo), GitHub, PeerTube, Wikiversity, and DEV Community directly from the
+  browser, with per-source status and direct links to the original creator. No API keys are
+  required.
 - **Course pages** with an overview, typical syllabus, practical details, related courses,
   an honest editorial score, and separate learner reviews.
 - **Provider directory** with search, type filters, and course counts.
@@ -21,8 +22,9 @@ the catalogue.
   recently viewed courses.
 - **Live AI scan** that plans searches with a free AI model and fetches real results in the
   browser from YouTube, GitHub, PeerTube, Wikiversity, DEV Community, and the open web.
-- **Outbound Google web search** from both live-search tools for anything outside those
-  indexes. Google results open in a new tab and are not scraped or fetched by Learnova.
+- **Google web-search links** from both live-search tools for anything outside those indexes.
+  Google blocks direct browser scans, so its results open in a new tab; the in-app Web source
+  uses DuckDuckGo instead.
 - **Local-first state.** Saves, progress, profiles, and reviews work without an account and are
   stored in `localStorage`. Supabase can be connected for email sign-in and cross-device sync.
 

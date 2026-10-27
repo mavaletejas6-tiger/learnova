@@ -1033,6 +1033,7 @@ input[type="url"]:focus, textarea:focus, select:focus {
 }
 .live-source-tag::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--src, var(--indigo)); }
 .live-source-tag[data-source="youtube"] { --src: #D92D20; background: #FEF3F2; color: #B42318; }
+.live-source-tag[data-source="web"] { --src: #0E7490; background: #ECFEFF; color: #155E75; }
 .live-source-tag[data-source="github"] { --src: #24292F; background: #F3F4F6; color: #24292F; }
 .live-source-tag[data-source="peertube"] { --src: #2D6CDF; background: #EEF4FF; color: #2457B8; }
 .live-source-tag[data-source="wikimedia"] { --src: #0F766E; background: #ECFDF5; color: #0B6B63; }

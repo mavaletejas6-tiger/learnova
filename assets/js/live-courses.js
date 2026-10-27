@@ -25,8 +25,30 @@
   const REPO_COURSE_RE = /\b(course|curriculum|roadmap|tutorials?|bootcamp|academy|study plan|education|learning path|syllabus|guide)\b/i;
   const PIRATE_RE = /(udemy|lynda|pluralsight|skillshare|torrent|desire-course|free-course-site|course-for-free|udacity[-_\s]?download|download[-_\s]?course)/i;
 
+  /* Known free/open course hosts and academic domains get a free label; other
+     course-like web pages are kept only when they explicitly say they are free. */
+  const FREE_HOSTS = [
+    "khanacademy.org", "nptel.ac.in", "swayam.gov.in", "swayam2.gov.in",
+    "freecodecamp.org", "ocw.mit.edu", "cs50.harvard.edu", "pll.harvard.edu",
+    "openstax.org", "openlearn.open.ac.uk", "open.edu", "saylor.org", "gcfglobal.org",
+    "archive.org", "openlibrary.org", "gutenberg.org",
+    "w3schools.com", "developer.mozilla.org", "javascript.info", "python.org",
+    "programiz.com", "geeksforgeeks.org", "javatpoint.com", "tutorialspoint.com",
+    "learnpython.org", "theodinproject.com", "fullstackopen.com", "exercism.org",
+    "roadmap.sh", "code.org", "kaggle.com", "cognitiveclass.ai", "open.hpi.de",
+    "developers.google.com", "learn.microsoft.com",
+    "mathsisfun.com", "phet.colorado.edu", "ck12.org", "openwho.org", "who.int",
+    "musictheory.net", "justinguitar.com", "duolingo.com", "learnvern.com",
+    "magnetbrains.com", "ncert.nic.in", "cbseacademic.nic.in", "nios.ac.in",
+    "epathshala.nic.in", "diksha.gov.in", "bbc.co.uk", "britishcouncil.org"
+  ];
+  const WEB_SKIP_RE = /(^|\.)(youtube\.com|youtu\.be|duckduckgo\.com|bing\.com|google\.com|github\.com|wikiversity\.org|dev\.to|facebook\.com|instagram\.com|linkedin\.com|reddit\.com|quora\.com|pinterest\.com|tiktok\.com|x\.com|twitter\.com|medium\.com|bit\.ly|tinyurl\.com|t\.co|goo\.gl|ow\.ly)$/i;
+  const PAID_WEB_HOST_RE = /(^|\.)(udemy\.com|lynda\.com|pluralsight\.com|skillshare\.com|datacamp\.com|udacity\.com|masterclass\.com|brilliant\.org)$/i;
+  const WEB_NOISE_PATH_RE = /\/(answers|questions|forum|forums|threads|discussion|community|qna)(\/|$)/i;
+
   const SOURCE_DEFS = [
     { id: "youtube", name: "YouTube", run: searchYouTube },
+    { id: "web", name: "Web", run: searchWeb, via: "DuckDuckGo" },
     { id: "github", name: "GitHub", run: searchGitHub },
     { id: "peertube", name: "PeerTube", run: searchPeerTube },
     { id: "wikimedia", name: "Wikiversity", run: searchWiki },
@@ -92,6 +114,21 @@
       return url.href.replace(/\/+$/, "");
     } catch (e) { return ""; }
   }
+  function isAcademicHost(host) {
+    return /(^|\.)(edu|gov)(\.[a-z]{2})?$/.test(host) ||
+      /\.(ac|edu|gov)\.[a-z]{2}$/.test(host) ||
+      /\.nic\.in$/.test(host);
+  }
+  function webHostInfo(value) {
+    try {
+      const host = new URL(value).hostname.toLowerCase().replace(/^www\./, "");
+      if (FREE_HOSTS.some(domain => host === domain || host.endsWith("." + domain))) {
+        return { free: true, host: host };
+      }
+      if (isAcademicHost(host)) return { free: false, host: host };
+      return null;
+    } catch (e) { return null; }
+  }
   function relevant(item, tokens) {
     if (!tokens.length) return true;
     const hay = normalize([item.title, item.text, item.meta].filter(Boolean).join(" "));
@@ -146,6 +183,60 @@
           throw err;
         }
         return response.json();
+      })
+      .catch(err => {
+        if (timedOut) {
+          const timeout = new Error("request timed out");
+          timeout.name = "TimeoutError";
+          throw timeout;
+        }
+        if (signal && signal.aborted) {
+          const aborted = new Error("cancelled");
+          aborted.name = "AbortError";
+          throw aborted;
+        }
+        throw err;
+      })
+      .finally(() => {
+        clearTimeout(timer);
+        if (signal) signal.removeEventListener("abort", onAbort);
+      });
+  }
+
+  function fetchText(url, signal, options) {
+    const opts = options || {};
+    const ctrl = new AbortController();
+    let timedOut = false;
+    const timer = setTimeout(() => {
+      timedOut = true;
+      ctrl.abort();
+    }, opts.timeout || REQUEST_TIMEOUT);
+    const onAbort = () => ctrl.abort();
+
+    if (signal) {
+      if (signal.aborted) {
+        clearTimeout(timer);
+        const err = new Error("cancelled");
+        err.name = "AbortError";
+        return Promise.reject(err);
+      }
+      signal.addEventListener("abort", onAbort, { once: true });
+    }
+
+    const headers = Object.assign({ Accept: "text/plain" }, opts.headers || {});
+
+    return fetch(url, {
+      signal: ctrl.signal,
+      headers: headers,
+      referrerPolicy: "no-referrer"
+    })
+      .then(response => {
+        if (!response.ok) {
+          const err = new Error("HTTP " + response.status);
+          err.status = response.status;
+          throw err;
+        }
+        return response.text();
       })
       .catch(err => {
         if (timedOut) {
@@ -384,6 +475,87 @@
     return dedupe(items).slice(0, 5);
   }
 
+  /* ---------- Open web (DuckDuckGo via Jina Reader) ---------- */
+  function unwrapDDG(raw) {
+    try {
+      const url = new URL(String(raw).replace(/&amp;/g, "&"));
+      const host = url.hostname.toLowerCase();
+      if (host === "duckduckgo.com" || host.endsWith(".duckduckgo.com")) {
+        if (url.pathname === "/l/" || url.pathname === "/l") {
+          return url.searchParams.get("uddg") || "";
+        }
+        return "";
+      }
+      return url.href;
+    } catch (e) { return ""; }
+  }
+
+  function stripMarkdown(value) {
+    return tidy(String(value == null ? "" : value)
+      .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
+      .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+      .replace(/[*_`~#>]/g, " ")
+      .replace(/\\([\[\]()])/g, "$1")
+      .replace(/&quot;/g, '"').replace(/&#39;|&rsquo;/g, "'")
+      .replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
+      .replace(/&nbsp;/g, " "), 320);
+  }
+
+  function parseWebResults(markdown, tokens) {
+    const lines = String(markdown || "").split(/\r?\n/);
+    const out = [];
+    const seen = new Set();
+    const seenHosts = new Set();
+    for (let index = 0; index < lines.length; index++) {
+      const match = lines[index].match(/^##\s+\[(.+?)\]\((https?:\/\/[^)\s]+)\)/);
+      if (!match) continue;
+      const title = stripMarkdown(match[1]);
+      const rawUrl = unwrapDDG(match[2]);
+      if (!title || !rawUrl) continue;
+      let parsed;
+      try { parsed = new URL(rawUrl); } catch (e) { continue; }
+      if (WEB_NOISE_PATH_RE.test(parsed.pathname)) continue;
+      const url = safeUrl(parsed.href);
+      if (!url) continue;
+      const host = parsed.hostname.toLowerCase().replace(/^www\./, "");
+      if (WEB_SKIP_RE.test(host) || PAID_WEB_HOST_RE.test(host) || seenHosts.has(host)) continue;
+      const info = webHostInfo(url);
+
+      let snippet = "";
+      for (let next = index + 1; next < lines.length && !/^##\s+\[/.test(lines[next]); next++) {
+        const text = stripMarkdown(lines[next]);
+        if (text.length > snippet.length) snippet = text;
+      }
+      const hay = [title, snippet].filter(Boolean).join(" ");
+      if (PIRATE_RE.test(url + " " + hay) || !COURSEY_RE.test(hay)) continue;
+      if (!(info && info.free) && !/\bfree\b/i.test(hay)) continue;
+      if (tokens.length) {
+        const hayKey = normalize(hay + " " + host);
+        if (!tokens.some(token => hayKey.includes(token))) continue;
+      }
+      const key = normUrl(url);
+      if (!key || seen.has(key)) continue;
+      seen.add(key);
+      seenHosts.add(host);
+      out.push({
+        sourceId: "web", source: "Web", title: title, url: url,
+        text: snippet, meta: info ? info.host : host,
+        kind: info && info.free ? "Free website" : "Web page"
+      });
+      if (out.length >= 8) break;
+    }
+    return out;
+  }
+
+  async function searchWeb(query, signal) {
+    const tokens = tokensFor(query);
+    const search = /\b(free|course|courses|class|classes|tutorial|tutorials|lesson|lessons)\b/i.test(query)
+      ? query : query + " free course";
+    const target = "https://html.duckduckgo.com/html/?q=" + encodeURIComponent(search);
+    const markdown = await fetchText("https://r.jina.ai/" + target, signal, { timeout: 16000 });
+    return dedupe(parseWebResults(markdown, tokens)).slice(0, 8);
+  }
+
   /* ---------- rendering ---------- */
   function durationText(item) {
     if (item.videoCount) return item.videoCount + (item.videoCount === 1 ? " video" : " videos");
@@ -435,7 +607,7 @@
         : state.state === "ok" ? String(state.count)
         : state.state === "fail" ? "unavailable"
         : "waiting";
-      const title = def.name + ": " + (state.state === "ok"
+      const title = def.name + (def.via ? " via " + def.via : "") + ": " + (state.state === "ok"
         ? state.count + (state.count === 1 ? " result" : " results")
         : text);
       return '<li class="live-source is-' + esc(state.state) + '" title="' + esc(title) + '">' +
