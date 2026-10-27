@@ -922,6 +922,7 @@ input[type="url"]:focus, textarea:focus, select:focus {
   content: ""; position: absolute; inset: 0 0 auto 0; height: 3px;
   background: linear-gradient(90deg, var(--teal), var(--indigo) 55%, var(--amber));
 }
+.live-courses--top { margin-top: 1.4rem; }
 .live-courses-head {
   display: flex; align-items: flex-start; justify-content: space-between;
   gap: 1.2rem; padding: 1.5rem 1.6rem 0;
@@ -1470,7 +1471,6 @@ input[type="url"]:focus, textarea:focus, select:focus {
   .main-nav { gap: 0; }
   .main-nav a { padding-inline: .55rem; font-size: .86rem; }
   .header-search { max-width: 330px; }
-  .live-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .hero-inner { gap: 2.5rem; }
   .hero-art { min-height: 380px; }
 }
@@ -1502,6 +1502,7 @@ input[type="url"]:focus, textarea:focus, select:focus {
   .menu-toggle { margin-left: auto; }
   .header-actions .btn-primary { padding-inline: .8rem; }
   .browse-layout { grid-template-columns: 1fr; padding-top: 1.2rem; }
+  .live-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .filters-toggle { display: inline-flex; }
   .filter-done { display: inline-flex; }
   .filters {
@@ -1582,6 +1583,7 @@ input[type="url"]:focus, textarea:focus, select:focus {
   .toolbar-controls { width: 100%; justify-content: space-between; }
   .sort-select { flex: 1; min-width: 0; }
   .live-courses-head { flex-direction: column; gap: .75rem; padding: 1.25rem 1rem 0; }
+  .live-courses--top { margin-top: 1rem; }
   .live-search-form { flex-wrap: wrap; margin: 1rem 1rem 0; }
   .live-search-form input { flex-basis: 100%; padding-left: 2.35rem; }
   .live-search-form .search-icon { top: calc(.35rem + 20px); }

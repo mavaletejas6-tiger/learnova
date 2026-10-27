@@ -11,7 +11,7 @@ the catalogue.
 - **70 courses from 30 providers**, across 12 subjects and 6 curated collections.
 - **Catalogue browsing** with keyword search, subject, provider, level, language, price,
   certificate, duration, sorting, grid/list layout, and load-more paging.
-- **Live course search on the browse page** that queries YouTube, GitHub, PeerTube,
+- **Live course search at the top of the browse page** that queries YouTube, GitHub, PeerTube,
   Wikiversity, and DEV Community directly from the browser, with per-source status and
   direct links to the original creator. No API keys are required.
 - **Course pages** with an overview, typical syllabus, practical details, related courses,

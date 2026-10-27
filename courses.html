@@ -96,6 +96,70 @@
     </section>
 
     <div class="container">
+      <!-- ===================== LIVE COURSE SEARCH ===================== -->
+      <section class="live-courses live-courses--top" id="liveCourses" aria-labelledby="liveCoursesTitle">
+        <div class="live-courses-head">
+          <div class="live-courses-intro">
+            <span class="eyebrow">Live course search</span>
+            <h2 id="liveCoursesTitle">Beyond the catalogue, in real time</h2>
+            <p>Search open course indexes and tutorial libraries for any topic. Results are fetched live in your browser and link straight to the original creator — separate from the hand-checked catalogue below.</p>
+          </div>
+          <span class="live-badge"><span class="live-dot" aria-hidden="true"></span> Live</span>
+        </div>
+
+        <form class="live-search-form" id="liveSearchForm" role="search" aria-label="Search live course indexes">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+          <label class="sr-only" for="liveSearchInput">Search live course indexes</label>
+          <input id="liveSearchInput" type="search" placeholder="Try “Python for beginners” or “digital marketing”" autocomplete="off" maxlength="120" />
+          <button class="btn btn-primary" id="liveSearchBtn" type="submit">Search live web</button>
+        </form>
+
+        <div class="live-quick" id="liveQuick">
+          <span>Try:</span>
+          <button type="button" data-live-query="Python">Python</button>
+          <button type="button" data-live-query="Web development">Web development</button>
+          <button type="button" data-live-query="Data science">Data science</button>
+          <button type="button" data-live-query="English speaking">English speaking</button>
+          <button type="button" data-live-query="Excel">Excel</button>
+        </div>
+
+        <div class="live-meta-row">
+          <p class="live-status" id="liveStatus" role="status" aria-live="polite">Type a topic, or choose a suggestion above.</p>
+          <ul class="live-sources" id="liveSources" aria-label="Live source status" hidden></ul>
+        </div>
+
+        <div class="live-loading" id="liveLoading" hidden>
+          <span class="live-spinner" aria-hidden="true"></span>
+          <span>Searching the open indexes for real courses…</span>
+        </div>
+
+        <div class="live-grid" id="liveGrid" hidden></div>
+
+        <div class="live-empty" id="liveEmpty" hidden>
+          <span class="live-empty-icon" aria-hidden="true">🛰️</span>
+          <h3 id="liveEmptyTitle">No live matches yet</h3>
+          <p id="liveEmptyText">Try a shorter topic, or open the full live scan for a wider search.</p>
+          <div class="live-empty-actions">
+            <button class="btn btn-outline btn-sm" id="liveRetryBtn" type="button">Try again</button>
+            <a class="btn btn-amber btn-sm" id="liveScanLink" href="scan.html">Open full live scan</a>
+          </div>
+        </div>
+
+        <div class="live-more-wrap" id="liveMoreWrap" hidden>
+          <button class="btn btn-outline btn-sm" id="liveMoreBtn" type="button">Show more live results</button>
+        </div>
+
+        <div class="live-footer">
+          <p>Live results come from YouTube, GitHub, PeerTube, Wikiversity and DEV Community, queried directly from your browser. Learnova does not host or endorse them — always check the original provider’s access terms.</p>
+          <div class="live-elsewhere">
+            <span>Also search</span>
+            <a id="liveEdxLink" href="https://www.edx.org/search?q=free%20courses" target="_blank" rel="noopener noreferrer">edX <span aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a>
+            <a id="liveCourseraLink" href="https://www.coursera.org/search?query=free%20courses" target="_blank" rel="noopener noreferrer">Coursera <span aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a>
+            <a id="liveFullScanLink" href="scan.html">Full live scan <span aria-hidden="true">→</span></a>
+          </div>
+        </div>
+      </section>
+
       <div class="browse-layout">
         <!-- ===================== FILTERS ===================== -->
         <aside class="filters" id="filters" aria-label="Filter courses">
@@ -164,70 +228,6 @@
           <div class="load-more-wrap" id="loadMoreWrap" hidden>
             <button class="btn btn-outline" id="loadMoreBtn" type="button">Show more courses</button>
           </div>
-
-          <!-- ===================== LIVE COURSE SEARCH ===================== -->
-          <section class="live-courses" id="liveCourses" aria-labelledby="liveCoursesTitle">
-            <div class="live-courses-head">
-              <div class="live-courses-intro">
-                <span class="eyebrow">Live course search</span>
-                <h2 id="liveCoursesTitle">Beyond the catalogue, in real time</h2>
-                <p>Search open course indexes and tutorial libraries for any topic. Results are fetched live in your browser and link straight to the original creator — separate from the hand-checked courses above.</p>
-              </div>
-              <span class="live-badge"><span class="live-dot" aria-hidden="true"></span> Live</span>
-            </div>
-
-            <form class="live-search-form" id="liveSearchForm" role="search" aria-label="Search live course indexes">
-              <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
-              <label class="sr-only" for="liveSearchInput">Search live course indexes</label>
-              <input id="liveSearchInput" type="search" placeholder="Try “Python for beginners” or “digital marketing”" autocomplete="off" maxlength="120" />
-              <button class="btn btn-primary" id="liveSearchBtn" type="submit">Search live web</button>
-            </form>
-
-            <div class="live-quick" id="liveQuick">
-              <span>Try:</span>
-              <button type="button" data-live-query="Python">Python</button>
-              <button type="button" data-live-query="Web development">Web development</button>
-              <button type="button" data-live-query="Data science">Data science</button>
-              <button type="button" data-live-query="English speaking">English speaking</button>
-              <button type="button" data-live-query="Excel">Excel</button>
-            </div>
-
-            <div class="live-meta-row">
-              <p class="live-status" id="liveStatus" role="status" aria-live="polite">Type a topic, or choose a suggestion above.</p>
-              <ul class="live-sources" id="liveSources" aria-label="Live source status" hidden></ul>
-            </div>
-
-            <div class="live-loading" id="liveLoading" hidden>
-              <span class="live-spinner" aria-hidden="true"></span>
-              <span>Searching the open indexes for real courses…</span>
-            </div>
-
-            <div class="live-grid" id="liveGrid" hidden></div>
-
-            <div class="live-empty" id="liveEmpty" hidden>
-              <span class="live-empty-icon" aria-hidden="true">🛰️</span>
-              <h3 id="liveEmptyTitle">No live matches yet</h3>
-              <p id="liveEmptyText">Try a shorter topic, or open the full live scan for a wider search.</p>
-              <div class="live-empty-actions">
-                <button class="btn btn-outline btn-sm" id="liveRetryBtn" type="button">Try again</button>
-                <a class="btn btn-amber btn-sm" id="liveScanLink" href="scan.html">Open full live scan</a>
-              </div>
-            </div>
-
-            <div class="live-more-wrap" id="liveMoreWrap" hidden>
-              <button class="btn btn-outline btn-sm" id="liveMoreBtn" type="button">Show more live results</button>
-            </div>
-
-            <div class="live-footer">
-              <p>Live results come from YouTube, GitHub, PeerTube, Wikiversity and DEV Community, queried directly from your browser. Learnova does not host or endorse them — always check the original provider’s access terms.</p>
-              <div class="live-elsewhere">
-                <span>Also search</span>
-                <a id="liveEdxLink" href="https://www.edx.org/search?q=free%20courses" target="_blank" rel="noopener noreferrer">edX <span aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a>
-                <a id="liveCourseraLink" href="https://www.coursera.org/search?query=free%20courses" target="_blank" rel="noopener noreferrer">Coursera <span aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a>
-                <a id="liveFullScanLink" href="scan.html">Full live scan <span aria-hidden="true">→</span></a>
-              </div>
-            </div>
-          </section>
 
           <div class="scan-callout">
             <div>
