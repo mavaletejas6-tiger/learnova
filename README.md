@@ -19,6 +19,9 @@ the catalogue.
   to free courses and course projects published in the last 90 days. Results carry a date and
   a New/Recent badge, and a one-click fallback shows all-time results. The homepage links
   straight to it with `courses.html?fresh=1`.
+- **Live scan handoff from every catalogue search bar.** Search suggestions keep the
+  catalogue matches and add a persistent Live scan card, so the typed topic can move straight
+  into `scan.html?q=…` without retyping. The mobile menu search is available at small widths too.
 - **Course pages** with an overview, typical syllabus, practical details, related courses,
   an honest editorial score, and separate learner reviews.
 - **Provider directory** with search, type filters, and course counts.

@@ -773,6 +773,20 @@
   /* ---------- header search + suggestions ---------- */
   let suggestionIndex = -1;
 
+  function scanSuggestion(q) {
+    return '<div class="suggest-scan">' +
+      '<div class="suggest-label">Live scan</div>' +
+      '<a class="suggest-scan-link" href="' + scanPath(q) + '" data-live-scan>' +
+        '<span class="suggest-scan-icon" aria-hidden="true"><span class="live-dot"></span></span>' +
+        '<span class="suggest-scan-copy">' +
+          '<strong>Scan the live web for &ldquo;' + esc(q) + '&rdquo;</strong>' +
+          '<span>YouTube, edX, Coursera, open libraries and more</span>' +
+        '</span>' +
+        '<span class="suggest-scan-arrow" aria-hidden="true">&rarr;</span>' +
+      '</a>' +
+    '</div>';
+  }
+
   function renderSuggestions(form, q) {
     let box = form.querySelector(".search-suggest");
     if (!box) {
@@ -827,11 +841,13 @@
       html += "</div>";
     }
 
-    if (!html) {
-      html = '<div class="suggest-empty">No catalogue match yet. Try a broader subject, or <strong>scan the live web</strong> below.</div>' +
-        '<div class="suggest-footer"><span>Live scan searches other sites</span><a href="' + scanPath(q) + '">Scan for “' + esc(q) + '” →</a></div>';
-    } else {
-      html += '<div class="suggest-footer"><span>Press Enter for all results</span><a href="' + browsePath({ q: q }) + '">See all →</a></div>';
+    const hasCatalogue = Boolean(html);
+    if (!hasCatalogue) {
+      html = '<div class="suggest-empty">No catalogue match yet. A live scan can look outside the catalogue.</div>';
+    }
+    html += scanSuggestion(q);
+    if (hasCatalogue) {
+      html += '<div class="suggest-footer"><span>Press Enter for all results</span><a href="' + browsePath({ q: q }) + '">See all &rarr;</a></div>';
     }
     box.innerHTML = html;
     box.classList.add("open");
@@ -849,12 +865,15 @@
         timer = setTimeout(() => renderSuggestions(form, value), 110);
       });
       input.addEventListener("focus", () => {
+        $$(".search-suggest.open").forEach(box => {
+          if (!form.contains(box)) box.classList.remove("open");
+        });
         if (input.value.trim().length >= 2) renderSuggestions(form, input.value);
       });
       input.addEventListener("keydown", e => {
         const box = form.querySelector(".search-suggest");
         if (!box || !box.classList.contains("open")) return;
-        const items = $$(".suggest-item", box);
+        const items = $$(".suggest-item, .suggest-scan-link", box);
         if (e.key === "ArrowDown" || e.key === "ArrowUp") {
           e.preventDefault();
           if (!items.length) return;
