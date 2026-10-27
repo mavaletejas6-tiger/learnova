@@ -153,6 +153,7 @@
       about: "Free engineering and science courses from Indian Institutes of Technology, with optional paid certification exams.",
       liveSearch: {
         host: "nptel.ac.in",
+        pathExcludes: ["/shop/"],
         freeMode: "always",
         freeLabel: "Free course",
         freeNote: "Course content is free; optional certification exams have a fee.",

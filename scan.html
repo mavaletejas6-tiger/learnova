@@ -6,14 +6,14 @@
 
   <!-- ============ SEO ============ -->
   <title>Live course scan — Learnova</title>
-  <meta name="description" content="Scan the live web for free courses. A free AI plans searches across YouTube, edX, Coursera, the open web, GitHub and PeerTube, then brings back real courses for any subject." />
+  <meta name="description" content="Scan the live web for free courses. A free AI plans searches across YouTube, edX, Coursera, the open web, GitHub, PeerTube and provider sites including Udemy, NPTEL and SWAYAM." />
   <meta name="theme-color" content="#1B1F4B" />
   <link rel="canonical" href="https://mavaletejas6-tiger.github.io/learnova/scan.html" />
 
   <!-- Open Graph (social sharing) -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Live course scan — Learnova" />
-  <meta property="og:description" content="Type any subject. A free AI plans the search, then your browser fetches real courses from YouTube, edX, Coursera, GitHub and the open web — live." />
+  <meta property="og:description" content="Type any subject. A free AI plans the search, then your browser fetches real courses from YouTube, edX, Coursera, GitHub, the open web and selected provider sites — live." />
   <meta property="og:url" content="https://mavaletejas6-tiger.github.io/learnova/scan.html" />
   <!-- Optional: add an og.png (1200x630) next to this file and reference it below -->
   <!-- <meta property="og:image" content="https://your-site.netlify.app/og.png" /> -->
@@ -288,6 +288,12 @@
       font-size: .75rem; font-weight: 800; letter-spacing: .05em;
       padding: .18rem .6rem; border-radius: 999px;
     }
+    /* Provider content that is only available during a free trial */
+    .badge-trial {
+      background: #FFF7E6; color: #8A4B00; border: 1px solid #F3D39B;
+      font-size: .75rem; font-weight: 800; letter-spacing: .05em;
+      padding: .18rem .6rem; border-radius: 999px;
+    }
     /* Neutral pill showing which list or repo the result came from */
     .badge-kind {
       background: #EEF0FF; color: #3A41A8; border: 1px solid #D2D6FA;
@@ -335,6 +341,32 @@
     .source-list li[data-state="ok"]   { color: var(--navy); }
     .source-list li[data-state="fail"] { color: #9A3F3F; border-color: #F3C9C9; }
     .source-list .n { font-variant-numeric: tabular-nums; }
+
+    /* Provider selector inside the live scan */
+    .scan-provider {
+      margin: .2rem 0 .8rem; padding: .8rem .9rem;
+      background: rgba(255, 255, 255, .72); border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+    }
+    .scan-provider-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: .25rem .7rem; }
+    .scan-provider-title { color: var(--navy); font-size: .9rem; font-weight: 800; }
+    .scan-provider-hint { color: var(--muted); font-size: .76rem; line-height: 1.4; }
+    .scan-provider-chips { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .55rem; }
+    .scan-provider-chips button {
+      font: inherit; padding: .32rem .72rem; border: 1px solid var(--line);
+      border-radius: 999px; background: #fff; color: var(--muted);
+      font-size: .76rem; font-weight: 700; cursor: pointer;
+    }
+    .scan-provider-chips button:hover { border-color: var(--indigo); color: var(--indigo); background: #EEF0FF; }
+    .scan-provider-chips button[aria-pressed="true"] {
+      border-color: var(--indigo); background: var(--indigo); color: #fff;
+    }
+    .scan-provider-note {
+      margin: .6rem 0 0; color: var(--muted); font-size: .78rem; line-height: 1.45;
+    }
+    .scan-provider-note a { color: var(--indigo); font-weight: 700; white-space: nowrap; }
+    .scan-provider-note a:hover { text-decoration: underline; }
+    .course-card.is-fallback { border-style: dashed; }
 
     .course-meta { font-size: .88rem; color: var(--muted); margin: 0; }
     .course-source { font-weight: 700; color: var(--indigo); font-size: .85rem; text-transform: uppercase; letter-spacing: .04em; }
@@ -438,6 +470,14 @@
     .footer-bottom { border-top: 1px solid rgba(255,255,255,.15); margin-top: 2rem; padding-top: 1.2rem; font-size: .85rem; display: flex; flex-wrap: wrap; gap: .5rem; justify-content: space-between; }
 
     /* ---------- 7. Responsive (mobile-first: these are the larger screens) ---------- */
+    @media (max-width: 639px) {
+      .scan-provider-chips {
+        flex-wrap: nowrap; overflow-x: auto; width: 100%;
+        padding-bottom: .15rem; -webkit-overflow-scrolling: touch;
+      }
+      .scan-provider-chips button { flex: 0 0 auto; }
+    }
+
     @media (min-width: 640px) {
       .grid-3        { grid-template-columns: repeat(3, 1fr); }
       .results-grid  { grid-template-columns: repeat(2, 1fr); }
@@ -530,6 +570,7 @@
             Looking for something beyond Learnova’s hand-checked catalogue? Type any subject.
             A free AI plans the searches, then your browser scans YouTube, edX, Coursera,
             the open web, GitHub and PeerTube — live, and only for the subject you asked for.
+            You can also focus the scan on one provider, from Udemy to NPTEL.
           </p>
 
           <!-- Hero search: jumps to the live demo below with your choices -->
@@ -658,7 +699,8 @@
         <p class="lead">
           Type a subject and Learnova plans the searches with a free AI, then queries YouTube,
           edX, Coursera, the open web, GitHub, PeerTube, Wikiversity and DEV at the same time — in your browser,
-          right now. No stored list, no sample data.
+          right now. Or focus the scan on one provider's free or free-trial pages, from Udemy to NPTEL.
+          No stored list, no sample data.
         </p>
 
         <div class="demo-controls">
@@ -680,6 +722,18 @@
           </div>
         </div>
 
+        <div class="scan-provider" id="scanProvider" hidden>
+          <div class="scan-provider-head">
+            <span class="scan-provider-title">Provider scan</span>
+            <span class="scan-provider-hint">Optional &mdash; focus this scan on one provider's free or free-trial pages.</span>
+          </div>
+          <div class="scan-provider-chips" id="scanProviderChips" role="group" aria-label="Choose a provider to scan"></div>
+          <p class="scan-provider-note" id="scanProviderNote" hidden aria-live="polite">
+            <span id="scanProviderNoteText"></span>
+            <a id="scanProviderLink" href="#" target="_blank" rel="noopener noreferrer">Open free page <span aria-hidden="true">↗</span></a>
+          </p>
+        </div>
+
         <!-- Live status: one chip per index being queried -->
         <div class="scan-bar" id="scanBar" data-state="idle" aria-hidden="true"></div>
         <div class="scan-head">
@@ -695,18 +749,22 @@
         <div class="results-grid" id="results"></div>
 
         <p class="muted-note" style="margin-top:1rem">
-          Every card below came from a request made when you searched. A free AI model
-          (<strong>LLM7</strong>, with <strong>Pollinations</strong> as backup) writes the search
-          queries; your browser then fetches real results from <strong>YouTube</strong>,
-          <strong>edX</strong>, <strong>Coursera</strong>,
-          <strong>DuckDuckGo&rsquo;s open web index</strong>, <strong>GitHub</strong>,
-          <strong>PeerTube</strong>, <strong>Wikiversity / Wikibooks</strong> and
-          <strong>DEV Community</strong>. The AI never supplies links — it only plans searches.
-          Cards marked <strong>FREE</strong> come from sources that only hold free material; cards
-          marked <strong>FREE TO AUDIT</strong> come from edX or Coursera, where the lessons are
-          usually free but graded work and certificates may be paid — check the page. Cards
-          marked <strong>OPEN WEB</strong> come from the wider web or academic sites, so check the
-          page is free before you enrol. Language and level are read from the source when it reports
+          Every card below came from a live request made when you searched, or is a clearly
+          labelled official provider fallback. A free AI model (<strong>LLM7</strong>, with
+          <strong>Pollinations</strong> as backup) writes the search queries; your browser then
+          fetches real results from <strong>YouTube</strong>, <strong>edX</strong>,
+          <strong>Coursera</strong>, <strong>DuckDuckGo&rsquo;s open web index</strong>,
+          <strong>GitHub</strong>, <strong>PeerTube</strong>,
+          <strong>Wikiversity / Wikibooks</strong> and <strong>DEV Community</strong>. In provider
+          mode it checks one provider&rsquo;s own site instead, keeping only pages that are free
+          or explicitly free-trial. The AI never supplies links — it only plans searches.
+          Cards marked <strong>FREE</strong> come from sources that only hold free material, or
+          from provider pages that are marked free; cards marked <strong>FREE TRIAL</strong> are
+          only accessible during a trial and require payment afterwards. Cards marked
+          <strong>FREE TO AUDIT</strong> come from edX or Coursera, where the lessons are usually
+          free but graded work and certificates may be paid — check the page. Cards marked
+          <strong>OPEN WEB</strong> come from the wider web or academic sites, so check the page
+          is free before you enrol. Language and level are read from the source when it reports
           them — results whose source reports a different language or level are filtered out, and
           anything a source does not report stays visible and unlabelled rather than guessed. Every
           link opens the original creator&rsquo;s page — we never copy or re-host anyone&rsquo;s content.
@@ -720,7 +778,7 @@
         <h2>What we actually scan</h2>
         <p class="lead">
           Learnova keeps a hand-checked catalogue, and this page adds a live web scan on top of it.
-          Every search runs in your browser, against these sources:
+          Every search runs in your browser. The default scan checks these open sources:
         </p>
 
         <ul class="chips">
@@ -736,13 +794,34 @@
         </ul>
 
         <p>
-          Those indexes reach platforms and creators everywhere, so a search also surfaces
-          NPTEL, SWAYAM, Khan Academy, MIT OpenCourseWare, freeCodeCamp, OpenStax, university pages
-          — plus independent teachers who publish for free. edX and Coursera courses are found
-          through DuckDuckGo&rsquo;s index of their public course pages and labelled
+          Provider mode checks one provider&rsquo;s own site instead, keeping only pages that are
+          free or explicitly free-trial:
+        </p>
+
+        <ul class="chips">
+          <li>Udemy</li>
+          <li>Skillshare (free trial)</li>
+          <li>LinkedIn Learning (free trial)</li>
+          <li>Domestika</li>
+          <li>Alison</li>
+          <li>SWAYAM</li>
+          <li>NPTEL</li>
+          <li>upGrad</li>
+          <li>Unacademy</li>
+          <li>Physics Wallah</li>
+          <li>Udacity</li>
+        </ul>
+
+        <p>
+          The open scan also reaches Khan Academy, MIT OpenCourseWare, freeCodeCamp, OpenStax,
+          university pages — plus independent teachers who publish for free. edX and Coursera
+          courses are found through
+          DuckDuckGo&rsquo;s index of their public course pages and labelled
           <strong>FREE TO AUDIT</strong>, because their lessons are usually free while certificates
-          can be paid. A free AI plans the queries first, but every card still links to the original
-          creator with credit. We never copy or re-host anyone&rsquo;s content.
+          can be paid. Provider scans apply the same free and free-trial rules as the live course
+          search, and show a clearly labelled official free collection or free-trial page when no
+          topic-specific page matches. A free AI plans the queries first, but every card still
+          links to the original creator with credit. We never copy or re-host anyone&rsquo;s content.
         </p>
       </div>
     </section>
@@ -842,7 +921,7 @@
             <h3>Phase 1: Build</h3>
             <ul>
               <li>Focus on one niche subject first</li>
-              <li>AI-planned live scan across YouTube, edX, Coursera, the open web and open course libraries</li>
+              <li>AI-planned live scan across YouTube, edX, Coursera, the open web, open course libraries and 11 provider sites</li>
               <li>Language and level filters that drive the scan itself</li>
             </ul>
           </article>
@@ -1029,8 +1108,9 @@
   <!-- Small confirmation toast -->
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <!-- Shared backend config + Supabase JS (auth + database). -->
+  <!-- Shared backend config, provider data + Supabase JS (auth + database). -->
   <script src="assets/js/config.js"></script>
+  <script src="assets/js/data.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
   <!-- ===================== JAVASCRIPT ===================== -->
@@ -1278,6 +1358,11 @@
     const sourceList  = document.getElementById("sourceList");
     const rescanBtn   = document.getElementById("rescanBtn");
     const googleSearchLink = document.getElementById("googleSearchLink");
+    const providerBox = document.getElementById("scanProvider");
+    const providerChips = document.getElementById("scanProviderChips");
+    const providerNote = document.getElementById("scanProviderNote");
+    const providerNoteText = document.getElementById("scanProviderNoteText");
+    const providerLink = document.getElementById("scanProviderLink");
 
     /* Escape text before putting it into HTML (safety) */
     const esc = s => String(s).replace(/[&<>"']/g, m =>
@@ -1294,6 +1379,74 @@
     fillSelect(demoTopic, TOPICS);
     fillSelect(demoLang, LANGUAGES);
     fillSelect(demoLevel, LEVELS);
+
+    /* Provider scans reuse the same provider metadata and access rules as
+       the live course search in data.js. If that file is unavailable, the
+       provider row stays hidden and the normal multi-source scan still works. */
+    const providerData = (window.LN_DATA && window.LN_DATA.providers) || {};
+    const providerScanIds = ((window.LN_DATA && window.LN_DATA.liveProviderIds) || [])
+      .filter(id => providerData[id] && providerData[id].liveSearch);
+    let activeProviderId = "";
+
+    function providerById(id) {
+      const provider = id && providerData[id];
+      if (!provider || !provider.liveSearch) return null;
+      return Object.assign({ id: id }, provider);
+    }
+    function activeProvider() {
+      return providerById(activeProviderId);
+    }
+    function isTrialProvider(provider) {
+      return Boolean(provider && provider.liveSearch &&
+        provider.liveSearch.freeLabel === "Free trial access");
+    }
+
+    function renderProviderChips() {
+      if (!providerBox || !providerChips) return;
+      if (!providerScanIds.length) {
+        providerBox.hidden = true;
+        return;
+      }
+      providerBox.hidden = false;
+      providerChips.innerHTML =
+        '<button type="button" data-provider="" aria-pressed="true">All sources</button>' +
+        providerScanIds.map(id => {
+          const provider = providerData[id];
+          const label = provider.name;
+          const note = (provider.liveSearch && provider.liveSearch.freeNote) ||
+            ("Search " + label + " free pages");
+          return '<button type="button" data-provider="' + esc(id) +
+            '" aria-pressed="false" title="' + esc(note) + '">' + esc(label) + "</button>";
+        }).join("");
+      updateProviderUI();
+    }
+
+    function updateProviderUI() {
+      if (!providerChips) return;
+      providerChips.querySelectorAll("[data-provider]").forEach(button => {
+        const id = button.getAttribute("data-provider") || "";
+        button.setAttribute("aria-pressed", String(id === activeProviderId));
+      });
+      const provider = activeProvider();
+      if (!provider) {
+        if (providerNote) providerNote.hidden = true;
+        return;
+      }
+      const live = provider.liveSearch;
+      const trial = isTrialProvider(provider);
+      if (providerNoteText) {
+        providerNoteText.textContent = live.freeNote ||
+          ("Only " + (trial ? "free-trial " : "free ") + "pages from " + provider.name + " are included.");
+      }
+      if (providerLink) {
+        providerLink.href = live.freeUrl || provider.url;
+        providerLink.innerHTML = "Open " + esc(provider.name) +
+          (trial ? " free trial" : " free page") + ' <span aria-hidden="true">↗</span>';
+        providerLink.setAttribute("aria-label", "Open " + provider.name +
+          (trial ? " free trial" : " free page") + " (opens in a new tab)");
+      }
+      if (providerNote) providerNote.hidden = false;
+    }
 
     /* ---------- 3a. What we ask the indexes for ---------- */
     function baseTerms() {
@@ -1378,6 +1531,34 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       }, signal, false, timeoutMs);
+    }
+
+    /* DuckDuckGo search through Jina Reader. The HTML endpoint is the
+       primary route; the Lite endpoint is a fallback because Jina can
+       temporarily block one DuckDuckGo host without blocking the other. */
+    async function ddgMarkdown(query, signal) {
+      const endpoints = [
+        "https://html.duckduckgo.com/html/?q=",
+        "https://lite.duckduckgo.com/lite/?q="
+      ];
+      let lastError = null;
+      for (const endpoint of endpoints) {
+        try {
+          const markdown = await fetchAny(
+            "https://r.jina.ai/" + endpoint + encodeURIComponent(query),
+            signal,
+            true
+          );
+          if (!/AbuseAlleviationError|Target URL returned error|Verifying you're not a bot|maybe requiring CAPTCHA|"code"\s*:\s*(?:401|403|409|429)/i.test(markdown)) {
+            return markdown;
+          }
+          lastError = new Error("DuckDuckGo blocked");
+        } catch (e) {
+          if (e && e.name === "AbortError") throw e;
+          lastError = e;
+        }
+      }
+      throw lastError || new Error("DuckDuckGo unavailable");
     }
 
     /* ---------- 3c. The free AI planner ----------
@@ -1651,9 +1832,7 @@
       return m ? "https://www.coursera.org/learn/" + m[1] : "";
     }
     function ddgSiteSearch(q, opts, signal) {
-      const target = "https://lite.duckduckgo.com/lite/?q=" + encodeURIComponent(q);
-      return fetchAny("https://r.jina.ai/" + target, signal, true)
-        .then(md => parseDDG(md, opts));
+      return ddgMarkdown(q, signal).then(md => parseDDG(md, opts));
     }
     async function scanCourseSite(c, opts) {
       const queries = await c.planPromise;
@@ -1776,8 +1955,7 @@
     }
 
     function ddgSearch(q, signal) {
-      const target = "https://lite.duckduckgo.com/lite/?q=" + encodeURIComponent(q);
-      return fetchAny("https://r.jina.ai/" + target, signal, true).then(md => parseDDG(md));
+      return ddgMarkdown(q, signal).then(md => parseDDG(md));
     }
 
     async function scanOpenWeb(c) {
@@ -1914,8 +2092,188 @@
         })));
     }
 
+    /* 8. Provider scan — one provider at a time, using the same free and
+          free-trial rules as the live course search. Provider mode bypasses
+          the global paid/pirate host filters only for the selected provider;
+          its own URL and free-access rules still apply. */
+    function providerMatchesUrl(parsed, provider) {
+      const live = provider.liveSearch || {};
+      const host = parsed.hostname.toLowerCase().replace(/^www\./, "");
+      const hosts = live.hosts || (live.host ? [live.host] : []);
+      const hostMatch = live.allowSubdomains === false
+        ? hosts.some(value => host === value)
+        : hosts.some(value => host === value || host.endsWith("." + value));
+      if (!hostMatch) return false;
+      const excludedHosts = live.excludeHosts || [];
+      if (excludedHosts.some(value => host === value || host.endsWith("." + value))) return false;
+      const excluded = live.pathExcludes || [];
+      if (excluded.some(prefix => parsed.pathname.startsWith(prefix))) return false;
+      const prefixes = live.pathPrefixes || [];
+      if (prefixes.length && !prefixes.some(prefix => parsed.pathname.startsWith(prefix))) return false;
+      if (live.pathPattern) {
+        try {
+          if (!new RegExp(live.pathPattern).test(parsed.pathname)) return false;
+        } catch (e) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    function providerKind(live, parsed) {
+      if (parsed && (parsed.pathname.includes("/topic/") || parsed.pathname === "/courses/free/" ||
+        parsed.pathname === "/explorer" || parsed.pathname.includes("/course-collection/"))) {
+        return "Free course collection";
+      }
+      if (parsed && /\.(pdf|zip|docx?|pptx?)$/i.test(parsed.pathname)) return "Free resource";
+      return live.freeLabel || "Free course";
+    }
+
+    function providerTitle(provider, parsed, title, snippet) {
+      const clean = String(title || "").trim();
+      if (provider.id === "nptel" && /^nptel$/i.test(clean)) {
+        const lead = String(snippet || "").split(/[,|·•]/)[0].replace(/\s+/g, " ").trim();
+        if (lead.length >= 20) {
+          return lead.length > 110 ? lead.slice(0, 107).trimEnd() + "…" : lead;
+        }
+      }
+      if (provider.id === "unacademy" && /india's largest learning platform/i.test(clean)) {
+        const parts = parsed.pathname.split("/").filter(Boolean);
+        const slug = parts[1] || "";
+        const readable = slug.replace(/-/g, " ").replace(/\b\w/g, letter => letter.toUpperCase());
+        if (readable) return "Free " + readable + " classes — Unacademy";
+      }
+      return clean;
+    }
+
+    function parseProviderResults(markdown, provider, tokens) {
+      const live = provider.liveSearch || {};
+      const trial = isTrialProvider(provider);
+      const lines = String(markdown || "").split(/\r?\n/);
+      const out = [], seen = new Set();
+      const resultLine = /^(?:##|\d+\.)\s*\[(.+?)\]\((https?:\/\/[^)\s]+)\)/;
+      for (let index = 0; index < lines.length; index++) {
+        const match = lines[index].match(resultLine);
+        if (!match) continue;
+        const title = stripMd(match[1]);
+        const rawUrl = unwrapDDG(match[2]);
+        if (!title || !rawUrl) continue;
+        let parsed;
+        try { parsed = new URL(rawUrl); } catch (e) { continue; }
+        if (!providerMatchesUrl(parsed, provider)) continue;
+        const url = parsed.href;
+        const host = parsed.hostname.toLowerCase().replace(/^www\./, "");
+        let snippet = "";
+        for (let next = index + 1; next < lines.length && !resultLine.test(lines[next]); next++) {
+          const text = stripMd(lines[next]);
+          if (text.length > snippet.length) snippet = text;
+        }
+        const hay = [title, snippet].filter(Boolean).join(" ");
+        const freeInHay = /\bfree\b/i.test(hay);
+        const freeTitle = /\bfree\b/i.test(title);
+        let freePath = false;
+        if (live.freePathPattern) {
+          try { freePath = new RegExp(live.freePathPattern).test(parsed.pathname); } catch (e) {}
+        }
+        if (live.freeMode === "filter") {
+          let freeEvidence = freePath;
+          if (live.freePathOnly) {
+            freeEvidence = freePath;
+          } else if (live.freeTitleOnly) {
+            freeEvidence = freeEvidence || freeTitle;
+          } else if (live.freePhrase) {
+            try { freeEvidence = freeEvidence || new RegExp(live.freePhrase, "i").test(hay); } catch (e) {}
+          } else {
+            freeEvidence = freeEvidence || freeInHay;
+          }
+          if (!freeEvidence) continue;
+        }
+        if (!COURSEY_RE.test(hay)) {
+          const prefixes = live.pathPrefixes || [];
+          if (!prefixes.some(prefix => parsed.pathname.startsWith(prefix))) continue;
+        }
+        if (tokens.length) {
+          const hayKey = (hay + " " + host).toLowerCase();
+          if (!tokens.some(token => hayKey.includes(token))) continue;
+        }
+        const key = normUrl(url);
+        if (!key || seen.has(key)) continue;
+        seen.add(key);
+        out.push({
+          title: providerTitle(provider, parsed, title, snippet),
+          url: url,
+          source: provider.name,
+          text: snippet.slice(0, 320),
+          free: !trial,
+          trial: trial,
+          provider: true,
+          note: live.freeNote || "",
+          kind: "course",
+          kindLabel: providerKind(live, parsed),
+          meta: host,
+          metaTitle: provider.name + " (found through DuckDuckGo)",
+          strict: true
+        });
+        if (out.length >= 10) break;
+      }
+      return out;
+    }
+
+    function providerQuery(provider, raw) {
+      const live = provider.liveSearch || {};
+      const searchHost = live.searchHost || live.host;
+      if (!searchHost) return "";
+      const searchFor = raw || live.searchSuffix || "free course";
+      let search = "site:" + searchHost + " " + searchFor;
+      if (live.searchSuffix && raw) {
+        if (!search.toLowerCase().includes(live.searchSuffix.toLowerCase())) {
+          search += " " + live.searchSuffix;
+        }
+      } else if (!live.searchSuffix) {
+        if (live.freeMode === "filter" && !/\bfree\b/i.test(search)) search += " free";
+        if (!COURSEY_RE.test(search)) search += " course";
+      }
+      return search;
+    }
+
+    async function scanProvider(c, provider) {
+      const queries = await c.planPromise;
+      const live = provider.liveSearch || {};
+      const query = providerQuery(provider, tidy(queries[0] || c.baseQuery));
+      if (!query) throw new Error("No provider query");
+      const markdown = await ddgMarkdown(query, c.signal);
+      const items = parseProviderResults(markdown, provider, matchTokens());
+      if (items.length) return items;
+
+      /* A successful search with no free match gets the provider's own
+         official free collection or trial page, clearly labelled. */
+      if (!live.freeUrl) return [];
+      const trial = isTrialProvider(provider);
+      let host = "";
+      try { host = new URL(live.freeUrl).hostname.replace(/^www\./, ""); } catch (e) {}
+      return [{
+        title: live.fallbackTitle ||
+          (trial ? "Try " + provider.name + " free" : "Free courses at " + provider.name),
+        url: live.freeUrl,
+        source: provider.name,
+        text: live.fallbackNote ||
+          ("No topic-specific page matched. Open the provider's official " +
+            (trial ? "free trial" : "free collection") + "."),
+        free: !trial,
+        trial: trial,
+        provider: true,
+        fallback: true,
+        note: live.freeNote || "",
+        kind: "course",
+        kindLabel: trial ? "Official free trial page" : "Official free collection",
+        meta: host,
+        metaTitle: provider.name + " official " + (trial ? "trial" : "free") + " page",
+        strict: true
+      }];
+    }
+
     /* ---------- 3e. The scan itself ---------- */
-    const SCANNERS = [
+    const BASE_SCANNERS = [
       { id: "youtube",   name: "YouTube",                   run: scanYouTube },
       { id: "edx",       name: "edX",                       run: scanEdx },
       { id: "coursera",  name: "Coursera",                  run: scanCoursera },
@@ -1925,6 +2283,17 @@
       { id: "wikimedia", name: "Wikiversity + Wikibooks",   run: scanWikimedia },
       { id: "devto",     name: "DEV Community",             run: scanDevTo }
     ];
+
+    function activeScanners() {
+      const provider = activeProvider();
+      if (!provider) return BASE_SCANNERS;
+      return [{
+        id: "provider",
+        name: provider.name,
+        note: provider.liveSearch.freeNote || "",
+        run: c => scanProvider(c, provider)
+      }];
+    }
 
     const KIND_LABEL = {
       video: "Video course", playlist: "Course playlist", course: "Online course",
@@ -1942,11 +2311,17 @@
 
     function scanning() {
       return aiState.state === "busy" ||
-        SCANNERS.some(s => (sourceState[s.id] || {}).state === "busy");
+        activeScanners().some(s => (sourceState[s.id] || {}).state === "busy");
     }
     function summaryText() {
-      if (!scanStarted) return "Ready. Type any subject to start a live scan.";
-      const states = SCANNERS.map(s => (sourceState[s.id] || {}).state);
+      const provider = activeProvider();
+      const scanners = activeScanners();
+      if (!scanStarted) {
+        return provider
+          ? "Ready. Type a subject to scan " + provider.name + "."
+          : "Ready. Type any subject to start a live scan.";
+      }
+      const states = scanners.map(s => (sourceState[s.id] || {}).state);
       const busy = states.filter(x => x === "busy").length;
       const fail = states.filter(x => x === "fail").length;
       let ai;
@@ -1954,19 +2329,23 @@
       else if (aiState.state === "ok") ai = "AI planned " + aiState.count + " search" + (aiState.count === 1 ? "" : "es") + (aiState.cached ? " (cached)" : "");
       else if (aiState.state === "fail") ai = "AI planner unavailable — searched your words directly";
       else ai = "Ready";
-      if (busy) return ai + " · scanning " + (SCANNERS.length - busy) + " of " + SCANNERS.length + " sources…";
-      if (fail === SCANNERS.length) return "No source answered — check your connection, then press Scan again.";
-      return ai + " · queried " + SCANNERS.length + " sources · finished in " + (scanElapsed / 1000).toFixed(1) + "s" +
+      const sourceLabel = provider
+        ? provider.name + (isTrialProvider(provider) ? " free-trial pages" : " free pages")
+        : scanners.length + " source" + (scanners.length === 1 ? "" : "s");
+      if (busy) return ai + " · scanning " + sourceLabel + "…";
+      if (fail === scanners.length) return "No source answered — check your connection, then press Scan again.";
+      return ai + " · queried " + sourceLabel + " · finished in " + (scanElapsed / 1000).toFixed(1) + "s" +
              (fail ? " · " + fail + " unreachable" : "");
     }
     function renderSourceList() {
-      sourceList.innerHTML = SCANNERS.map(s => {
+      sourceList.innerHTML = activeScanners().map(s => {
         const st = sourceState[s.id] || { state: "idle" };
         const label = st.state === "ok"   ? st.count + (st.count === 1 ? " result" : " results")
                     : st.state === "busy" ? "scanning…"
                     : st.state === "fail" ? "unreachable"
                     : "waiting";
-        return '<li data-state="' + st.state + '" title="' + esc(s.name) + '">' +
+        const title = s.name + (s.note ? " — " + s.note : "");
+        return '<li data-state="' + st.state + '" title="' + esc(title) + '">' +
                '<span class="dot"></span>' + esc(s.name) + ' <b class="n">' + label + "</b></li>";
       }).join("");
       scanSummary.textContent = summaryText();
@@ -1983,6 +2362,7 @@
       return item;
     }
     function relevant(item, tokens) {
+      if (item.fallback) return true;
       if (!tokens.length) return true;
       const title = item.title.toLowerCase();
       const hay = (item.title + " " + (item.text || "") + " " + item.source).toLowerCase();
@@ -2083,20 +2463,22 @@
       return "";
     }
     function cardHTML(c) {
-      const meta = [KIND_LABEL[c.kind] || "Web page"];
+      const meta = [c.kindLabel || KIND_LABEL[c.kind] || "Web page"];
       const dur = durationLabel(c);
       if (dur) meta.push(dur);
       if (c.lang) meta.push(c.lang);
       if (c.level) meta.push(c.level);
-      const badge = c.free
-        ? { cls: "badge-free", text: "FREE", title: "Comes from a source that only holds free material" }
-        : c.audit
-          ? { cls: "badge-audit", text: "FREE TO AUDIT", title: "Usually free to audit — graded work and certificates may be paid. Check the course page." }
-          : { cls: "badge-open", text: "OPEN WEB", title: "Found on the open web or an academic site — check it is free before you enrol" };
+      const badge = c.trial
+        ? { cls: "badge-trial", text: "FREE TRIAL", title: c.note || "Accessible during a free trial; payment is required afterwards." }
+        : c.free
+          ? { cls: "badge-free", text: "FREE", title: c.provider ? (c.note || "Marked free on the provider's own site") : "Comes from a source that only holds free material" }
+          : c.audit
+            ? { cls: "badge-audit", text: "FREE TO AUDIT", title: "Usually free to audit — graded work and certificates may be paid. Check the course page." }
+            : { cls: "badge-open", text: "OPEN WEB", title: "Found on the open web or an academic site — check it is free before you enrol" };
       return `
-        <article class="card course-card">
+        <article class="card course-card${c.fallback ? " is-fallback" : ""}">
           <div class="badge-row">
-            <span class="${badge.cls}" title="${badge.title}">${badge.text}</span>
+            <span class="${badge.cls}" title="${esc(badge.title)}">${badge.text}</span>
             ${c.meta ? `<span class="badge-kind" title="${esc(c.metaTitle || "Source")}">${esc(String(c.meta).split("/").pop().slice(0, 34))}</span>` : ""}
           </div>
           <span class="course-source">${esc(c.source)}</span>
@@ -2108,33 +2490,52 @@
         </article>`;
     }
     function renderResults() {
+      const provider = activeProvider();
       if (!scanStarted) {
         resultCount.textContent = "";
         results.innerHTML = '<div class="card no-results"><h3>Type a subject to start</h3>' +
           '<p>Nothing is pre-loaded. Try <strong>python</strong>, <strong>class 10 physics in Hindi</strong> ' +
-          'or <strong>spoken English</strong> — a free AI plans the searches, then your browser fetches the courses live.</p></div>';
+          'or <strong>spoken English</strong> — a free AI plans the searches, then your browser fetches the courses live.' +
+          (provider ? ' Provider scan is set to <strong>' + esc(provider.name) + '</strong>.' : '') +
+          '</p></div>';
         return;
       }
       const list = currentList();
-      const freeCount = list.filter(i => i.free).length;
-      const auditCount = list.filter(i => i.audit && !i.free).length;
+      const freeCount = list.filter(i => i.free && !i.trial).length;
+      const trialCount = list.filter(i => i.trial).length;
+      const auditCount = list.filter(i => i.audit && !i.free && !i.trial).length;
       resultCount.textContent = list.length
         ? (freeCount === list.length
             ? list.length + " free result" + (list.length === 1 ? "" : "s")
-            : [list.length + " result" + (list.length === 1 ? "" : "s")]
-                .concat(freeCount ? [freeCount + " marked free"] : [])
-                .concat(auditCount ? [auditCount + " free to audit"] : [])
-                .join(" · "))
+            : trialCount === list.length
+              ? list.length + " free-trial result" + (list.length === 1 ? "" : "s")
+              : [list.length + " result" + (list.length === 1 ? "" : "s")]
+                  .concat(freeCount ? [freeCount + " marked free"] : [])
+                  .concat(trialCount ? [trialCount + " free trial"] : [])
+                  .concat(auditCount ? [auditCount + " free to audit"] : [])
+                  .join(" · "))
         : "";
       if (!list.length) {
         const filtersOn = demoLang.value || demoLevel.value || demoTopic.value;
+        const providerFailed = provider && sourceState.provider && sourceState.provider.state === "fail";
         results.innerHTML = scanning()
           ? '<div class="card no-results"><h3>Scanning the live web…</h3>' +
             '<p>AI is planning the searches and the indexes are answering. Results appear as each one arrives.</p></div>'
-          : '<div class="card no-results"><h3>Nothing matched that</h3>' +
-            '<p>' + (filtersOn
-              ? 'The sources answered, but none of their results fit the filters you chose.'
-              : 'This is a real empty result: the live indexes found no matching course for those words.') +
+          : '<div class="card no-results"><h3>' +
+            (provider
+              ? (providerFailed
+                  ? esc(provider.name) + " did not answer"
+                  : "No " + (isTrialProvider(provider) ? "free-trial " : "free ") + esc(provider.name) + " matches")
+              : "Nothing matched that") + '</h3>' +
+            '<p>' + (provider
+              ? (providerFailed
+                  ? 'Check your connection and press Scan again, or open the provider&rsquo;s official page from the provider row.'
+                  : 'The provider answered, but nothing ' +
+                    (isTrialProvider(provider) ? "matched the free-trial search" : "marked free matched") +
+                    (filtersOn ? ' after the filters you chose.' : ' for those words.'))
+              : (filtersOn
+                  ? 'The sources answered, but none of their results fit the filters you chose.'
+                  : 'This is a real empty result: the live indexes found no matching course for those words.')) +
             ' Try fewer words, a different spelling' +
             (filtersOn ? ', or clear the filters.' : '.') + '</p>' +
             (filtersOn
@@ -2164,7 +2565,7 @@
       visibleLimit = PAGE_SIZE;
       scanBar.dataset.state = "idle";
       renderSourceList();
-      scanSummary.textContent = message || "Ready. Type any subject to start a live scan.";
+      scanSummary.textContent = message || summaryText();
       renderResults();
     }
 
@@ -2173,7 +2574,10 @@
       syncGoogleSearchLink();
       const base = baseTerms();
       if (!base || base.length < 2 || !matchTokens().length) {
-        resetIdle("Add a subject — for example python, class 10 physics or spoken English — to start a live scan.");
+        const provider = activeProvider();
+        resetIdle(provider
+          ? "Add a subject — for example python, class 10 physics or spoken English — to scan " + provider.name + "."
+          : "Add a subject — for example python, class 10 physics or spoken English — to start a live scan.");
         return;
       }
       const my = ++scanToken;
@@ -2191,12 +2595,13 @@
         planPromise: null
       };
 
+      const scans = activeScanners();
       scanStarted = performance.now();
       scanElapsed = 0;
       collected = [];
       visibleLimit = PAGE_SIZE;
       sourceState = {};
-      SCANNERS.forEach(s => { sourceState[s.id] = { state: "busy" }; });
+      scans.forEach(s => { sourceState[s.id] = { state: "busy" }; });
       scanBar.dataset.state = "running";
 
       const planKey = [ctx.base, ctx.hint, ctx.level, ctx.lang].join("|");
@@ -2225,7 +2630,7 @@
       renderSourceList();
       renderResults();
 
-      const key = [ctx.base, ctx.hint, ctx.level, demoTopic.value].join("|");
+      const key = [ctx.base, ctx.hint, ctx.level, demoTopic.value, activeProviderId].join("|");
       let entry = force ? null : cache.get(key);
       if (!entry || performance.now() - entry.at > CACHE_MS) {
         entry = { at: performance.now(), bySource: {} };
@@ -2238,7 +2643,7 @@
         entry.at = performance.now();
       }
 
-      let pending = SCANNERS.length + 1;
+      let pending = scans.length + 1;
       function land() {
         if (my !== scanToken) return;
         renderSourceList();
@@ -2253,7 +2658,7 @@
 
       ctx.planPromise.then(land, land);
 
-      SCANNERS.forEach(s => {
+      scans.forEach(s => {
         const cached = entry.bySource[s.id];
         if (cached) {
           collected.push.apply(collected, cached);
@@ -2320,6 +2725,22 @@
       if (demoQuery.value.trim()) scheduleScan(60);
     });
     rescanBtn.addEventListener("click", () => runScan(true));
+    if (providerChips) {
+      providerChips.addEventListener("click", e => {
+        const button = e.target.closest("[data-provider]");
+        if (!button) return;
+        const id = button.getAttribute("data-provider") || "";
+        if (id && !providerById(id)) return;
+        activeProviderId = id;
+        updateProviderUI();
+        clearTimeout(scanTimer);
+        if (!baseTerms() || !matchTokens().length) {
+          resetIdle();
+          return;
+        }
+        runScan(true);
+      });
+    }
     /* Show more of the results without re-querying anything */
     results.addEventListener("click", e => {
       if (e.target.closest("#moreBtn")) { visibleLimit += PAGE_SIZE; renderResults(); }
@@ -2331,7 +2752,9 @@
       }
     });
 
-    /* Start in a real idle state — no sample courses are fetched or shown. */
+    /* Start in a real idle state — no sample courses or provider results
+       are fetched until the learner searches. */
+    renderProviderChips();
     resetIdle();
 
     /* A catalogue search can hand its query to the live scan. */

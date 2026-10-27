@@ -323,6 +323,34 @@
       });
   }
 
+  /* DuckDuckGo search through Jina Reader. The HTML endpoint is the
+     primary route; the Lite endpoint is a fallback because Jina can
+     temporarily block one DuckDuckGo host without blocking the other. */
+  async function ddgMarkdown(query, signal) {
+    const endpoints = [
+      "https://html.duckduckgo.com/html/?q=",
+      "https://lite.duckduckgo.com/lite/?q="
+    ];
+    let lastError = null;
+    for (const endpoint of endpoints) {
+      try {
+        const markdown = await fetchText(
+          "https://r.jina.ai/" + endpoint + encodeURIComponent(query),
+          signal,
+          { timeout: 16000 }
+        );
+        if (!/AbuseAlleviationError|Target URL returned error|Verifying you're not a bot|maybe requiring CAPTCHA|"code"\s*:\s*(?:401|403|409|429)/i.test(markdown)) {
+          return markdown;
+        }
+        lastError = new Error("DuckDuckGo blocked");
+      } catch (e) {
+        if (e && e.name === "AbortError") throw e;
+        lastError = e;
+      }
+    }
+    throw lastError || new Error("DuckDuckGo unavailable");
+  }
+
   /* ---------- YouTube ---------- */
   const PIPED_HOST = "https://pipedapi.ducks.party";
   const INVIDIOUS_HOSTS = ["https://yt.chocolatemoo53.com", "https://inv.nadeko.net"];
@@ -622,14 +650,21 @@
     return live.freeLabel || "Free course";
   }
 
-  function providerTitle(provider, parsed, title) {
-    if (provider.id === "unacademy" && /india's largest learning platform/i.test(title)) {
+  function providerTitle(provider, parsed, title, snippet) {
+    const clean = String(title || "").trim();
+    if (provider.id === "nptel" && /^nptel$/i.test(clean)) {
+      const lead = String(snippet || "").split(/[,|·•]/)[0].replace(/\s+/g, " ").trim();
+      if (lead.length >= 20) {
+        return lead.length > 110 ? lead.slice(0, 107).trimEnd() + "…" : lead;
+      }
+    }
+    if (provider.id === "unacademy" && /india's largest learning platform/i.test(clean)) {
       const parts = parsed.pathname.split("/").filter(Boolean);
       const slug = parts[1] || "";
       const readable = slug.replace(/-/g, " ").replace(/\b\w/g, letter => letter.toUpperCase());
       if (readable) return "Free " + readable + " classes — Unacademy";
     }
-    return title;
+    return clean;
   }
 
   function parseWebResults(markdown, tokens, options) {
@@ -703,7 +738,7 @@
       if (!key || seen.has(key)) continue;
       seen.add(key);
       if (!providerMode) seenHosts.add(host);
-      const shownTitle = providerMode ? providerTitle(provider, parsed, title) : title;
+      const shownTitle = providerMode ? providerTitle(provider, parsed, title, snippet) : title;
       out.push({
         sourceId: providerMode ? "provider" : "web",
         source: providerMode ? provider.name : "Web",
@@ -721,8 +756,7 @@
     let search = query;
     if (!/\bfree\b/i.test(search)) search += " free";
     if (!COURSEY_RE.test(search)) search += " course";
-    const target = "https://lite.duckduckgo.com/lite/?q=" + encodeURIComponent(search);
-    const markdown = await fetchText("https://r.jina.ai/" + target, signal, { timeout: 16000 });
+    const markdown = await ddgMarkdown(search, signal);
     return dedupe(parseWebResults(markdown, tokens)).slice(0, 8);
   }
 
@@ -742,8 +776,7 @@
       if (live.freeMode === "filter" && !/\bfree\b/i.test(search)) search += " free";
       if (!COURSEY_RE.test(search)) search += " course";
     }
-    const target = "https://lite.duckduckgo.com/lite/?q=" + encodeURIComponent(search);
-    const markdown = await fetchText("https://r.jina.ai/" + target, signal, { timeout: 16000 });
+    const markdown = await ddgMarkdown(search, signal);
     const results = dedupe(parseWebResults(markdown, tokens, { provider: provider })).slice(0, 10);
     if (results.length) return results;
     if (!live.freeUrl) return results;

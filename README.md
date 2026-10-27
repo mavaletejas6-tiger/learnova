@@ -34,7 +34,10 @@ the catalogue.
 - **My Learning** for saved courses, in-progress and completed courses, written reviews, and
   recently viewed courses.
 - **Live AI scan** that plans searches with a free AI model and fetches real results in the
-  browser from YouTube, GitHub, PeerTube, Wikiversity, DEV Community, and the open web.
+  browser from YouTube, GitHub, PeerTube, Wikiversity, DEV Community, and the open web. The
+  scan can also focus on one provider at a time — Udemy, Skillshare, LinkedIn Learning,
+  Domestika, Alison, SWAYAM, NPTEL, upGrad, Unacademy, Physics Wallah, or Udacity — with free
+  and free-trial labels and official provider fallbacks.
 - **Google web-search links** from both live-search tools for anything outside those indexes.
   Google blocks direct browser scans, so its results open in a new tab; the in-app Web source
   uses DuckDuckGo instead.
@@ -52,7 +55,7 @@ Every course links to its original provider. Learnova never re-hosts course cont
 | `course.html?id=...` | Course details, syllabus, reviews, save/progress actions |
 | `providers.html` | Provider directory |
 | `my-learning.html` | Saved, in-progress, completed, and review history |
-| `scan.html` | Existing live AI scan, with `?q=` handoff from the catalogue |
+| `scan.html` | Live AI scan with `?q=` handoff and one-provider focus |
 
 ## Project layout
 
