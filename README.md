@@ -15,6 +15,10 @@ the catalogue.
   (via DuckDuckGo), GitHub, PeerTube, Wikiversity, and DEV Community directly from the
   browser, with per-source status and direct links to the original creator. No API keys are
   required.
+- **Newly launched mode** that filters the dated sources — YouTube, GitHub, and PeerTube —
+  to free courses and course projects published in the last 90 days. Results carry a date and
+  a New/Recent badge, and a one-click fallback shows all-time results. The homepage links
+  straight to it with `courses.html?fresh=1`.
 - **Course pages** with an overview, typical syllabus, practical details, related courses,
   an honest editorial score, and separate learner reviews.
 - **Provider directory** with search, type filters, and course counts.

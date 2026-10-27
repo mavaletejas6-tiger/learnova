@@ -435,6 +435,10 @@ input[type="url"]:focus, textarea:focus, select:focus {
   font-size: .78rem; font-weight: 600; text-decoration: none;
 }
 .trend-chip:hover { background: #fff; border-color: var(--indigo-line); color: var(--indigo); }
+.trend-chip--new {
+  border-color: #F1D6A2; background: var(--amber-soft); color: var(--amber-dark);
+}
+.trend-chip--new:hover { border-color: var(--amber); background: #FFF1D2; color: var(--amber-dark); }
 .hero-stats { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-top: 1.65rem; }
 .hero-stat strong { display: block; font-size: 1.15rem; color: var(--ink); letter-spacing: -.02em; }
 .hero-stat span { font-size: .78rem; color: var(--muted); }
@@ -978,6 +982,35 @@ input[type="url"]:focus, textarea:focus, select:focus {
   cursor: pointer; transition: border-color .15s ease, color .15s ease, background .15s ease;
 }
 .live-quick button:hover { border-color: var(--indigo-line); background: var(--indigo-soft); color: var(--indigo); }
+.live-fresh {
+  display: flex; align-items: center; flex-wrap: wrap; gap: .7rem;
+  margin: .8rem 1.6rem 0; padding: .7rem .8rem;
+  border: 1px solid #F1D6A2; border-radius: 12px;
+  background: linear-gradient(135deg, #FFF9ED, #FFFDF8);
+  transition: border-color .15s ease, background .15s ease;
+}
+.live-fresh.is-active { border-color: #E9C16D; background: #FFF3D8; }
+.live-fresh-icon {
+  display: grid; place-items: center; flex: 0 0 30px; width: 30px; height: 30px;
+  border-radius: 9px; background: #FFE9BA; color: var(--amber-dark); font-size: .95rem;
+}
+.live-fresh-copy { flex: 1 1 260px; min-width: 0; }
+.live-fresh-copy strong { display: block; color: var(--ink); font-size: .82rem; line-height: 1.3; }
+.live-fresh-copy span { color: var(--muted); font-size: .72rem; line-height: 1.45; }
+.live-fresh .btn { flex: 0 0 auto; }
+.live-fresh-active {
+  display: flex; align-items: center; justify-content: space-between; gap: .6rem; flex-wrap: wrap;
+  margin: .55rem 1.6rem 0; padding: .42rem .65rem;
+  border: 1px dashed #E9C16D; border-radius: 9px;
+  background: #FFFCF4; color: var(--amber-dark); font-size: .7rem; font-weight: 750;
+}
+.live-fresh-active > span { display: inline-flex; align-items: center; gap: .4rem; }
+.live-fresh-active .live-dot { background: var(--amber); }
+.live-fresh-active button {
+  padding: .12rem .2rem; border: 0; background: transparent;
+  color: var(--indigo); font: inherit; font-weight: 800; cursor: pointer;
+}
+.live-fresh-active button:hover { text-decoration: underline; }
 .live-meta-row {
   display: flex; align-items: flex-start; justify-content: space-between;
   gap: 1rem; flex-wrap: wrap; margin: 1rem 1.6rem 0;
@@ -1025,6 +1058,14 @@ input[type="url"]:focus, textarea:focus, select:focus {
   border-color: var(--indigo-line); box-shadow: var(--shadow);
 }
 .live-card-top { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-bottom: .6rem; }
+.live-card-badges { display: inline-flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: .3rem; margin-left: auto; }
+.live-new-badge {
+  display: inline-flex; align-items: center;
+  padding: .14rem .4rem; border-radius: 999px;
+  background: var(--teal-soft); color: var(--teal-dark);
+  font-size: .58rem; font-weight: 900; letter-spacing: .06em; text-transform: uppercase;
+}
+.live-new-badge.is-recent { background: var(--amber-soft); color: var(--amber-dark); }
 .live-source-tag {
   display: inline-flex; align-items: center; gap: .32rem;
   padding: .18rem .46rem; border-radius: 999px;
@@ -1590,6 +1631,9 @@ input[type="url"]:focus, textarea:focus, select:focus {
   .live-search-form .search-icon { top: calc(.35rem + 20px); }
   .live-search-form .btn { width: 100%; }
   .live-quick { margin: .65rem 1rem 0; }
+  .live-fresh { margin: .65rem 1rem 0; align-items: flex-start; }
+  .live-fresh .btn { width: 100%; }
+  .live-fresh-active { margin: .5rem 1rem 0; }
   .live-meta-row { margin: .9rem 1rem 0; }
   .live-grid { grid-template-columns: 1fr; padding: .9rem 1rem 0; }
   .live-loading, .live-empty { margin: .9rem 1rem 0; }

@@ -61,6 +61,7 @@
     });
     if (state.collection) p.set("collection", state.collection);
     if (state.sort && state.sort !== "recommended") p.set("sort", state.sort);
+    if (new URLSearchParams(location.search).get("fresh") === "1") p.set("fresh", "1");
     const qs = p.toString();
     try {
       history.replaceState(null, "", "courses.html" + (qs ? "?" + qs : ""));

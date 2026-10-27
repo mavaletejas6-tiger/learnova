@@ -123,6 +123,20 @@
           <button type="button" data-live-query="Excel">Excel</button>
         </div>
 
+        <div class="live-fresh" id="liveFresh">
+          <span class="live-fresh-icon" aria-hidden="true">✦</span>
+          <div class="live-fresh-copy">
+            <strong>Looking for what just launched?</strong>
+            <span>Show free courses and course projects published in the last 90 days, from sources that provide dates.</span>
+          </div>
+          <button class="btn btn-amber btn-sm" id="liveFreshBtn" type="button" aria-pressed="false">Show newly launched</button>
+        </div>
+
+        <div class="live-fresh-active" id="liveFreshActive" hidden>
+          <span><span class="live-dot" aria-hidden="true"></span> Newly launched only · last 90 days</span>
+          <button type="button" id="liveFreshClearBtn">Show all time</button>
+        </div>
+
         <div class="live-meta-row">
           <p class="live-status" id="liveStatus" role="status" aria-live="polite">Type a topic, or choose a suggestion above.</p>
           <ul class="live-sources" id="liveSources" aria-label="Live source status" hidden></ul>
@@ -141,6 +155,7 @@
           <p id="liveEmptyText">Try a shorter topic, or open the full live scan for a wider search.</p>
           <div class="live-empty-actions">
             <button class="btn btn-outline btn-sm" id="liveRetryBtn" type="button">Try again</button>
+            <button class="btn btn-outline btn-sm" id="liveFreshEmptyBtn" type="button" hidden>Show all-time results</button>
             <a class="btn btn-amber btn-sm" id="liveScanLink" href="scan.html">Open full live scan</a>
           </div>
         </div>
@@ -150,7 +165,7 @@
         </div>
 
         <div class="live-footer">
-          <p>Live results come from YouTube, GitHub, PeerTube, Wikiversity, DEV Community and the open web via DuckDuckGo, queried directly from your browser. Learnova does not host or endorse them — always check the original provider’s access terms.</p>
+          <p>Live results come from YouTube, GitHub, PeerTube, Wikiversity, DEV Community and the open web via DuckDuckGo, queried directly from your browser. Newly launched mode uses YouTube, GitHub and PeerTube because those sources publish dates. Learnova does not host or endorse them — always check the original provider’s access terms.</p>
           <div class="live-elsewhere">
             <span>Also search</span>
             <a id="liveGoogleLink" href="https://www.google.com/search?q=free%20courses" target="_blank" rel="noopener noreferrer">Google web <span aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a>

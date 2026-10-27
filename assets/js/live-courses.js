@@ -13,6 +13,9 @@
 
   const PAGE_SIZE = 6;
   const REQUEST_TIMEOUT = 11000;
+  const DAY_MS = 86400000;
+  const RECENT_DAYS = 90;
+  const NEW_DAYS = 30;
 
   const STOPWORDS = new Set([
     "free", "course", "courses", "class", "classes", "online", "best", "top",
@@ -24,6 +27,9 @@
   const COURSEY_RE = /\b(course|courses|class|classes|lesson|lessons|tutorial|tutorials|learn|learning|teach|teaching|training|bootcamp|curriculum|syllabus|certification|academy|masterclass|basics?|intro(?:duction)?|beginner|beginners|roadmap|lecture|lectures|workshop|playlist|study|school|guide)\b/i;
   const REPO_COURSE_RE = /\b(course|curriculum|roadmap|tutorials?|bootcamp|academy|study plan|education|learning path|syllabus|guide)\b/i;
   const PIRATE_RE = /(udemy|lynda|pluralsight|skillshare|torrent|desire-course|free-course-site|course-for-free|udacity[-_\s]?download|download[-_\s]?course)/i;
+  const FRESH_COURSE_RE = /\b(course|courses|class|classes|lesson|lessons|tutorial|tutorials|bootcamp|masterclass|curriculum|syllabus|lecture|lectures|workshop|training)\b/i;
+  const FRESH_SKIP_RE = /(dropshipping|internship|scheme|stipend|salary|job guarantee|apply now|earn money|make money|passive income|affiliate|giveaway|forex|binary options|casino|betting|loan|coupon)/i;
+  const FRESH_ROUNDUP_RE = /\b(best|top|ultimate list|list of)\b.*\b(courses?|certifications?|certificates?)\b/i;
 
   /* Known free/open course hosts and academic domains get a free label; other
      course-like web pages are kept only when they explicitly say they are free. */
@@ -47,12 +53,12 @@
   const WEB_NOISE_PATH_RE = /\/(answers|questions|forum|forums|threads|discussion|community|qna)(\/|$)/i;
 
   const SOURCE_DEFS = [
-    { id: "youtube", name: "YouTube", run: searchYouTube },
+    { id: "youtube", name: "YouTube", run: searchYouTube, dated: true },
     { id: "web", name: "Web", run: searchWeb, via: "DuckDuckGo" },
-    { id: "github", name: "GitHub", run: searchGitHub },
-    { id: "peertube", name: "PeerTube", run: searchPeerTube },
+    { id: "github", name: "GitHub", run: searchGitHub, dated: true },
+    { id: "peertube", name: "PeerTube", run: searchPeerTube, dated: true },
     { id: "wikimedia", name: "Wikiversity", run: searchWiki },
-    { id: "devto", name: "DEV", run: searchDevTo }
+    { id: "devto", name: "DEV", run: searchDevTo, dated: true, launch: false }
   ];
 
   let els = null;
@@ -68,6 +74,8 @@
   let startedAt = 0;
   let liveDirty = false;
   let browseSyncTimer = null;
+  let recentOnly = false;
+  let recentCutoff = 0;
 
   /* ---------- text + URL helpers ---------- */
   function esc(value) {
@@ -106,6 +114,41 @@
       const url = new URL(value);
       return /^https?:$/.test(url.protocol) ? url.href : "";
     } catch (e) { return ""; }
+  }
+  function asTimestamp(value) {
+    if (value == null || value === "") return 0;
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return value > 1e12 ? value : value > 1e9 ? value * 1000 : 0;
+    }
+    const parsed = Date.parse(String(value));
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+  function dateText(value) {
+    const timestamp = asTimestamp(value);
+    if (!timestamp) return "";
+    const days = Math.max(0, Math.floor((Date.now() - timestamp) / DAY_MS));
+    if (days === 0) return "Today";
+    if (days === 1) return "Yesterday";
+    if (days < 30) return days + " days ago";
+    return new Date(timestamp).toLocaleDateString(undefined, {
+      month: "short", day: "numeric", year: "numeric"
+    });
+  }
+  function isNew(item) {
+    return Boolean(item && item.publishedAt && Date.now() - item.publishedAt <= NEW_DAYS * DAY_MS);
+  }
+  function sourceDefsForMode() {
+    return recentOnly ? SOURCE_DEFS.filter(def => def.dated && def.launch !== false) : SOURCE_DEFS;
+  }
+  function freshResultAllowed(item) {
+    if (!item || !item.publishedAt) return false;
+    const title = item.title || "";
+    if (FRESH_SKIP_RE.test(title) || FRESH_ROUNDUP_RE.test(title)) return false;
+    if (!FRESH_COURSE_RE.test(title + " " + (item.text || ""))) return false;
+    if (item.sourceId === "youtube" && !item.videoCount) {
+      if (!FRESH_COURSE_RE.test(title) || Number(item.seconds) < 1200) return false;
+    }
+    return true;
   }
   function normUrl(value) {
     try {
@@ -273,7 +316,8 @@
         sourceId: "youtube", source: "YouTube", title: title, url: url,
         text: tidy(item.shortDescription, 220), meta: tidy(item.uploaderName || "YouTube", 80),
         kind: seconds >= 2400 ? "Video course" : "Video lecture",
-        seconds: seconds, views: Number(item.views) || 0
+        seconds: seconds, views: Number(item.views) || 0,
+        publishedAt: asTimestamp(item.uploaded)
       };
       return relevant(result, tokens) ? result : null;
     }
@@ -286,7 +330,8 @@
         sourceId: "youtube", source: "YouTube", title: title,
         url: "https://www.youtube.com/playlist?list=" + encodeURIComponent(match[1]),
         text: "", meta: tidy(item.uploaderName || "YouTube", 80),
-        kind: "Course playlist", videoCount: count
+        kind: "Course playlist", videoCount: count,
+        publishedAt: asTimestamp(item.uploaded)
       };
       return relevant(result, tokens) ? result : null;
     }
@@ -303,7 +348,8 @@
       url: "https://www.youtube.com/watch?v=" + encodeURIComponent(video.videoId),
       text: tidy(video.description, 220), meta: tidy(video.author || "YouTube", 80),
       kind: seconds >= 2400 ? "Video course" : "Video lecture",
-      seconds: seconds, views: Number(video.viewCount) || 0
+      seconds: seconds, views: Number(video.viewCount) || 0,
+      publishedAt: asTimestamp(video.published)
     };
     return relevant(result, tokens) ? result : null;
   }
@@ -314,7 +360,8 @@
       sourceId: "youtube", source: "YouTube", title: tidy(playlist.title, 180),
       url: "https://www.youtube.com/playlist?list=" + encodeURIComponent(playlist.playlistId),
       text: "", meta: tidy(playlist.author || "YouTube", 80),
-      kind: "Course playlist", videoCount: Number(playlist.videoCount) || 0
+      kind: "Course playlist", videoCount: Number(playlist.videoCount) || 0,
+      publishedAt: asTimestamp(playlist.published)
     };
     return relevant(result, tokens) ? result : null;
   }
@@ -340,8 +387,12 @@
     return [];
   }
 
-  async function searchYouTube(query, signal) {
-    const search = /\b(course|playlist|tutorial)\b/i.test(query) ? query : query + " full course";
+  async function searchYouTube(query, signal, options) {
+    let search = /\b(course|playlist|tutorial)\b/i.test(query) ? query : query + " full course";
+    if (options && options.recent) {
+      const year = String(new Date().getFullYear());
+      if (!new RegExp("\\b" + year + "\\b").test(search)) search += " " + year;
+    }
     const tokens = tokensFor(query);
     let items = [];
     let pipedAnswered = false;
@@ -364,9 +415,12 @@
   }
 
   /* ---------- GitHub ---------- */
-  async function searchGitHub(query, signal) {
+  async function searchGitHub(query, signal, options) {
     const tokens = tokensFor(query);
-    const search = query + " course in:name,description";
+    let search = query + " course in:name,description";
+    if (options && options.recent) {
+      search += " created:>" + new Date(Date.now() - RECENT_DAYS * DAY_MS).toISOString().slice(0, 10);
+    }
     const url = "https://api.github.com/search/repositories?q=" +
       encodeURIComponent(search) + "&sort=stars&order=desc&per_page=12";
     const json = await fetchJSON(url, signal, {
@@ -384,7 +438,8 @@
         url: safeUrl(repo.html_url),
         text: [description, topics].filter(Boolean).join(" · "),
         meta: tidy(repo.full_name || "github.com", 90),
-        kind: "Course repository", stars: Number(repo.stargazers_count) || 0
+        kind: "Course repository", stars: Number(repo.stargazers_count) || 0,
+        publishedAt: asTimestamp(repo.created_at)
       };
       if (!result.url) return null;
       return relevant(result, tokens) ? result : null;
@@ -393,11 +448,12 @@
   }
 
   /* ---------- PeerTube ---------- */
-  async function searchPeerTube(query, signal) {
+  async function searchPeerTube(query, signal, options) {
     const tokens = tokensFor(query);
     const search = /\bcourse\b/i.test(query) ? query : query + " course";
+    const count = options && options.recent ? 50 : 20;
     const url = "https://sepiasearch.org/api/v1/search/videos?search=" +
-      encodeURIComponent(search) + "&count=20&nsfw=false";
+      encodeURIComponent(search) + "&count=" + count + "&nsfw=false";
     const json = await fetchJSON(url, signal);
     const items = (json.data || []).map(video => {
       if (!video || !video.name || !video.account || !video.uuid) return null;
@@ -412,7 +468,8 @@
         sourceId: "peertube", source: "PeerTube", title: title,
         url: safeUrl("https://" + host + "/w/" + video.uuid),
         text: tidy(video.description, 220), meta: host,
-        kind: "Video course", seconds: seconds, views: Number(video.views) || 0
+        kind: "Video course", seconds: seconds, views: Number(video.views) || 0,
+        publishedAt: asTimestamp(video.publishedAt || video.createdAt)
       };
       if (!result.url) return null;
       return relevant(result, tokens) ? result : null;
@@ -446,13 +503,18 @@
   }
 
   /* ---------- DEV Community ---------- */
-  async function searchDevTo(query, signal) {
+  async function searchDevTo(query, signal, options) {
     const tokens = tokensFor(query);
     const tag = tokens.find(token => /^[a-z][a-z0-9]{1,19}$/.test(token));
     if (!tag) return [];
     let json = [];
     try {
-      json = await fetchJSON("https://dev.to/api/articles?tag=" + encodeURIComponent(tag) + "&per_page=10", signal);
+      const endpoint = options && options.recent
+        ? "https://dev.to/api/articles/latest"
+        : "https://dev.to/api/articles";
+      const perPage = options && options.recent ? 20 : 10;
+      json = await fetchJSON(endpoint + "?tag=" +
+        encodeURIComponent(tag) + "&per_page=" + perPage, signal);
     } catch (err) {
       if (err && (err.name === "AbortError" || err.status === 404)) {
         if (err.name === "AbortError") throw err;
@@ -467,7 +529,8 @@
       const result = {
         sourceId: "devto", source: "DEV Community", title: tidy(article.title, 180),
         url: safeUrl(article.url), text: tidy(article.description, 220),
-        meta: "dev.to", kind: "Tutorial", minutes: Number(article.reading_time_minutes) || 0
+        meta: "dev.to", kind: "Tutorial", minutes: Number(article.reading_time_minutes) || 0,
+        publishedAt: asTimestamp(article.published_at)
       };
       if (!result.url) return null;
       return relevant(result, tokens) ? result : null;
@@ -586,12 +649,19 @@
     if (duration) meta.push(duration);
     if (item.views) meta.push(countText(item.views) + " views");
     if (item.stars) meta.push(countText(item.stars) + " stars");
-    const label = item.title + " — " + item.source + " " + item.kind + " (opens in a new tab)";
+    const published = dateText(item.publishedAt);
+    if (published) meta.push(published);
+    const newBadge = isNew(item) ? "New" : (recentOnly && item.publishedAt ? "Recent" : "");
+    const label = item.title + " — " + item.source + " " + item.kind +
+      (published ? " published " + published : "") + " (opens in a new tab)";
     return '<a class="live-card" href="' + esc(item.url) + '" target="_blank" rel="noopener noreferrer"' +
       ' data-source="' + esc(item.sourceId) + '" aria-label="' + esc(label) + '">' +
         '<div class="live-card-top">' +
           '<span class="live-source-tag" data-source="' + esc(item.sourceId) + '">' + esc(item.source) + "</span>" +
-          '<span class="live-kind">' + esc(item.kind) + "</span>" +
+          '<span class="live-card-badges">' +
+            (newBadge ? '<span class="live-new-badge' + (newBadge === "Recent" ? " is-recent" : "") + '">' + newBadge + "</span>" : "") +
+            '<span class="live-kind">' + esc(item.kind) + "</span>" +
+          "</span>" +
         "</div>" +
         "<h3>" + esc(item.title) + "</h3>" +
         (item.text ? "<p>" + esc(item.text) + "</p>" : "<p></p>") +
@@ -602,7 +672,7 @@
 
   function renderSources() {
     if (!els) return;
-    els.sources.innerHTML = SOURCE_DEFS.map(def => {
+    els.sources.innerHTML = sourceDefsForMode().map(def => {
       const state = sourceState[def.id] || { state: "idle" };
       const text = state.state === "busy" ? "checking"
         : state.state === "ok" ? String(state.count)
@@ -622,23 +692,28 @@
     const cards = orderedResults.slice(0, shown);
     els.grid.innerHTML = cards.map(cardHTML).join("");
     els.grid.hidden = cards.length === 0;
+    els.grid.setAttribute("data-mode", recentOnly ? "recent" : "all");
     const remaining = Math.max(0, orderedResults.length - shown);
     els.more.hidden = remaining === 0 || busy;
     els.moreBtn.textContent = "Show " + Math.min(PAGE_SIZE, remaining) +
-      " more live " + (Math.min(PAGE_SIZE, remaining) === 1 ? "result" : "results");
+      (recentOnly ? " more newly launched " : " more live ") +
+      (Math.min(PAGE_SIZE, remaining) === 1 ? "result" : "results");
   }
 
   function updateProgress() {
     if (!busy) return;
     const total = Object.keys(resultsBySource).reduce((sum, id) => sum + resultsBySource[id].length, 0);
-    const remaining = SOURCE_DEFS.filter(def => (sourceState[def.id] || {}).state === "busy").length;
+    const defs = sourceDefsForMode();
+    const remaining = defs.filter(def => (sourceState[def.id] || {}).state === "busy").length;
     if (total) {
-      els.status.innerHTML = "Found <strong>" + total + "</strong> live " +
+      els.status.innerHTML = "Found <strong>" + total + "</strong> " +
+        (recentOnly ? "newly launched " : "live ") +
         (total === 1 ? "result" : "results") + " so far — still checking " +
         remaining + " " + (remaining === 1 ? "source" : "sources") + "…";
     } else {
-      els.status.innerHTML = "Searching <strong>" + SOURCE_DEFS.length + " live sources</strong> for <strong>" +
-        esc(currentQuery) + "</strong>…";
+      els.status.innerHTML = "Searching <strong>" + defs.length + " " +
+        (recentOnly ? "dated " : "") + "live sources</strong> for " +
+        (recentOnly ? "newly launched " : "") + "<strong>" + esc(currentQuery) + "</strong>…";
     }
   }
 
@@ -649,6 +724,24 @@
     els.grid.hidden = true;
   }
 
+  function updateFreshUI() {
+    if (!els) return;
+    els.fresh.classList.toggle("is-active", recentOnly);
+    els.freshBtn.textContent = recentOnly ? "Refresh newly launched" : "Show newly launched";
+    els.freshBtn.setAttribute("aria-pressed", recentOnly ? "true" : "false");
+    els.freshActive.hidden = !recentOnly;
+  }
+
+  function updateFreshParam(active) {
+    const params = new URLSearchParams(location.search);
+    if (active) params.set("fresh", "1");
+    else params.delete("fresh");
+    const qs = params.toString();
+    try {
+      history.replaceState(null, "", "courses.html" + (qs ? "?" + qs : "") + location.hash);
+    } catch (e) {}
+  }
+
   function finishSearch() {
     busy = false;
     searched = true;
@@ -656,37 +749,53 @@
     els.btn.removeAttribute("aria-busy");
     els.btn.textContent = "Search live web";
     els.loading.hidden = true;
+    updateFreshUI();
 
     orderedResults = collectOrdered();
     const total = orderedResults.length;
-    const answered = SOURCE_DEFS.filter(def => (sourceState[def.id] || {}).state === "ok").length;
-    const failed = SOURCE_DEFS.filter(def => (sourceState[def.id] || {}).state === "fail").length;
+    const defs = sourceDefsForMode();
+    const answered = defs.filter(def => (sourceState[def.id] || {}).state === "ok").length;
+    const failed = defs.filter(def => (sourceState[def.id] || {}).state === "fail").length;
     const elapsed = ((performance.now() - startedAt) / 1000).toFixed(1);
 
     if (total) {
-      els.status.innerHTML = "Found <strong>" + total + "</strong> live " +
-        (total === 1 ? "result" : "results") + " for <strong>" + esc(currentQuery) + "</strong> · " +
-        answered + " of " + SOURCE_DEFS.length + " sources answered" +
-        (failed ? " · " + failed + " unavailable" : "") + " · " + elapsed + "s.";
+      els.status.innerHTML = recentOnly
+        ? "Found <strong>" + total + "</strong> newly launched " +
+          (total === 1 ? "result" : "results") + " for <strong>" + esc(currentQuery) +
+          "</strong> · published in the last " + RECENT_DAYS + " days · " +
+          answered + " of " + defs.length + " dated sources answered" +
+          (failed ? " · " + failed + " unavailable" : "") + " · " + elapsed + "s."
+        : "Found <strong>" + total + "</strong> live " +
+          (total === 1 ? "result" : "results") + " for <strong>" + esc(currentQuery) + "</strong> · " +
+          answered + " of " + defs.length + " sources answered" +
+          (failed ? " · " + failed + " unavailable" : "") + " · " + elapsed + "s.";
       els.empty.hidden = true;
       renderCards();
     } else {
-      const allFailed = failed === SOURCE_DEFS.length;
+      const allFailed = failed === defs.length;
       els.status.innerHTML = allFailed
         ? "No live source answered. Check your connection and try again."
-        : "No live results for <strong>" + esc(currentQuery) + "</strong> in the sources that answered.";
+        : recentOnly
+          ? "No results published in the last " + RECENT_DAYS + " days for <strong>" + esc(currentQuery) + "</strong>."
+          : "No live results for <strong>" + esc(currentQuery) + "</strong> in the sources that answered.";
       setEmpty(
-        allFailed ? "Live search is unavailable right now" : "No live matches for “" + currentQuery + "”",
+        allFailed ? "Live search is unavailable right now"
+          : recentOnly ? "No newly launched matches for “" + currentQuery + "”"
+          : "No live matches for “" + currentQuery + "”",
         allFailed
           ? "The open indexes did not respond. Try again in a moment, or use the full live scan for a wider search."
-          : "The sources answered, but nothing relevant came back. Try a shorter topic, or open the full live scan for more sources."
+          : recentOnly
+            ? "The dated sources answered, but nothing was published in the last " + RECENT_DAYS +
+              " days. Try another topic, or show all-time results."
+            : "The sources answered, but nothing relevant came back. Try a shorter topic, or open the full live scan for more sources."
       );
     }
+    els.freshEmptyBtn.hidden = !recentOnly || total > 0;
     els.scanLink.href = "scan.html" + (currentQuery ? "?q=" + encodeURIComponent(currentQuery) : "");
   }
 
   function collectOrdered() {
-    const buckets = SOURCE_DEFS.map(def => resultsBySource[def.id] || []);
+    const buckets = sourceDefsForMode().map(def => resultsBySource[def.id] || []);
     const out = [];
     const seen = new Set();
     for (let index = 0; ; index++) {
@@ -702,6 +811,7 @@
       }
       if (!added) break;
     }
+    if (recentOnly) out.sort((a, b) => (b.publishedAt || 0) - (a.publishedAt || 0));
     return out;
   }
 
@@ -712,6 +822,8 @@
     busy = false;
     searched = false;
     currentQuery = "";
+    recentOnly = false;
+    recentCutoff = 0;
     sourceState = {};
     resultsBySource = {};
     orderedResults = [];
@@ -726,10 +838,13 @@
     els.more.hidden = true;
     els.sources.innerHTML = "";
     els.sources.hidden = true;
+    els.freshEmptyBtn.hidden = true;
+    updateFreshUI();
   }
 
   function setReady(query) {
     resetResults();
+    updateFreshParam(false);
     const clean = cleanQuery(query);
     els.status.innerHTML = clean
       ? "Ready to search the live indexes for <strong>" + esc(clean) + "</strong>."
@@ -750,14 +865,15 @@
     els.fullScanLink.href = els.scanLink.href;
   }
 
-  function runSearch(rawQuery) {
+  function runSearch(rawQuery, options) {
     const query = cleanQuery(rawQuery);
+    const wantsRecent = Boolean(options && options.recent);
     if (!query) {
       setReady("");
       els.input.focus();
       return;
     }
-    if (busy && query === currentQuery) return;
+    if (busy && query === currentQuery && recentOnly === wantsRecent) return;
 
     if (activeCtrl) activeCtrl.abort();
     activeCtrl = new AbortController();
@@ -768,34 +884,44 @@
     busy = true;
     searched = true;
     currentQuery = query;
+    recentOnly = wantsRecent;
+    updateFreshParam(recentOnly);
+    recentCutoff = Date.now() - RECENT_DAYS * DAY_MS;
     startedAt = performance.now();
     shown = PAGE_SIZE;
     sourceState = {};
     resultsBySource = {};
     orderedResults = [];
-    SOURCE_DEFS.forEach(def => { sourceState[def.id] = { state: "busy", count: 0 }; });
+    const defs = sourceDefsForMode();
+    defs.forEach(def => { sourceState[def.id] = { state: "busy", count: 0 }; });
 
     els.input.value = query;
     els.btn.disabled = true;
     els.btn.setAttribute("aria-busy", "true");
     els.btn.textContent = "Searching…";
-    els.status.innerHTML = "Searching <strong>" + SOURCE_DEFS.length + " live sources</strong> for <strong>" +
-      esc(query) + "</strong>…";
+    els.status.innerHTML = "Searching <strong>" + defs.length + " " +
+      (recentOnly ? "dated " : "") + "live sources</strong> for " +
+      (recentOnly ? "newly launched " : "") + "<strong>" + esc(query) + "</strong>…";
     els.grid.innerHTML = "";
     els.grid.hidden = true;
     els.empty.hidden = true;
     els.more.hidden = true;
     els.loading.hidden = false;
     els.sources.hidden = false;
+    els.freshEmptyBtn.hidden = true;
+    updateFreshUI();
     updateLinks(query);
     renderSources();
 
-    const tasks = SOURCE_DEFS.map(def => {
-      return def.run(query, signal)
+    const tasks = defs.map(def => {
+      return def.run(query, signal, { recent: recentOnly })
         .then(items => {
           if (seq !== searchSeq) return;
-          sourceState[def.id] = { state: "ok", count: (items || []).length };
-          resultsBySource[def.id] = dedupe(items || []);
+          let clean = dedupe(items || []);
+          if (recentOnly) clean = clean.filter(item =>
+            item.publishedAt && item.publishedAt >= recentCutoff && freshResultAllowed(item));
+          sourceState[def.id] = { state: "ok", count: clean.length };
+          resultsBySource[def.id] = clean;
           renderSources();
           updateProgress();
         })
@@ -854,6 +980,11 @@
       scanLink: document.getElementById("liveScanLink"),
       more: document.getElementById("liveMoreWrap"),
       moreBtn: document.getElementById("liveMoreBtn"),
+      fresh: document.getElementById("liveFresh"),
+      freshBtn: document.getElementById("liveFreshBtn"),
+      freshActive: document.getElementById("liveFreshActive"),
+      freshClearBtn: document.getElementById("liveFreshClearBtn"),
+      freshEmptyBtn: document.getElementById("liveFreshEmptyBtn"),
       googleLink: document.getElementById("liveGoogleLink"),
       edxLink: document.getElementById("liveEdxLink"),
       courseraLink: document.getElementById("liveCourseraLink"),
@@ -861,12 +992,13 @@
     };
 
     const initial = initialQuery();
+    const initialFresh = new URLSearchParams(location.search).get("fresh") === "1";
     if (initial) els.input.value = initial;
     setReady(initial);
 
     els.form.addEventListener("submit", event => {
       event.preventDefault();
-      runSearch(els.input.value);
+      runSearch(els.input.value, { recent: false });
     });
 
     els.input.addEventListener("input", () => {
@@ -888,8 +1020,22 @@
     els.quick.addEventListener("click", event => {
       const button = event.target.closest("[data-live-query]");
       if (!button) return;
-      runSearch(button.getAttribute("data-live-query"));
+      runSearch(button.getAttribute("data-live-query"), { recent: false });
     });
+
+    els.freshBtn.addEventListener("click", () => {
+      const query = cleanQuery(els.input.value) || currentQuery || "free course";
+      els.input.value = query;
+      runSearch(query, { recent: true });
+    });
+
+    const clearFresh = () => {
+      const query = cleanQuery(els.input.value) || currentQuery;
+      if (query) runSearch(query, { recent: false });
+      else setReady("");
+    };
+    els.freshClearBtn.addEventListener("click", clearFresh);
+    els.freshEmptyBtn.addEventListener("click", clearFresh);
 
     els.moreBtn.addEventListener("click", () => {
       const firstNew = shown;
@@ -903,7 +1049,7 @@
     });
 
     els.retry.addEventListener("click", () => {
-      runSearch(currentQuery || els.input.value);
+      runSearch(currentQuery || els.input.value, { recent: recentOnly });
     });
 
     const browseSearch = document.getElementById("browseSearch");
@@ -919,6 +1065,12 @@
           setReady(value);
         }, 350);
       });
+    }
+
+    if (initialFresh) {
+      const query = initial || "free course";
+      els.input.value = query;
+      runSearch(query, { recent: true });
     }
 
     window.addEventListener("beforeunload", () => {
