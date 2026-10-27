@@ -30,6 +30,7 @@
     }).sort((a, b) => b.courses.length - a.courses.length || a.name.localeCompare(b.name));
 
     renderFilters();
+    renderLiveBar();
     const input = document.getElementById("providerSearch");
     if (input) {
       input.value = search;
@@ -67,6 +68,33 @@
   function nameOfSubject(id) {
     const s = D.subjects.find(x => x.id === id);
     return s ? s.name : id;
+  }
+
+  function liveProviderPath(id) {
+    return "courses.html?providerLive=" + encodeURIComponent(id) + "#liveCourses";
+  }
+
+  function renderLiveBar() {
+    const host = document.getElementById("providerLiveBar");
+    if (!host) return;
+    const ids = (D.liveProviderIds || []).filter(id => D.providers[id]);
+    if (!ids.length) {
+      host.hidden = true;
+      return;
+    }
+    const dateNote = ids.some(id => D.providers[id].liveSearch && D.providers[id].liveSearch.freeMode === "trial")
+      ? "Free and free-trial picks, searched live by provider."
+      : "Free picks searched live by provider.";
+    host.innerHTML = '<span class="provider-live-label"><span class="live-dot" aria-hidden="true"></span> Live provider search</span>' +
+      '<div class="provider-live-links">' +
+        ids.map(id => {
+          const p = D.providers[id];
+          const live = p.liveSearch || {};
+          return '<a class="provider-live-chip" href="' + liveProviderPath(id) + '" title="' +
+            LN.esc(live.freeNote || dateNote) + '">' + LN.esc(p.name) + "</a>";
+        }).join("") +
+      "</div>" +
+      '<span class="provider-live-note">' + LN.esc(dateNote) + "</span>";
   }
 
   function typeCounts() {
@@ -109,8 +137,10 @@
 
     const count = document.getElementById("providerCount");
     if (count) {
+      const liveCount = (D.liveProviderIds || []).length;
       count.innerHTML = list.length === providers.length
-        ? "<strong>" + providers.length + "</strong> providers · <strong>" + D.courses.length + "</strong> free courses"
+        ? "<strong>" + providers.length + "</strong> providers · <strong>" + D.courses.length +
+          "</strong> catalogue courses" + (liveCount ? " · <strong>" + liveCount + "</strong> live provider searches" : "")
         : "Showing <strong>" + list.length + "</strong> of <strong>" + providers.length + "</strong> providers";
     }
 
@@ -126,7 +156,22 @@
 
   function providerCard(p) {
     const topSubjects = p.subjects.slice(0, 3);
-    return '<a class="provider-card" href="' + LN.browsePath({ provider: p.id }) + '" aria-label="Browse courses from ' + LN.esc(p.name) + '">' +
+    const hasCourses = p.courses.length > 0;
+    const live = p.liveSearch || null;
+    const href = hasCourses || !live ? LN.browsePath({ provider: p.id }) : liveProviderPath(p.id);
+    const trial = Boolean(live && live.freeLabel === "Free trial access");
+    const meta = hasCourses
+      ? "<span><b>" + p.courses.length + "</b> " + LN.plural(p.courses.length, "course") + "</span>"
+      : live
+        ? "<span><b>Live</b> " + (trial ? "trial search" : "free search") + "</span>"
+        : "<span>No catalogue courses yet</span>";
+    const action = hasCourses ? "View courses" : live ? (trial ? "Find trial classes" : "Find free courses") : "View provider";
+    const label = hasCourses
+      ? "Browse courses from " + p.name
+      : live
+        ? "Search " + (trial ? "free trial classes" : "free courses") + " from " + p.name + " live"
+        : "Open " + p.name;
+    return '<a class="provider-card' + (live && !hasCourses ? " provider-card--live" : "") + '" href="' + href + '" aria-label="' + LN.esc(label) + '">' +
       '<div class="provider-card-top">' +
         '<span class="provider-logo" style="--pcolor:' + p.color + ';--ptext:' + (p.text || "#fff") + '" aria-hidden="true">' + LN.esc(p.initials) + "</span>" +
         '<span><span class="provider-name">' + LN.esc(p.name) + '</span><span class="provider-type">' + LN.esc(p.type) + "</span></span>" +
@@ -138,8 +183,8 @@
           "</div>"
         : "") +
       '<div class="provider-card-meta">' +
-        "<span><b>" + p.courses.length + "</b> " + LN.plural(p.courses.length, "course") + "</span>" +
-        '<span style="display:inline-flex;align-items:center;gap:.25rem">View courses ' +
+        meta +
+        '<span style="display:inline-flex;align-items:center;gap:.25rem">' + LN.esc(action) + " " +
           '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>' +
       "</div>" +
     "</a>";

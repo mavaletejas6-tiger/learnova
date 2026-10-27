@@ -42,6 +42,7 @@
   const plural = (n, one, many) => n === 1 ? one : (many || one + "s");
   const coursePath = id => "course.html?id=" + encodeURIComponent(id);
   const scanPath = q => "scan.html" + (q ? "?q=" + encodeURIComponent(q) : "");
+  const liveProviderPath = id => "courses.html?providerLive=" + encodeURIComponent(id) + "#liveCourses";
   const browsePath = params => {
     const p = new URLSearchParams();
     Object.keys(params || {}).forEach(k => {
@@ -833,10 +834,17 @@
       providerHits.forEach(k => {
         const p = PROVIDERS[k];
         const count = COURSES.filter(c => c.provider === k).length;
-        html += '<a class="suggest-item" href="' + browsePath({ provider: k }) + '">' +
+        const live = p.liveSearch;
+        const href = count || !live ? browsePath({ provider: k }) : liveProviderPath(k);
+        const meta = count
+          ? count + " " + plural(count, "course")
+          : live
+            ? (live.freeLabel === "Free trial access" ? "Free trial · live search" : "Live free search")
+            : "No catalogue courses";
+        html += '<a class="suggest-item" href="' + href + '">' +
           '<span class="suggest-cover" style="--c1:' + p.color + ';--c2:' + p.color + ';color:' + (p.text || "#fff") + '">' + esc(p.initials) + "</span>" +
           '<span class="suggest-info"><span class="suggest-title">' + esc(p.name) + "</span>" +
-          '<span class="suggest-meta">' + count + " " + plural(count, "course") + "</span></span></a>";
+          '<span class="suggest-meta">' + esc(meta) + "</span></span></a>";
       });
       html += "</div>";
     }

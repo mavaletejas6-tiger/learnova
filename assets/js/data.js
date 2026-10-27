@@ -150,7 +150,14 @@
     nptel: {
       name: "NPTEL", initials: "N", color: "#B91C1C", text: "#FFFFFF",
       type: "University consortium", url: "https://nptel.ac.in/",
-      about: "Free engineering and science courses from Indian Institutes of Technology, with optional paid certification exams."
+      about: "Free engineering and science courses from Indian Institutes of Technology, with optional paid certification exams.",
+      liveSearch: {
+        host: "nptel.ac.in",
+        freeMode: "always",
+        freeLabel: "Free course",
+        freeNote: "Course content is free; optional certification exams have a fee.",
+        freeUrl: "https://nptel.ac.in/courses"
+      }
     },
     codewithharry: {
       name: "CodeWithHarry", initials: "CWH", color: "#111827", text: "#FFFFFF",
@@ -161,8 +168,176 @@
       name: "Stanford Online", initials: "S", color: "#8C1515", text: "#FFFFFF",
       type: "University", url: "https://online.stanford.edu/",
       about: "Stanford's online courses and free lecture materials, including courses hosted on Coursera and edX."
+    },
+    udemy: {
+      name: "Udemy", initials: "U", color: "#A435F0", text: "#FFFFFF",
+      type: "Platform", url: "https://www.udemy.com/",
+      about: "A large course marketplace with thousands of free courses alongside paid ones. The live provider search only returns free-marked Udemy pages.",
+      liveSearch: {
+        host: "udemy.com",
+        allowSubdomains: false,
+        pathPrefixes: ["/course/", "/topic/", "/courses/free/"],
+        freeMode: "filter",
+        freePathOnly: true,
+        freePathPattern: "(^|[/-])free([/-]|$)",
+        freeLabel: "Free course",
+        freeNote: "Only Udemy pages marked free are included; paid courses are excluded.",
+        freeUrl: "https://www.udemy.com/courses/free/"
+      }
+    },
+    skillshare: {
+      name: "Skillshare", initials: "S", color: "#002333", text: "#FFFFFF",
+      type: "Platform", url: "https://www.skillshare.com/",
+      about: "Creative and professional classes. Skillshare no longer has a permanent free tier, but new learners can explore the library during a free trial.",
+      liveSearch: {
+        host: "skillshare.com",
+        allowSubdomains: false,
+        pathPrefixes: ["/classes/", "/en/classes/", "/browse/", "/en/browse/"],
+        pathExcludes: ["/pricing", "/join/"],
+        freeMode: "trial",
+        freeLabel: "Free trial access",
+        freeNote: "Classes are accessible during Skillshare's free trial; a paid membership is required afterwards.",
+        freeUrl: "https://www.skillshare.com/en/join/premium"
+      }
+    },
+    linkedinlearning: {
+      name: "LinkedIn Learning", initials: "in", color: "#0A66C2", text: "#FFFFFF",
+      type: "Platform", url: "https://www.linkedin.com/learning/",
+      about: "Professional skills courses from LinkedIn. Some courses are free, and a trial may be available; the full library requires a subscription.",
+      liveSearch: {
+        host: "linkedin.com",
+        searchHost: "linkedin.com/learning",
+        allowSubdomains: false,
+        pathPrefixes: ["/learning/"],
+        pathPattern: "^/learning/(paths/[^/]+|[^/]+)$",
+        freeMode: "trial",
+        freeLabel: "Free trial access",
+        freeNote: "LinkedIn Learning includes some free courses and trial access; most of the library is subscription-based.",
+        freeUrl: "https://www.linkedin.com/learning/"
+      }
+    },
+    domestika: {
+      name: "Domestika", initials: "D", color: "#E4252C", text: "#FFFFFF",
+      type: "Platform", url: "https://www.domestika.org/",
+      about: "Creative courses from independent professionals. Domestika publishes a rotating collection of free courses alongside its paid catalogue.",
+      liveSearch: {
+        host: "domestika.org",
+        allowSubdomains: false,
+        pathPrefixes: ["/en/courses/", "/courses/"],
+        pathExcludes: ["/plus"],
+        freeMode: "filter",
+        freeTitleOnly: true,
+        freeLabel: "Free course",
+        freeNote: "Only Domestika pages marked free are included; paid and Plus-only courses are excluded.",
+        freeUrl: "https://www.domestika.org/keeponcreating",
+        fallbackTitle: "Free online courses — Domestika",
+        fallbackNote: "No topic-specific free page matched. Open Domestika's official free-course collection."
+      }
+    },
+    alison: {
+      name: "Alison", initials: "A", color: "#0B7A5C", text: "#FFFFFF",
+      type: "Platform", url: "https://alison.com/",
+      about: "Free online courses with optional paid certificates and upgrades. Alison's course library is free to study.",
+      liveSearch: {
+        host: "alison.com",
+        allowSubdomains: false,
+        pathPrefixes: ["/course/"],
+        freeMode: "always",
+        freeLabel: "Free course",
+        freeNote: "Alison courses are free to study; certificates and upgrades are optional.",
+        freeUrl: "https://alison.com/courses"
+      }
+    },
+    swayam: {
+      name: "SWAYAM", initials: "SW", color: "#E85D04", text: "#FFFFFF",
+      type: "Government", url: "https://swayam.gov.in/",
+      about: "India's government-backed MOOC platform, offering free university and school courses. Optional proctored exams may have a fee.",
+      liveSearch: {
+        host: "swayam.gov.in",
+        allowSubdomains: false,
+        pathPrefixes: ["/explorer", "/nd1_", "/nd2_", "/nd3_", "/course"],
+        freeMode: "always",
+        freeLabel: "Free course",
+        freeNote: "SWAYAM course content is free; optional exams and credits may have a fee.",
+        freeUrl: "https://swayam.gov.in/explorer",
+        fallbackTitle: "SWAYAM course catalogue",
+        fallbackNote: "No topic-specific course page matched in the open index. Search the official SWAYAM catalogue."
+      }
+    },
+    upgrad: {
+      name: "upGrad", initials: "uG", color: "#D81B60", text: "#FFFFFF",
+      type: "Platform", url: "https://www.upgrad.com/",
+      about: "Career-focused programs plus a catalogue of free short courses with certificates. Full degree and executive programs are paid.",
+      liveSearch: {
+        host: "upgrad.com",
+        allowSubdomains: false,
+        pathPrefixes: ["/free-courses/"],
+        freeMode: "filter",
+        freePathPattern: "^/free-courses/",
+        freeLabel: "Free course",
+        freeNote: "Only upGrad free-course pages are included; paid programs are excluded.",
+        freeUrl: "https://www.upgrad.com/free-courses/"
+      }
+    },
+    unacademy: {
+      name: "Unacademy", initials: "U", color: "#0F9D58", text: "#FFFFFF",
+      type: "Platform", url: "https://unacademy.com/",
+      about: "India's test-prep and skills platform, with free live classes and resources alongside paid subscriptions and batches.",
+      liveSearch: {
+        host: "unacademy.com",
+        allowSubdomains: false,
+        pathPrefixes: ["/goal/", "/free"],
+        pathPattern: "^(/goal/.*/classes|/free)",
+        searchSuffix: "free class",
+        freeMode: "filter",
+        freePhrase: "\\bfree\\b[^.]{0,40}\\bclass",
+        freeLabel: "Free class",
+        freeNote: "Only free classes and resources are included; subscription-only content is excluded.",
+        freeUrl: "https://unacademy.com/goal/-/HVZIZ/classes",
+        fallbackTitle: "Free classes — Unacademy",
+        fallbackNote: "No topic-specific free class matched. Open Unacademy's free class catalogue."
+      }
+    },
+    physicswallah: {
+      name: "Physics Wallah", initials: "PW", color: "#6D28D9", text: "#FFFFFF",
+      type: "Platform", url: "https://www.pw.live/",
+      about: "Indian exam-prep and skills platform with free lectures, batches, notes, and YouTube content. Some structured batches are paid.",
+      liveSearch: {
+        host: "pw.live",
+        allowSubdomains: false,
+        pathPrefixes: ["/learners/", "/study-v2", "/free"],
+        pathExcludes: ["/pwskills/", "/gyaane", "/store", "/books"],
+        searchSuffix: "free lecture",
+        freeMode: "filter",
+        freePhrase: "\\bfree\\b[^.]{0,40}\\b(lecture|class|batch|resource|course)",
+        freeLabel: "Free resource",
+        freeNote: "Only free lectures, batches, and resources are included; paid batches are excluded.",
+        freeUrl: "https://www.pw.live/study-v2",
+        fallbackTitle: "Free lectures and resources — Physics Wallah",
+        fallbackNote: "No topic-specific free page matched. Open Physics Wallah's study catalogue."
+      }
+    },
+    udacity: {
+      name: "Udacity", initials: "U", color: "#01B3E3", text: "#FFFFFF",
+      type: "Platform", url: "https://www.udacity.com/",
+      about: "Technical courses and career programs. Udacity publishes a free course collection alongside its paid Nanodegrees.",
+      liveSearch: {
+        host: "udacity.com",
+        allowSubdomains: false,
+        pathPrefixes: ["/course/", "/course-collection/free"],
+        pathPattern: "^(/course/(?!.*(?:nanodegree|--nd\\d))|/course-collection/free)",
+        freeMode: "always",
+        freeLabel: "Free course",
+        freeNote: "Only Udacity free courses and collections are included; Nanodegrees are paid.",
+        freeUrl: "https://www.udacity.com/course-collection/free-udacity-courses"
+      }
     }
   };
+
+  const LIVE_PROVIDER_IDS = [
+    "udemy", "skillshare", "linkedinlearning", "domestika", "alison", "swayam",
+    "nptel", "upgrad", "unacademy", "physicswallah", "udacity"
+  ];
 
   const SUBJECTS = [
     { id: "computer-science", name: "Computer Science", icon: "🖥️", c1: "#1B1F4B", c2: "#4F5BD5", blurb: "How computers, systems, and software work." },
@@ -1318,6 +1493,7 @@
     levels: LEVELS,
     languages: LANGUAGES,
     sorts: SORTS,
+    liveProviderIds: LIVE_PROVIDER_IDS,
     siteUrl: "https://mavaletejas6-tiger.github.io/learnova/"
   };
 })();

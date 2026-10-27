@@ -102,7 +102,7 @@
           <div class="live-courses-intro">
             <span class="eyebrow">Live course search</span>
             <h2 id="liveCoursesTitle">Beyond the catalogue, in real time</h2>
-            <p>Search open course indexes, tutorial libraries and the wider web for any topic. Results are fetched live in your browser and link straight to the original creator — separate from the hand-checked catalogue below.</p>
+            <p>Search open course indexes, tutorial libraries and the wider web for any topic. You can also search free and free-trial results from Udemy, Skillshare, LinkedIn Learning, Alison, SWAYAM, NPTEL and other providers. Results are fetched live in your browser and link straight to the original creator — separate from the hand-checked catalogue below.</p>
           </div>
           <span class="live-badge"><span class="live-dot" aria-hidden="true"></span> Live</span>
         </div>
@@ -137,6 +137,14 @@
           <button type="button" id="liveFreshClearBtn">Show all time</button>
         </div>
 
+        <div class="live-provider-row" id="liveProviderRow" aria-label="Search courses by provider"></div>
+        <div class="live-provider-active" id="liveProviderActive" hidden>
+          <span class="live-provider-active-label"><span class="live-dot" aria-hidden="true"></span> <strong id="liveProviderName"></strong> <span id="liveProviderMode">free search</span></span>
+          <span class="live-provider-note" id="liveProviderNote"></span>
+          <a class="live-provider-fallback" id="liveProviderFallback" href="#" target="_blank" rel="noopener noreferrer">Open provider <span aria-hidden="true">↗</span></a>
+          <button type="button" id="liveProviderClearBtn">All sources</button>
+        </div>
+
         <div class="live-meta-row">
           <p class="live-status" id="liveStatus" role="status" aria-live="polite">Type a topic, or choose a suggestion above.</p>
           <ul class="live-sources" id="liveSources" aria-label="Live source status" hidden></ul>
@@ -165,7 +173,7 @@
         </div>
 
         <div class="live-footer">
-          <p>Live results come from YouTube, GitHub, PeerTube, Wikiversity, DEV Community and the open web via DuckDuckGo, queried directly from your browser. Newly launched mode uses YouTube, GitHub and PeerTube because those sources publish dates. Learnova does not host or endorse them — always check the original provider’s access terms.</p>
+          <p>Live results come from YouTube, GitHub, PeerTube, Wikiversity, DEV Community and the open web via DuckDuckGo, queried directly from your browser. Provider search checks one provider at a time and labels free results, free-trial access and provider-specific access terms. Newly launched mode uses YouTube, GitHub and PeerTube because those sources publish dates. Learnova does not host or endorse them — always check the original provider’s access terms.</p>
           <div class="live-elsewhere">
             <span>Also search</span>
             <a id="liveGoogleLink" href="https://www.google.com/search?q=free%20courses" target="_blank" rel="noopener noreferrer">Google web <span aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a>

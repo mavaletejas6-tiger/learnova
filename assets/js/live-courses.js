@@ -76,6 +76,7 @@
   let browseSyncTimer = null;
   let recentOnly = false;
   let recentCutoff = 0;
+  let activeProviderId = "";
 
   /* ---------- text + URL helpers ---------- */
   function esc(value) {
@@ -137,7 +138,29 @@
   function isNew(item) {
     return Boolean(item && item.publishedAt && Date.now() - item.publishedAt <= NEW_DAYS * DAY_MS);
   }
+  function providerById(id) {
+    const D = window.LN_DATA || {};
+    const p = id && D.providers ? D.providers[id] : null;
+    return p ? Object.assign({ id: id }, p) : null;
+  }
+  function liveProviderIds() {
+    const D = window.LN_DATA || {};
+    return (D.liveProviderIds || []).filter(id => {
+      const p = providerById(id);
+      return Boolean(p && p.liveSearch);
+    });
+  }
+  function providerSourceDef(provider) {
+    return {
+      id: "provider",
+      name: provider.name,
+      providerId: provider.id,
+      run: (query, signal) => searchProviderFree(provider, query, signal)
+    };
+  }
   function sourceDefsForMode() {
+    const provider = providerById(activeProviderId);
+    if (provider && provider.liveSearch) return [providerSourceDef(provider)];
     return recentOnly ? SOURCE_DEFS.filter(def => def.dated && def.launch !== false) : SOURCE_DEFS;
   }
   function freshResultAllowed(item) {
@@ -564,13 +587,63 @@
       .replace(/&nbsp;/g, " "), 320);
   }
 
-  function parseWebResults(markdown, tokens) {
+  function providerMatchesUrl(parsed, provider) {
+    const live = provider.liveSearch || {};
+    const host = parsed.hostname.toLowerCase().replace(/^www\./, "");
+    const hosts = live.hosts || (live.host ? [live.host] : []);
+    const hostMatch = live.allowSubdomains === false
+      ? hosts.some(value => host === value)
+      : hosts.some(value => host === value || host.endsWith("." + value));
+    if (!hostMatch) return false;
+    const excludedHosts = live.excludeHosts || [];
+    if (excludedHosts.some(value => host === value || host.endsWith("." + value))) return false;
+    const excluded = live.pathExcludes || [];
+    if (excluded.some(prefix => parsed.pathname.startsWith(prefix))) return false;
+    const prefixes = live.pathPrefixes || [];
+    if (prefixes.length && !prefixes.some(prefix => parsed.pathname.startsWith(prefix))) return false;
+    if (live.pathPattern) {
+      try {
+        if (!new RegExp(live.pathPattern).test(parsed.pathname)) return false;
+      } catch (e) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function providerKind(live, parsed, fallback) {
+    const trial = live.freeLabel === "Free trial access";
+    if (fallback) return trial ? "Free trial page" : "Free course collection";
+    if (parsed && (parsed.pathname.includes("/topic/") || parsed.pathname === "/courses/free/" ||
+      parsed.pathname === "/explorer" || parsed.pathname.includes("/course-collection/"))) {
+      return "Free course collection";
+    }
+    if (parsed && /\.(pdf|zip|docx?|pptx?)$/i.test(parsed.pathname)) return "Free resource";
+    return live.freeLabel || "Free course";
+  }
+
+  function providerTitle(provider, parsed, title) {
+    if (provider.id === "unacademy" && /india's largest learning platform/i.test(title)) {
+      const parts = parsed.pathname.split("/").filter(Boolean);
+      const slug = parts[1] || "";
+      const readable = slug.replace(/-/g, " ").replace(/\b\w/g, letter => letter.toUpperCase());
+      if (readable) return "Free " + readable + " classes — Unacademy";
+    }
+    return title;
+  }
+
+  function parseWebResults(markdown, tokens, options) {
+    const opts = options || {};
+    const provider = opts.provider || null;
+    const live = provider && provider.liveSearch ? provider.liveSearch : null;
+    const providerMode = Boolean(provider && live);
     const lines = String(markdown || "").split(/\r?\n/);
     const out = [];
     const seen = new Set();
     const seenHosts = new Set();
+    const resultLine = /^(?:##|\d+\.)\s*\[(.+?)\]\((https?:\/\/[^)\s]+)\)/;
     for (let index = 0; index < lines.length; index++) {
-      const match = lines[index].match(/^##\s+\[(.+?)\]\((https?:\/\/[^)\s]+)\)/);
+      const match = lines[index].match(resultLine);
       if (!match) continue;
       const title = stripMarkdown(match[1]);
       const rawUrl = unwrapDDG(match[2]);
@@ -581,17 +654,47 @@
       const url = safeUrl(parsed.href);
       if (!url) continue;
       const host = parsed.hostname.toLowerCase().replace(/^www\./, "");
-      if (WEB_SKIP_RE.test(host) || PAID_WEB_HOST_RE.test(host) || seenHosts.has(host)) continue;
+      if (providerMode) {
+        if (!providerMatchesUrl(parsed, provider)) continue;
+      } else if (WEB_SKIP_RE.test(host) || PAID_WEB_HOST_RE.test(host) || seenHosts.has(host)) {
+        continue;
+      }
       const info = webHostInfo(url);
 
       let snippet = "";
-      for (let next = index + 1; next < lines.length && !/^##\s+\[/.test(lines[next]); next++) {
+      for (let next = index + 1; next < lines.length && !resultLine.test(lines[next]); next++) {
         const text = stripMarkdown(lines[next]);
         if (text.length > snippet.length) snippet = text;
       }
       const hay = [title, snippet].filter(Boolean).join(" ");
-      if (PIRATE_RE.test(url + " " + hay) || !COURSEY_RE.test(hay)) continue;
-      if (!(info && info.free) && !/\bfree\b/i.test(hay)) continue;
+      const freeInHay = /\bfree\b/i.test(hay);
+      const freeTitle = /\bfree\b/i.test(title);
+      let freePath = false;
+      if (live && live.freePathPattern) {
+        try { freePath = new RegExp(live.freePathPattern).test(parsed.pathname); } catch (e) {}
+      }
+      if (providerMode) {
+        if (live.freeMode === "filter") {
+          let freeEvidence = freePath;
+          if (live.freePathOnly) {
+            freeEvidence = freePath;
+          } else if (live.freeTitleOnly) {
+            freeEvidence = freeEvidence || freeTitle;
+          } else if (live.freePhrase) {
+            try { freeEvidence = freeEvidence || new RegExp(live.freePhrase, "i").test(hay); } catch (e) {}
+          } else {
+            freeEvidence = freeEvidence || freeInHay;
+          }
+          if (!freeEvidence) continue;
+        }
+        if (!COURSEY_RE.test(hay)) {
+          const prefixes = live.pathPrefixes || [];
+          if (!prefixes.some(prefix => parsed.pathname.startsWith(prefix))) continue;
+        }
+      } else {
+        if (PIRATE_RE.test(url + " " + hay) || !COURSEY_RE.test(hay)) continue;
+        if (!(info && info.free) && !freeInHay) continue;
+      }
       if (tokens.length) {
         const hayKey = normalize(hay + " " + host);
         if (!tokens.some(token => hayKey.includes(token))) continue;
@@ -599,13 +702,16 @@
       const key = normUrl(url);
       if (!key || seen.has(key)) continue;
       seen.add(key);
-      seenHosts.add(host);
+      if (!providerMode) seenHosts.add(host);
+      const shownTitle = providerMode ? providerTitle(provider, parsed, title) : title;
       out.push({
-        sourceId: "web", source: "Web", title: title, url: url,
-        text: snippet, meta: info ? info.host : host,
-        kind: info && info.free ? "Free website" : "Web page"
+        sourceId: providerMode ? "provider" : "web",
+        source: providerMode ? provider.name : "Web",
+        title: shownTitle, url: url,
+        text: snippet, meta: providerMode ? host : info ? info.host : host,
+        kind: providerMode ? providerKind(live, parsed, false) : info && info.free ? "Free website" : "Web page"
       });
-      if (out.length >= 8) break;
+      if (out.length >= (providerMode ? 10 : 8)) break;
     }
     return out;
   }
@@ -615,9 +721,45 @@
     let search = query;
     if (!/\bfree\b/i.test(search)) search += " free";
     if (!COURSEY_RE.test(search)) search += " course";
-    const target = "https://html.duckduckgo.com/html/?q=" + encodeURIComponent(search);
+    const target = "https://lite.duckduckgo.com/lite/?q=" + encodeURIComponent(search);
     const markdown = await fetchText("https://r.jina.ai/" + target, signal, { timeout: 16000 });
     return dedupe(parseWebResults(markdown, tokens)).slice(0, 8);
+  }
+
+  /* ---------- Provider-specific free search ---------- */
+  async function searchProviderFree(provider, query, signal) {
+    const live = provider.liveSearch || {};
+    const raw = cleanQuery(query);
+    const searchFor = raw || live.searchSuffix || "free course";
+    const generic = /^(free\s+)?(course|courses|class|classes|lesson|lessons)?$/i.test(searchFor);
+    const tokens = generic ? [] : tokensFor(searchFor);
+    const searchHost = live.searchHost || live.host;
+    if (!searchHost) return [];
+    let search = "site:" + searchHost + " " + searchFor;
+    if (live.searchSuffix && raw) {
+      if (!search.toLowerCase().includes(live.searchSuffix.toLowerCase())) search += " " + live.searchSuffix;
+    } else if (!live.searchSuffix) {
+      if (live.freeMode === "filter" && !/\bfree\b/i.test(search)) search += " free";
+      if (!COURSEY_RE.test(search)) search += " course";
+    }
+    const target = "https://lite.duckduckgo.com/lite/?q=" + encodeURIComponent(search);
+    const markdown = await fetchText("https://r.jina.ai/" + target, signal, { timeout: 16000 });
+    const results = dedupe(parseWebResults(markdown, tokens, { provider: provider })).slice(0, 10);
+    if (results.length) return results;
+    if (!live.freeUrl) return results;
+    let host = "";
+    try { host = new URL(live.freeUrl).hostname.replace(/^www\./, ""); } catch (e) {}
+    const trial = live.freeLabel === "Free trial access";
+    return [{
+      sourceId: "provider",
+      source: provider.name,
+      title: live.fallbackTitle || (trial ? "Try " + provider.name + " free" : "Free courses at " + provider.name),
+      url: live.freeUrl,
+      text: live.fallbackNote || ("No topic-specific page matched. Open the provider's official " + (trial ? "free trial" : "free collection") + "."),
+      meta: host,
+      kind: providerKind(live, null, true),
+      fallback: true
+    }];
   }
 
   /* ---------- rendering ---------- */
@@ -654,7 +796,7 @@
     const newBadge = isNew(item) ? "New" : (recentOnly && item.publishedAt ? "Recent" : "");
     const label = item.title + " — " + item.source + " " + item.kind +
       (published ? " published " + published : "") + " (opens in a new tab)";
-    return '<a class="live-card" href="' + esc(item.url) + '" target="_blank" rel="noopener noreferrer"' +
+    return '<a class="live-card' + (item.fallback ? " live-card--fallback" : "") + '" href="' + esc(item.url) + '" target="_blank" rel="noopener noreferrer"' +
       ' data-source="' + esc(item.sourceId) + '" aria-label="' + esc(label) + '">' +
         '<div class="live-card-top">' +
           '<span class="live-source-tag" data-source="' + esc(item.sourceId) + '">' + esc(item.source) + "</span>" +
@@ -692,11 +834,11 @@
     const cards = orderedResults.slice(0, shown);
     els.grid.innerHTML = cards.map(cardHTML).join("");
     els.grid.hidden = cards.length === 0;
-    els.grid.setAttribute("data-mode", recentOnly ? "recent" : "all");
+    els.grid.setAttribute("data-mode", activeProviderId ? "provider" : recentOnly ? "recent" : "all");
     const remaining = Math.max(0, orderedResults.length - shown);
     els.more.hidden = remaining === 0 || busy;
     els.moreBtn.textContent = "Show " + Math.min(PAGE_SIZE, remaining) +
-      (recentOnly ? " more newly launched " : " more live ") +
+      (activeProviderId ? " more provider " : recentOnly ? " more newly launched " : " more live ") +
       (Math.min(PAGE_SIZE, remaining) === 1 ? "result" : "results");
   }
 
@@ -705,6 +847,15 @@
     const total = Object.keys(resultsBySource).reduce((sum, id) => sum + resultsBySource[id].length, 0);
     const defs = sourceDefsForMode();
     const remaining = defs.filter(def => (sourceState[def.id] || {}).state === "busy").length;
+    const provider = providerById(activeProviderId);
+    if (provider) {
+      const trial = provider.liveSearch && provider.liveSearch.freeLabel === "Free trial access";
+      els.status.innerHTML = total
+        ? "Found <strong>" + total + "</strong> " + (trial ? "free-trial " : "free ") + (total === 1 ? "result" : "results") +
+          " from <strong>" + esc(provider.name) + "</strong> so far — still checking the provider…"
+        : "Searching <strong>" + esc(provider.name) + "</strong> for " + (trial ? "free-trial " : "free ") + "<strong>" + esc(currentQuery) + "</strong>…";
+      return;
+    }
     if (total) {
       els.status.innerHTML = "Found <strong>" + total + "</strong> " +
         (recentOnly ? "newly launched " : "live ") +
@@ -732,9 +883,11 @@
     els.freshActive.hidden = !recentOnly;
   }
 
-  function updateFreshParam(active) {
+  function updateModeParam(providerId, fresh) {
     const params = new URLSearchParams(location.search);
-    if (active) params.set("fresh", "1");
+    if (providerId) params.set("providerLive", providerId);
+    else params.delete("providerLive");
+    if (fresh) params.set("fresh", "1");
     else params.delete("fresh");
     const qs = params.toString();
     try {
@@ -742,14 +895,52 @@
     } catch (e) {}
   }
 
+  function renderProviderRow() {
+    if (!els || !els.providerRow) return;
+    const ids = liveProviderIds();
+    els.providerRow.innerHTML = '<span class="live-provider-label">Provider:</span>' +
+      ids.map(id => {
+        const p = providerById(id);
+        const live = p.liveSearch || {};
+        return '<button type="button" data-live-provider="' + esc(id) + '" aria-pressed="false" title="' +
+          esc(live.freeNote || ("Search free " + p.name + " results")) + '">' + esc(p.name) + "</button>";
+      }).join("");
+  }
+
+  function updateProviderUI() {
+    if (!els) return;
+    const provider = providerById(activeProviderId);
+    if (els.providerRow) {
+      els.providerRow.querySelectorAll("[data-live-provider]").forEach(button => {
+        const isActive = Boolean(provider && button.getAttribute("data-live-provider") === provider.id);
+        button.classList.toggle("is-active", isActive);
+        button.setAttribute("aria-pressed", isActive ? "true" : "false");
+      });
+    }
+    if (!els.providerActive) return;
+    els.providerActive.hidden = !provider;
+    if (!provider) return;
+    const live = provider.liveSearch || {};
+    const trial = live.freeLabel === "Free trial access";
+    els.providerName.textContent = provider.name;
+    els.providerMode.textContent = trial ? "free-trial search" : "free search";
+    els.providerNote.textContent = live.freeNote || "Only free results are included.";
+    const fallback = live.freeUrl || provider.url || "#";
+    els.providerFallback.href = fallback;
+    els.providerFallback.innerHTML = "Open " + esc(provider.name) + (trial ? " free trial" : " free page") + ' <span aria-hidden="true">↗</span>';
+    els.providerFallback.setAttribute("aria-label", "Open " + provider.name + (trial ? " free trial" : " free page") + " (opens in a new tab)");
+  }
+
   function finishSearch() {
     busy = false;
     searched = true;
+    const provider = providerById(activeProviderId);
     els.btn.disabled = false;
     els.btn.removeAttribute("aria-busy");
-    els.btn.textContent = "Search live web";
+    els.btn.textContent = provider ? "Search " + provider.name : "Search live web";
     els.loading.hidden = true;
     updateFreshUI();
+    updateProviderUI();
 
     orderedResults = collectOrdered();
     const total = orderedResults.length;
@@ -757,38 +948,62 @@
     const answered = defs.filter(def => (sourceState[def.id] || {}).state === "ok").length;
     const failed = defs.filter(def => (sourceState[def.id] || {}).state === "fail").length;
     const elapsed = ((performance.now() - startedAt) / 1000).toFixed(1);
+    const trial = Boolean(provider && provider.liveSearch && provider.liveSearch.freeLabel === "Free trial access");
+    const onlyFallback = total > 0 && orderedResults.every(item => item.fallback);
 
     if (total) {
-      els.status.innerHTML = recentOnly
-        ? "Found <strong>" + total + "</strong> newly launched " +
-          (total === 1 ? "result" : "results") + " for <strong>" + esc(currentQuery) +
-          "</strong> · published in the last " + RECENT_DAYS + " days · " +
-          answered + " of " + defs.length + " dated sources answered" +
-          (failed ? " · " + failed + " unavailable" : "") + " · " + elapsed + "s."
-        : "Found <strong>" + total + "</strong> live " +
-          (total === 1 ? "result" : "results") + " for <strong>" + esc(currentQuery) + "</strong> · " +
-          answered + " of " + defs.length + " sources answered" +
-          (failed ? " · " + failed + " unavailable" : "") + " · " + elapsed + "s.";
+      els.status.innerHTML = provider
+        ? onlyFallback
+          ? "No topic-specific live page matched for <strong>" + esc(currentQuery) + "</strong>; showing <strong>" +
+            esc(provider.name) + "</strong>'s official " + (trial ? "trial page" : "free collection") + " · " + elapsed + "s."
+          : "Found <strong>" + total + "</strong> " + (trial ? "free-trial " : "free ") +
+            (total === 1 ? "result" : "results") + " from <strong>" + esc(provider.name) +
+            "</strong> for <strong>" + esc(currentQuery) + "</strong> · searched the provider's site" +
+            (failed ? " · unavailable" : "") + " · " + elapsed + "s."
+        : recentOnly
+          ? "Found <strong>" + total + "</strong> newly launched " +
+            (total === 1 ? "result" : "results") + " for <strong>" + esc(currentQuery) +
+            "</strong> · published in the last " + RECENT_DAYS + " days · " +
+            answered + " of " + defs.length + " dated sources answered" +
+            (failed ? " · " + failed + " unavailable" : "") + " · " + elapsed + "s."
+          : "Found <strong>" + total + "</strong> live " +
+            (total === 1 ? "result" : "results") + " for <strong>" + esc(currentQuery) + "</strong> · " +
+            answered + " of " + defs.length + " sources answered" +
+            (failed ? " · " + failed + " unavailable" : "") + " · " + elapsed + "s.";
       els.empty.hidden = true;
       renderCards();
     } else {
       const allFailed = failed === defs.length;
-      els.status.innerHTML = allFailed
-        ? "No live source answered. Check your connection and try again."
-        : recentOnly
-          ? "No results published in the last " + RECENT_DAYS + " days for <strong>" + esc(currentQuery) + "</strong>."
-          : "No live results for <strong>" + esc(currentQuery) + "</strong> in the sources that answered.";
-      setEmpty(
-        allFailed ? "Live search is unavailable right now"
-          : recentOnly ? "No newly launched matches for “" + currentQuery + "”"
-          : "No live matches for “" + currentQuery + "”",
-        allFailed
-          ? "The open indexes did not respond. Try again in a moment, or use the full live scan for a wider search."
+      if (provider) {
+        els.status.innerHTML = allFailed
+          ? "The " + esc(provider.name) + " search did not answer. Check your connection and try again."
+          : "No " + (trial ? "free-trial " : "free ") + "results from <strong>" +
+            esc(provider.name) + "</strong> for <strong>" + esc(currentQuery) + "</strong>.";
+        setEmpty(
+          allFailed ? "Provider search is unavailable right now" : (trial ? "No free-trial " : "No free ") + provider.name + " matches for “" + currentQuery + "”",
+          allFailed
+            ? "The provider search did not respond. Try again in a moment, or open the provider’s own free page from the link above."
+            : "The provider answered, but nothing " + (trial ? "matched the free-trial search" : "marked free matched") +
+              ". Try a broader topic, or open the provider’s free page from the link above."
+        );
+      } else {
+        els.status.innerHTML = allFailed
+          ? "No live source answered. Check your connection and try again."
           : recentOnly
-            ? "The dated sources answered, but nothing was published in the last " + RECENT_DAYS +
-              " days. Try another topic, or show all-time results."
-            : "The sources answered, but nothing relevant came back. Try a shorter topic, or open the full live scan for more sources."
-      );
+            ? "No results published in the last " + RECENT_DAYS + " days for <strong>" + esc(currentQuery) + "</strong>."
+            : "No live results for <strong>" + esc(currentQuery) + "</strong> in the sources that answered.";
+        setEmpty(
+          allFailed ? "Live search is unavailable right now"
+            : recentOnly ? "No newly launched matches for “" + currentQuery + "”"
+            : "No live matches for “" + currentQuery + "”",
+          allFailed
+            ? "The open indexes did not respond. Try again in a moment, or use the full live scan for a wider search."
+            : recentOnly
+              ? "The dated sources answered, but nothing was published in the last " + RECENT_DAYS +
+                " days. Try another topic, or show all-time results."
+              : "The sources answered, but nothing relevant came back. Try a shorter topic, or open the full live scan for more sources."
+        );
+      }
     }
     els.freshEmptyBtn.hidden = !recentOnly || total > 0;
     els.scanLink.href = "scan.html" + (currentQuery ? "?q=" + encodeURIComponent(currentQuery) : "");
@@ -824,6 +1039,7 @@
     currentQuery = "";
     recentOnly = false;
     recentCutoff = 0;
+    activeProviderId = "";
     sourceState = {};
     resultsBySource = {};
     orderedResults = [];
@@ -840,11 +1056,12 @@
     els.sources.hidden = true;
     els.freshEmptyBtn.hidden = true;
     updateFreshUI();
+    updateProviderUI();
   }
 
   function setReady(query) {
     resetResults();
-    updateFreshParam(false);
+    updateModeParam("", false);
     const clean = cleanQuery(query);
     els.status.innerHTML = clean
       ? "Ready to search the live indexes for <strong>" + esc(clean) + "</strong>."
@@ -867,13 +1084,16 @@
 
   function runSearch(rawQuery, options) {
     const query = cleanQuery(rawQuery);
-    const wantsRecent = Boolean(options && options.recent);
+    const requested = options && options.provider ? providerById(options.provider) : null;
+    const wantsProvider = Boolean(requested && requested.liveSearch);
+    const wantsRecent = Boolean(options && options.recent) && !wantsProvider;
     if (!query) {
       setReady("");
       els.input.focus();
       return;
     }
-    if (busy && query === currentQuery && recentOnly === wantsRecent) return;
+    const wantedProviderId = wantsProvider ? requested.id : "";
+    if (busy && query === currentQuery && recentOnly === wantsRecent && activeProviderId === wantedProviderId) return;
 
     if (activeCtrl) activeCtrl.abort();
     activeCtrl = new AbortController();
@@ -885,7 +1105,8 @@
     searched = true;
     currentQuery = query;
     recentOnly = wantsRecent;
-    updateFreshParam(recentOnly);
+    activeProviderId = wantedProviderId;
+    updateModeParam(activeProviderId, recentOnly);
     recentCutoff = Date.now() - RECENT_DAYS * DAY_MS;
     startedAt = performance.now();
     shown = PAGE_SIZE;
@@ -893,15 +1114,19 @@
     resultsBySource = {};
     orderedResults = [];
     const defs = sourceDefsForMode();
+    const provider = providerById(activeProviderId);
     defs.forEach(def => { sourceState[def.id] = { state: "busy", count: 0 }; });
+    const providerTrial = Boolean(provider && provider.liveSearch && provider.liveSearch.freeLabel === "Free trial access");
 
     els.input.value = query;
     els.btn.disabled = true;
     els.btn.setAttribute("aria-busy", "true");
     els.btn.textContent = "Searching…";
-    els.status.innerHTML = "Searching <strong>" + defs.length + " " +
-      (recentOnly ? "dated " : "") + "live sources</strong> for " +
-      (recentOnly ? "newly launched " : "") + "<strong>" + esc(query) + "</strong>…";
+    els.status.innerHTML = provider
+      ? "Searching <strong>" + esc(provider.name) + "</strong> for " + (providerTrial ? "free-trial " : "free ") + "<strong>" + esc(query) + "</strong>…"
+      : "Searching <strong>" + defs.length + " " +
+        (recentOnly ? "dated " : "") + "live sources</strong> for " +
+        (recentOnly ? "newly launched " : "") + "<strong>" + esc(query) + "</strong>…";
     els.grid.innerHTML = "";
     els.grid.hidden = true;
     els.empty.hidden = true;
@@ -910,6 +1135,7 @@
     els.sources.hidden = false;
     els.freshEmptyBtn.hidden = true;
     updateFreshUI();
+    updateProviderUI();
     updateLinks(query);
     renderSources();
 
@@ -985,20 +1211,30 @@
       freshActive: document.getElementById("liveFreshActive"),
       freshClearBtn: document.getElementById("liveFreshClearBtn"),
       freshEmptyBtn: document.getElementById("liveFreshEmptyBtn"),
+      providerRow: document.getElementById("liveProviderRow"),
+      providerActive: document.getElementById("liveProviderActive"),
+      providerName: document.getElementById("liveProviderName"),
+      providerMode: document.getElementById("liveProviderMode"),
+      providerNote: document.getElementById("liveProviderNote"),
+      providerFallback: document.getElementById("liveProviderFallback"),
+      providerClearBtn: document.getElementById("liveProviderClearBtn"),
       googleLink: document.getElementById("liveGoogleLink"),
       edxLink: document.getElementById("liveEdxLink"),
       courseraLink: document.getElementById("liveCourseraLink"),
       fullScanLink: document.getElementById("liveFullScanLink")
     };
 
+    renderProviderRow();
     const initial = initialQuery();
-    const initialFresh = new URLSearchParams(location.search).get("fresh") === "1";
+    const initialParams = new URLSearchParams(location.search);
+    const initialFresh = initialParams.get("fresh") === "1";
+    const initialProvider = providerById(initialParams.get("providerLive") || "");
     if (initial) els.input.value = initial;
     setReady(initial);
 
     els.form.addEventListener("submit", event => {
       event.preventDefault();
-      runSearch(els.input.value, { recent: false });
+      runSearch(els.input.value, activeProviderId ? { provider: activeProviderId } : { recent: false });
     });
 
     els.input.addEventListener("input", () => {
@@ -1009,8 +1245,9 @@
         return;
       }
       if (!busy && searched && value !== currentQuery) {
-        els.status.innerHTML = "Press <strong>Search live web</strong> to look for <strong>" +
-          esc(value) + "</strong>.";
+        const provider = providerById(activeProviderId);
+        els.status.innerHTML = "Press <strong>Search " + (provider ? esc(provider.name) : "live web") +
+          "</strong> to look for <strong>" + esc(value) + "</strong>" + (provider ? " on " + esc(provider.name) : "") + ".";
       } else if (!searched) {
         els.status.innerHTML = "Ready to search the live indexes for <strong>" + esc(value) + "</strong>.";
       }
@@ -1021,6 +1258,22 @@
       const button = event.target.closest("[data-live-query]");
       if (!button) return;
       runSearch(button.getAttribute("data-live-query"), { recent: false });
+    });
+
+    if (els.providerRow) els.providerRow.addEventListener("click", event => {
+      const button = event.target.closest("[data-live-provider]");
+      if (!button) return;
+      const id = button.getAttribute("data-live-provider");
+      if (!providerById(id)) return;
+      const query = cleanQuery(els.input.value) || currentQuery || "free course";
+      els.input.value = query;
+      runSearch(query, { provider: id });
+    });
+
+    if (els.providerClearBtn) els.providerClearBtn.addEventListener("click", () => {
+      const query = cleanQuery(els.input.value) || currentQuery;
+      if (query) runSearch(query, { recent: false });
+      else setReady("");
     });
 
     els.freshBtn.addEventListener("click", () => {
@@ -1049,7 +1302,7 @@
     });
 
     els.retry.addEventListener("click", () => {
-      runSearch(currentQuery || els.input.value, { recent: recentOnly });
+      runSearch(currentQuery || els.input.value, activeProviderId ? { provider: activeProviderId } : { recent: recentOnly });
     });
 
     const browseSearch = document.getElementById("browseSearch");
@@ -1067,7 +1320,16 @@
       });
     }
 
-    if (initialFresh) {
+    if (initialProvider && initialProvider.liveSearch) {
+      const query = initial || "free course";
+      els.input.value = query;
+      runSearch(query, { provider: initialProvider.id });
+      if (location.hash === "#liveCourses") {
+        setTimeout(() => {
+          try { section.scrollIntoView({ block: "start" }); } catch (e) {}
+        }, 80);
+      }
+    } else if (initialFresh) {
       const query = initial || "free course";
       els.input.value = query;
       runSearch(query, { recent: true });

@@ -23,7 +23,7 @@
   }
 
   function renderStats(D) {
-    const providers = new Set(D.courses.map(c => c.provider)).size;
+    const providers = Object.keys(D.providers).length;
     const freeCerts = D.courses.filter(c => c.certificate === "free").length;
     setText("statCourses", D.courses.length + "+");
     setText("statProviders", providers);

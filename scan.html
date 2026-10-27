@@ -1651,7 +1651,7 @@
       return m ? "https://www.coursera.org/learn/" + m[1] : "";
     }
     function ddgSiteSearch(q, opts, signal) {
-      const target = "https://html.duckduckgo.com/html/?q=" + encodeURIComponent(q);
+      const target = "https://lite.duckduckgo.com/lite/?q=" + encodeURIComponent(q);
       return fetchAny("https://r.jina.ai/" + target, signal, true)
         .then(md => parseDDG(md, opts));
     }
@@ -1725,8 +1725,9 @@
       opts = opts || {};
       const lines = String(md || "").split(/\r?\n/);
       const out = [], seen = new Set();
+      const resultLine = /^(?:##|\d+\.)\s*\[(.+?)\]\((https?:\/\/[^)\s]+)\)/;
       for (let i = 0; i < lines.length; i++) {
-        const m = lines[i].match(/^##\s+\[(.+?)\]\((https?:\/\/[^)\s]+)\)/);
+        const m = lines[i].match(resultLine);
         if (!m) continue;
         const title = stripMd(m[1]);
         const rawUrl = unwrapDDG(m[2]);
@@ -1753,7 +1754,7 @@
         if (!key || seen.has(key)) continue;
         seen.add(key);
         let snippet = "";
-        for (let j = i + 1; j < lines.length && !/^##\s+\[/.test(lines[j]); j++) {
+        for (let j = i + 1; j < lines.length && !resultLine.test(lines[j]); j++) {
           const text = stripMd(lines[j]);
           if (text.length > snippet.length && !/^Image \d+/.test(text)) snippet = text;
         }
@@ -1775,7 +1776,7 @@
     }
 
     function ddgSearch(q, signal) {
-      const target = "https://html.duckduckgo.com/html/?q=" + encodeURIComponent(q);
+      const target = "https://lite.duckduckgo.com/lite/?q=" + encodeURIComponent(q);
       return fetchAny("https://r.jina.ai/" + target, signal, true).then(md => parseDDG(md));
     }
 
