@@ -567,6 +567,10 @@
   function updateLinks(query) {
     const clean = cleanQuery(query);
     const searchFor = clean || "free courses";
+    const googleFor = clean
+      ? clean + (/\b(free|course|courses|class|classes|tutorial|tutorials|lesson|lessons)\b/i.test(clean) ? "" : " free course")
+      : "free courses";
+    els.googleLink.href = "https://www.google.com/search?q=" + encodeURIComponent(googleFor);
     els.edxLink.href = "https://www.edx.org/search?q=" + encodeURIComponent(searchFor);
     els.courseraLink.href = "https://www.coursera.org/search?query=" + encodeURIComponent(searchFor);
     els.scanLink.href = "scan.html" + (clean ? "?q=" + encodeURIComponent(clean) : "");
@@ -677,6 +681,7 @@
       scanLink: document.getElementById("liveScanLink"),
       more: document.getElementById("liveMoreWrap"),
       moreBtn: document.getElementById("liveMoreBtn"),
+      googleLink: document.getElementById("liveGoogleLink"),
       edxLink: document.getElementById("liveEdxLink"),
       courseraLink: document.getElementById("liveCourseraLink"),
       fullScanLink: document.getElementById("liveFullScanLink")

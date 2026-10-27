@@ -21,6 +21,8 @@ the catalogue.
   recently viewed courses.
 - **Live AI scan** that plans searches with a free AI model and fetches real results in the
   browser from YouTube, GitHub, PeerTube, Wikiversity, DEV Community, and the open web.
+- **Outbound Google web search** from both live-search tools for anything outside those
+  indexes. Google results open in a new tab and are not scraped or fetched by Learnova.
 - **Local-first state.** Saves, progress, profiles, and reviews work without an account and are
   stored in `localStorage`. Supabase can be connected for email sign-in and cross-device sync.
 

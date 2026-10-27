@@ -686,6 +686,7 @@
           <p class="scan-summary" id="scanSummary" role="status" aria-live="polite">Preparing scan…</p>
           <div class="scan-actions">
             <button class="btn btn-light btn-small" type="button" id="rescanBtn">↻ Scan again</button>
+            <a class="btn btn-light btn-small" id="googleSearchLink" href="https://www.google.com/search?q=free%20online%20courses" target="_blank" rel="noopener noreferrer" aria-label="Google web search (opens in a new tab)">Google web <span aria-hidden="true">↗</span></a>
           </div>
         </div>
         <ul class="source-list" id="sourceList"></ul>
@@ -1276,6 +1277,7 @@
     const scanSummary = document.getElementById("scanSummary");
     const sourceList  = document.getElementById("sourceList");
     const rescanBtn   = document.getElementById("rescanBtn");
+    const googleSearchLink = document.getElementById("googleSearchLink");
 
     /* Escape text before putting it into HTML (safety) */
     const esc = s => String(s).replace(/[&<>"']/g, m =>
@@ -1301,6 +1303,15 @@
       if (cleaned) return cleaned;
       if (demoTopic.value) return demoTopic.value.toLowerCase();
       return "";
+    }
+    function googleSearchQuery() {
+      const base = baseTerms();
+      if (!base) return "free online courses";
+      return base + (/\b(free|course|courses|class|classes|tutorial|tutorials|lesson|lessons)\b/i.test(base) ? "" : " free course");
+    }
+    function syncGoogleSearchLink() {
+      if (!googleSearchLink) return;
+      googleSearchLink.href = "https://www.google.com/search?q=" + encodeURIComponent(googleSearchQuery());
     }
     /* Words that carry the topic ("free course" says nothing, so it is dropped here) */
     function matchTokens() {
@@ -2158,6 +2169,7 @@
 
     /* ---------- 3g. Running the scan ---------- */
     function runScan(force) {
+      syncGoogleSearchLink();
       const base = baseTerms();
       if (!base || base.length < 2 || !matchTokens().length) {
         resetIdle("Add a subject — for example python, class 10 physics or spoken English — to start a live scan.");
@@ -2278,6 +2290,7 @@
 
     /* ---------- 3h. Wiring ---------- */
     demoQuery.addEventListener("input", () => {
+      syncGoogleSearchLink();
       if (!baseTerms() || !matchTokens().length) {
         resetIdle();
         return;
@@ -2295,6 +2308,7 @@
       }
     });
     demoTopic.addEventListener("change", () => {
+      syncGoogleSearchLink();
       if (demoQuery.value.trim()) renderResults();
       else scheduleScan(60);
     });
@@ -2323,6 +2337,7 @@
     const initialScanQuery = (new URLSearchParams(location.search).get("q") || "").trim();
     if (initialScanQuery) {
       demoQuery.value = initialScanQuery;
+      syncGoogleSearchLink();
       const heroQ = document.getElementById("heroQuery");
       if (heroQ) heroQ.value = initialScanQuery;
       setTimeout(() => {
