@@ -549,8 +549,9 @@
 
   async function searchWeb(query, signal) {
     const tokens = tokensFor(query);
-    const search = /\b(free|course|courses|class|classes|tutorial|tutorials|lesson|lessons)\b/i.test(query)
-      ? query : query + " free course";
+    let search = query;
+    if (!/\bfree\b/i.test(search)) search += " free";
+    if (!COURSEY_RE.test(search)) search += " course";
     const target = "https://html.duckduckgo.com/html/?q=" + encodeURIComponent(search);
     const markdown = await fetchText("https://r.jina.ai/" + target, signal, { timeout: 16000 });
     return dedupe(parseWebResults(markdown, tokens)).slice(0, 8);
